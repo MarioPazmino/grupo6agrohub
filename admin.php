@@ -819,13 +819,16 @@ function validateForm(form) {
 
 
 
+
+    
+
 <!-- Formulario para agregar nuevo usuario -->
 <div class="card shadow mb-4">
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">Agregar Usuario</h6>
     </div>
     <div class="card-body">
-        <form method="post" action="" onsubmit="return validateForm(this);">
+        <form method="post" action="">
             <div class="row">
                 <!-- Columna 1 -->
                 <div class="col-md-4">
@@ -881,20 +884,6 @@ function validateForm(form) {
     </div>
 </div>
 
-<script>
-function validateForm(form) {
-    const fechaContratacion = new Date(form.fecha_contratacion.value);
-    const hoy = new Date();
-    
-    // Verificar que la fecha de contratación no sea futura
-    if (fechaContratacion > hoy) {
-        alert("La fecha de contratación no puede ser futura.");
-        return false;
-    }
-    
-    return true;
-}
-</script>
 
 
 

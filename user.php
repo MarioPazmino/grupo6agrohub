@@ -135,33 +135,56 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
     <!-- Custom styles for this template-->
     <link href="css/user/sb-admin-2.min.css" rel="stylesheet">
 <style>
-    .task-card {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 15px;
-    }
-    .task-card .card-body {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%; /* Hacer el card más ancho */
-    }
-    .task-card .card-text {
-        font-size: 1.1rem;
-    }
-    .task-card .btn {
-        margin-top: 10px;
-    }
-    .task-status-pendiente {
-        color: #dc3545; /* Rojo para pendiente */
-    }
-    .task-status-en-progreso {
-        color: #ffc107; /* Amarillo para en progreso */
-    }
-    .task-status-completada {
-        color: #28a745; /* Verde para completada */
-    }
+  /* Asegúrate de agregar estos estilos en tu archivo CSS o en una etiqueta <style> en el <head> */
+
+.task-card {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 15px;
+}
+
+.task-card-body {
+    width: 100%;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-text {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.task-status-pendiente {
+    color: #ff6f61; /* Rojo claro */
+}
+
+.task-status-en-progreso {
+    color: #ffa000; /* Naranja */
+}
+
+.task-status-completada {
+    color: #4caf50; /* Verde */
+}
+
+.card {
+    border: 2px solid #ddd;
+    border-radius: 10px;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.form-control {
+    width: auto;
+    display: inline-block;
+}
+
 </style>
 
 </head>

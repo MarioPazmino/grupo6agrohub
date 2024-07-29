@@ -457,10 +457,11 @@ if (isset($_POST['delete'])) {
     <button type="submit" name="delete" class="btn btn-danger btn-sm" title="Eliminar">
         <i class="fas fa-trash-alt"></i> <!-- Ícono de eliminar -->
     </button>
-</form>
-<button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal<?php echo $usuario['_id']; ?>" title="Modificar">
+    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal<?php echo $usuario['_id']; ?>" title="Modificar">
     <i class="fas fa-edit"></i> <!-- Ícono de modificar -->
 </button>
+</form>
+
 
 
                                                     <!-- Modal para modificar usuario -->

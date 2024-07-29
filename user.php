@@ -387,7 +387,7 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                                     <form method="post" action="actualizar_tarea.php" class="d-flex align-items-center">
                                         <input type="hidden" name="tarea_index" value="<?= $index ?>">
                                         <input type="hidden" name="tarea_id" value="<?= $tarea['_id'] ?>">
-                                         <div class="form-group mb-0 mr-2">
+                                         <div class="form-group mb-0 mr-4">
                                             <select name="estado" class="form-control">
                                                 <option value="Pendiente" <?= $tarea['estado'] === 'Pendiente' ? 'selected' : '' ?>>Pendiente</option>
                                                 <option value="En Progreso" <?= $tarea['estado'] === 'En Progreso' ? 'selected' : '' ?>>En Progreso</option>

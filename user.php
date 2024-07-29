@@ -66,8 +66,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Si no hay errores, actualizar los datos en la base de datos
     if (empty($errors)) {
-        // Construir el filtro para encontrar el usuario por nombre de usuario
-        $filter = ['nombre_usuario' => $_SESSION['nombre_usuario']];
+        // Construir el filtro para encontrar el usuario por ID
+        $filter = ['_id' => $usuario_id];
 
         // Construir el objeto de actualización
         $update = [
@@ -191,22 +191,11 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                         <i class="fa fa-bars"></i>
                     </button>
                     <!-- Topbar Search -->
-                    <form
-                        class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
-                    >
+                    <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                         <div class="input-group">
-                            <input
-                                type="text"
-                                class="form-control bg-light border-0 small"
-                                placeholder="Buscar..."
-                                aria-label="Search"
-                                aria-describedby="basic-addon2"
-                            />
+                            <input type="text" class="form-control bg-light border-0 small" placeholder="Buscar..." aria-label="Buscar" aria-describedby="basic-addon2">
                             <div class="input-group-append">
-                                <button
-                                    class="btn btn-primary"
-                                    type="button"
-                                >
+                                <button class="btn btn-primary" type="button">
                                     <i class="fas fa-search fa-sm"></i>
                                 </button>
                             </div>
@@ -216,36 +205,21 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                     <ul class="navbar-nav ml-auto">
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
-                            <a
-                                class="nav-link dropdown-toggle"
-                                href="#"
-                                id="userDropdown"
-                                role="button"
-                                data-toggle="dropdown"
-                                aria-haspopup="true"
-                                aria-expanded="false"
-                            >
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($usuario->nombre); ?></span>
-                                <img
-                                    class="img-profile rounded-circle"
-                                    src="img/undraw_profile.svg"
-                                />
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($_SESSION['nombre']); ?></span>
+                                <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
                             </a>
                             <!-- Dropdown - User Information -->
-                            <div
-                                class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="userDropdown"
-                            >
-                                <a class="dropdown-item" href="perfil.php">
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="user.php">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Perfil
                                 </a>
-                                <a class="dropdown-item" href="configuracion.php">
+                                <a class="dropdown-item" href="user-settings.php">
                                     <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Configuración
                                 </a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="logout.php">
+                                <a class="dropdown-item" href="user-logout.php">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Cerrar sesión
                                 </a>
@@ -257,58 +231,49 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Perfil de Usuario</h1>
-                    <!-- User Info -->
+                    <h1 class="h3 mb-2 text-gray-800">Perfil del Empleado</h1>
+                    <p class="mb-4">Actualiza tu información personal aquí.</p>
+                    <!-- Formulario de actualización -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Información Personal</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Actualizar Información</h6>
                         </div>
                         <div class="card-body">
-                            <form method="POST" action="">
-                                <div class="form-group row">
-                                    <label for="nombre" class="col-sm-2 col-form-label">Nombre</label>
-                                    <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($usuario->nombre); ?>">
-                                        <?php if (isset($errors['nombre'])): ?>
-                                            <small class="form-text text-danger"><?php echo htmlspecialchars($errors['nombre']); ?></small>
-                                        <?php endif; ?>
-                                    </div>
+                            <form action="" method="post">
+                                <div class="form-group">
+                                    <label for="nombre">Nombre</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($usuario->nombre); ?>">
+                                    <?php if (isset($errors['nombre'])): ?>
+                                        <div class="text-danger"><?php echo $errors['nombre']; ?></div>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="apellido" class="col-sm-2 col-form-label">Apellido</label>
-                                    <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($usuario->apellido); ?>">
-                                        <?php if (isset($errors['apellido'])): ?>
-                                            <small class="form-text text-danger"><?php echo htmlspecialchars($errors['apellido']); ?></small>
-                                        <?php endif; ?>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="apellido">Apellido</label>
+                                    <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($usuario->apellido); ?>">
+                                    <?php if (isset($errors['apellido'])): ?>
+                                        <div class="text-danger"><?php echo $errors['apellido']; ?></div>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="email" class="col-sm-2 col-form-label">Correo electrónico</label>
-                                    <div class="col-sm-10">
-                                        <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($usuario->email); ?>">
-                                        <?php if (isset($errors['email'])): ?>
-                                            <small class="form-text text-danger"><?php echo htmlspecialchars($errors['email']); ?></small>
-                                        <?php endif; ?>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($usuario->email); ?>">
+                                    <?php if (isset($errors['email'])): ?>
+                                        <div class="text-danger"><?php echo $errors['email']; ?></div>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="telefono" class="col-sm-2 col-form-label">Teléfono</label>
-                                    <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($usuario->telefono); ?>">
-                                        <?php if (isset($errors['telefono'])): ?>
-                                            <small class="form-text text-danger"><?php echo htmlspecialchars($errors['telefono']); ?></small>
-                                        <?php endif; ?>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="telefono">Teléfono</label>
+                                    <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($usuario->telefono); ?>">
+                                    <?php if (isset($errors['telefono'])): ?>
+                                        <div class="text-danger"><?php echo $errors['telefono']; ?></div>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="cedula" class="col-sm-2 col-form-label">Cédula</label>
-                                    <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo htmlspecialchars($usuario->cedula); ?>">
-                                        <?php if (isset($errors['cedula'])): ?>
-                                            <small class="form-text text-danger"><?php echo htmlspecialchars($errors['cedula']); ?></small>
-                                        <?php endif; ?>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="cedula">Cédula</label>
+                                    <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo htmlspecialchars($usuario->cedula); ?>">
+                                    <?php if (isset($errors['cedula'])): ?>
+                                        <div class="text-danger"><?php echo $errors['cedula']; ?></div>
+                                    <?php endif; ?>
                                 </div>
                                 <button type="submit" class="btn btn-primary">Actualizar</button>
                             </form>
@@ -321,25 +286,25 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                         </div>
                         <div class="card-body">
                             <?php if (!empty($empleado->tareas_asignadas)): ?>
-                                <ul>
+                                <ul class="list-group">
                                     <?php foreach ($empleado->tareas_asignadas as $tarea): ?>
-                                        <li><?php echo htmlspecialchars($tarea); ?></li>
+                                        <li class="list-group-item"><?php echo htmlspecialchars($tarea); ?></li>
                                     <?php endforeach; ?>
                                 </ul>
                             <?php else: ?>
-                                <p>No hay tareas asignadas.</p>
+                                <p>No tienes tareas asignadas.</p>
                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
-                <!-- End of Page Content -->
+                <!-- /.container-fluid -->
             </div>
             <!-- End of Main Content -->
             <!-- Footer -->
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Agro HUB 2024</span>
+                        <span>© 2024 Agro HUB</span>
                     </div>
                 </div>
             </footer>
@@ -352,30 +317,12 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">¿Estás seguro de que quieres cerrar sesión?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Selecciona "Cerrar sesión" si estás listo para finalizar tu sesión actual.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
-                    <a class="btn btn-primary" href="logout.php">Cerrar sesión</a>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <!-- Core plugin JavaScript-->
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
     <!-- Custom scripts for all pages-->
-    <script src="js/sb-admin-2.min.js"></script>
+    <script src="js/user/sb-admin-2.min.js"></script>
 </body>
 </html>

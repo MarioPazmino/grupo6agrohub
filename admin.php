@@ -675,7 +675,7 @@ $usuarios = $collection->find()->toArray();
 
 
 
-   <!-- Listado de Tareas Asignadas -->
+<!-- Listado de Tareas Asignadas -->
 <div class="card shadow mb-4">
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">Tareas Asignadas</h6>
@@ -688,20 +688,17 @@ $usuarios = $collection->find()->toArray();
                         <th>Empleado</th>
                         <th>Descripción</th>
                         <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (!empty($usuario['tareas_asignadas'])): ?>
-                        <?php foreach ($usuario['tareas_asignadas'] as $tarea): ?>
+                    <?php if (!empty($tareas)): // Suponiendo que $tareas es una lista de todas las tareas ?>
+                        <?php foreach ($tareas as $tarea): ?>
                             <tr>
                                 <td>
                                     <?php 
-                                    // Mostrar nombre completo o correo según el rol
-                                    if (isset($usuario['rol']) && $usuario['rol'] === 'empleado') {
-                                        echo htmlspecialchars($usuario['email']); 
-                                    } else {
-                                        echo htmlspecialchars($usuario['nombre'] . ' ' . $usuario['apellido']); 
-                                    }
+                                    // Mostrar nombre completo del empleado asociado a la tarea
+                                    echo htmlspecialchars($tarea['empleado_nombre']); // Aquí 'empleado_nombre' es un campo en tu tarea que contiene el nombre del empleado
                                     ?>
                                 </td>
                                 <td><?php echo htmlspecialchars($tarea['descripcion']); ?></td>
@@ -718,11 +715,20 @@ $usuarios = $collection->find()->toArray();
                                     }
                                     ?>
                                 </td>
+                                <td>
+                                    <!-- Botón de eliminar -->
+                                    <form method="post" action="" class="d-inline">
+                                        <input type="hidden" name="tarea_id" value="<?php echo htmlspecialchars($tarea['_id']); ?>">
+                                        <button type="submit" name="delete_task" class="btn btn-danger btn-sm" title="Eliminar">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="3" class="text-center text-muted">No hay tareas asignadas.</td>
+                            <td colspan="4" class="text-center text-muted">No hay tareas asignadas.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -730,6 +736,7 @@ $usuarios = $collection->find()->toArray();
         </div>
     </div>
 </div>
+
 
 
                                     

@@ -677,17 +677,50 @@ $usuarios = $collection->find()->toArray();
 
                     
 <?php if (!empty($usuario['tareas_asignadas'])): ?>
-    <h5>Tareas Asignadas:</h5>
-    <ul>
-    <?php foreach ($usuario['tareas_asignadas'] as $tarea): ?>
-        <li>
-            <?php echo htmlspecialchars($tarea['descripcion']); ?> - 
-            Estado: <?php echo htmlspecialchars($tarea['estado']); ?>
-        </li>
-    <?php endforeach; ?>
-    </ul>
+    <h5 class="mb-4">Tareas Asignadas:</h5>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Empleado</th>
+                    <th>Descripción de la Tarea</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($usuario['tareas_asignadas'] as $tarea): ?>
+                    <tr>
+                        <td>
+                            <?php 
+                            // Mostrar nombre completo o correo según el rol
+                            if (isset($usuario['rol']) && $usuario['rol'] === 'empleado') {
+                                echo htmlspecialchars($usuario['email']); 
+                            } else {
+                                echo htmlspecialchars($usuario['nombre'] . ' ' . $usuario['apellido']); 
+                            }
+                            ?>
+                        </td>
+                        <td><?php echo htmlspecialchars($tarea['descripcion']); ?></td>
+                        <td>
+                            <?php 
+                            $estado = htmlspecialchars($tarea['estado']);
+                            // Aplicar clases de Bootstrap según el estado
+                            if ($estado === 'pendiente') {
+                                echo '<span class="badge badge-warning">Pendiente</span>';
+                            } elseif ($estado === 'en_proceso') {
+                                echo '<span class="badge badge-info">En Proceso</span>';
+                            } elseif ($estado === 'completada') {
+                                echo '<span class="badge badge-success">Completada</span>';
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
 <?php else: ?>
-    <p>No hay tareas asignadas.</p>
+    <p class="text-muted">No hay tareas asignadas.</p>
 <?php endif; ?>
 
 

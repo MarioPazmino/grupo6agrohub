@@ -386,7 +386,7 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
         <?php if (!empty($empleado['tareas_asignadas'])) : ?>
             <?php foreach ($empleado['tareas_asignadas'] as $index => $tarea) : ?>
                 <div class="col-md-4 task-card">
-                    <div class="card shadow mb-4">
+                    <div class="card shadow mb-4 task-card-body">
                         <div class="card-body">
                             <h5 class="card-title"><?= $tarea['descripcion']; ?></h5>
                             <p class="card-text task-status-<?= $tarea['estado']; ?>">Estado: <?= ucfirst($tarea['estado']); ?></p>
@@ -410,6 +410,14 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
         <?php endif; ?>
     </div>
 </div>
+
+
+
+
+
+
+
+            
 
         </div>
     </div>

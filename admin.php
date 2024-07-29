@@ -46,11 +46,11 @@ if (isset($_POST['add'])) {
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = "El email es inválido.";
     }
-    if (empty($telefono) || !preg_match("/^0[0-9]{9}$/", $telefono)) {
-        $errors[] = "El teléfono es inválido.";
+    if (empty($telefono) || !preg_match("/^\d{10}$/", $telefono)) {
+        $errors[] = "El teléfono debe tener exactamente 10 dígitos.";
     }
-    if (empty($cedula) || !preg_match("/^V-[0-9]{8}$/", $cedula)) {
-        $errors[] = "La cédula es inválida.";
+    if (empty($cedula) || !preg_match("/^\d{10}$/", $cedula)) {
+        $errors[] = "La cédula debe tener exactamente 10 dígitos.";
     }
     if (empty($password) || strlen($password) < 6) {
         $errors[] = "La contraseña es requerida y debe tener al menos 6 caracteres.";
@@ -121,11 +121,11 @@ if (isset($_POST['update'])) {
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = "El email es inválido.";
     }
-    if (empty($telefono) || !preg_match("/^0[0-9]{9}$/", $telefono)) {
-        $errors[] = "El teléfono es inválido.";
+    if (empty($telefono) || !preg_match("/^\d{10}$/", $telefono)) {
+        $errors[] = "El teléfono debe tener exactamente 10 dígitos.";
     }
-    if (empty($cedula) || !preg_match("/^V-[0-9]{8}$/", $cedula)) {
-        $errors[] = "La cédula es inválida.";
+    if (empty($cedula) || !preg_match("/^\d{10}$/", $cedula)) {
+        $errors[] = "La cédula debe tener exactamente 10 dígitos.";
     }
     if (empty($password) || strlen($password) < 6) {
         $errors[] = "La contraseña es requerida y debe tener al menos 6 caracteres.";

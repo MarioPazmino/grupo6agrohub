@@ -134,7 +134,19 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
 
     <!-- Custom styles for this template-->
     <link href="css/user/sb-admin-2.min.css" rel="stylesheet">
-
+<style>
+        .task-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .task-card .card-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
 </head>
 
 <body id="page-top">

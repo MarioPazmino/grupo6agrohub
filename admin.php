@@ -358,6 +358,141 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                         </div>
                     </div>
 
+
+
+
+
+
+
+
+<!-- Listado de Empleados -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Lista de Empleados</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Apellido</th>
+                                            <th>Email</th>
+                                            <th>Teléfono</th>
+                                            <th>Cédula</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($empleados as $empleado): ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($empleado['nombre']); ?></td>
+                                                <td><?php echo htmlspecialchars($empleado['apellido']); ?></td>
+                                                <td><?php echo htmlspecialchars($empleado['email']); ?></td>
+                                                <td><?php echo htmlspecialchars($empleado['telefono']); ?></td>
+                                                <td><?php echo htmlspecialchars($empleado['cedula']); ?></td>
+                                                <td>
+                                                    <!-- Botones para modificar y eliminar -->
+                                                    <form method="post" action="" class="d-inline-flex align-items-center">
+                                                        <input type="hidden" name="id" value="<?php echo $empleado['id']; ?>">
+                                                        <button type="submit" name="delete" class="btn btn-danger btn-sm">Eliminar</button>
+                                                    </form>
+                                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal<?php echo $empleado['id']; ?>">Modificar</button>
+
+                                                    <!-- Modal para modificar empleado -->
+                                                    <div class="modal fade" id="editModal<?php echo $empleado['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+                                                        <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="editModalLabel">Modificar Empleado</h5>
+                                                                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">×</span>
+                                                                    </button>
+                                                                </div>
+                                                                <form method="post" action="">
+                                                                    <div class="modal-body">
+                                                                        <input type="hidden" name="id" value="<?php echo $empleado['id']; ?>">
+                                                                        <div class="form-group">
+                                                                            <label for="nombre">Nombre:</label>
+                                                                            <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($empleado['nombre']); ?>">
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label for="apellido">Apellido:</label>
+                                                                            <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($empleado['apellido']); ?>">
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label for="email">Email:</label>
+                                                                            <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($empleado['email']); ?>">
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label for="telefono">Teléfono:</label>
+                                                                            <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($empleado['telefono']); ?>">
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label for="cedula">Cédula:</label>
+                                                                            <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo htmlspecialchars($empleado['cedula']); ?>">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+                                                                        <button type="submit" name="update" class="btn btn-primary">Actualizar</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulario para agregar nuevo empleado -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Agregar Nuevo Empleado</h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" action="">
+                                <div class="form-group">
+                                    <label for="nombre">Nombre:</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre">
+                                </div>
+                                <div class="form-group">
+                                    <label for="apellido">Apellido:</label>
+                                    <input type="text" class="form-control" id="apellido" name="apellido">
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email:</label>
+                                    <input type="email" class="form-control" id="email" name="email">
+                                </div>
+                                <div class="form-group">
+                                    <label for="telefono">Teléfono:</label>
+                                    <input type="text" class="form-control" id="telefono" name="telefono">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cedula">Cédula:</label>
+                                    <input type="text" class="form-control" id="cedula" name="cedula">
+                                </div>
+                                <button type="submit" name="add" class="btn btn-primary">Agregar</button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- End of Main Content -->
+
+
+
+
+
+
+
+
+                    
 <div class="card shadow mb-4">
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">Tareas Asignadas</h6>

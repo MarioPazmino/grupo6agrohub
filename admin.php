@@ -31,7 +31,7 @@ if (isset($_POST['add'])) {
     $telefono = $_POST['telefono'];
     $cedula = $_POST['cedula'];
     $rol = $_POST['rol'];
-    $fecha_contratacion = new MongoDB\BSON\UTCDateTime(strtotime($_POST['fecha_contratacion']) * 1000);
+    $fecha_contratacion = $_POST['fecha_contratacion'];
     $tareas_asignadas = []; // Puedes agregar tareas si es necesario
     $password = $_POST['password'];
     $nombre_usuario = $_POST['nombre_usuario'];
@@ -49,35 +49,49 @@ if (isset($_POST['add'])) {
     if (empty($telefono) || !preg_match("/^0[0-9]{9}$/", $telefono)) {
         $errors[] = "El teléfono es inválido.";
     }
-    if (empty($cedula) || !preg_match("/^[0-9]{10}$/", $cedula)) {
+    if (empty($cedula) || !preg_match("/^V-[0-9]{8}$/", $cedula)) {
         $errors[] = "La cédula es inválida.";
     }
-    if (empty($password)) {
-        $errors[] = "La contraseña es requerida.";
+    if (empty($password) || strlen($password) < 6) {
+        $errors[] = "La contraseña es requerida y debe tener al menos 6 caracteres.";
     }
     if (empty($nombre_usuario)) {
         $errors[] = "El nombre de usuario es requerido.";
     }
 
+    // Validar fecha de contratación
+    $fecha = DateTime::createFromFormat('Y-m-d', $fecha_contratacion);
+    if (!$fecha || $fecha->format('Y-m-d') !== $fecha_contratacion) {
+        $errors[] = "La fecha de contratación es inválida.";
+    } else {
+        $fecha_contratacion = new MongoDB\BSON\UTCDateTime($fecha->getTimestamp() * 1000);
+    }
+
     // Insertar en la base de datos si no hay errores
     if (empty($errors)) {
-        $result = $collection->insertOne([
-            "nombre" => $nombre,
-            "apellido" => $apellido,
-            "email" => $email,
-            "telefono" => $telefono,
-            "cedula" => $cedula,
-            "rol" => $rol,
-            "fecha_contratacion" => $fecha_contratacion,
-            "tareas_asignadas" => $tareas_asignadas,
-            "password" => password_hash($password, PASSWORD_DEFAULT), // Asegúrate de cifrar la contraseña
-            "nombre_usuario" => $nombre_usuario
-        ]);
-
-        if ($result->getInsertedCount() > 0) {
-            $success[] = "Usuario agregado exitosamente.";
+        // Verificar si el nombre de usuario ya existe
+        $usuarioExistente = $collection->findOne(['nombre_usuario' => $nombre_usuario]);
+        if ($usuarioExistente) {
+            $errors[] = "El nombre de usuario ya existe.";
         } else {
-            $errors[] = "Error al agregar usuario.";
+            $result = $collection->insertOne([
+                "nombre" => $nombre,
+                "apellido" => $apellido,
+                "email" => $email,
+                "telefono" => $telefono,
+                "cedula" => $cedula,
+                "rol" => $rol,
+                "fecha_contratacion" => $fecha_contratacion,
+                "tareas_asignadas" => $tareas_asignadas,
+                "password" => password_hash($password, PASSWORD_DEFAULT),
+                "nombre_usuario" => $nombre_usuario
+            ]);
+
+            if ($result->getInsertedCount() > 0) {
+                $success[] = "Usuario agregado exitosamente.";
+            } else {
+                $errors[] = "Error al agregar usuario.";
+            }
         }
     }
 }
@@ -91,7 +105,7 @@ if (isset($_POST['update'])) {
     $telefono = $_POST['telefono'];
     $cedula = $_POST['cedula'];
     $rol = $_POST['rol'];
-    $fecha_contratacion = new MongoDB\BSON\UTCDateTime(strtotime($_POST['fecha_contratacion']) * 1000);
+    $fecha_contratacion = $_POST['fecha_contratacion'];
     $tareas_asignadas = []; // Puedes actualizar tareas si es necesario
     $password = $_POST['password'];
     $nombre_usuario = $_POST['nombre_usuario'];
@@ -110,14 +124,22 @@ if (isset($_POST['update'])) {
     if (empty($telefono) || !preg_match("/^0[0-9]{9}$/", $telefono)) {
         $errors[] = "El teléfono es inválido.";
     }
-    if (empty($cedula) || !preg_match("/^[0-9]{10}$/", $cedula)) {
+    if (empty($cedula) || !preg_match("/^V-[0-9]{8}$/", $cedula)) {
         $errors[] = "La cédula es inválida.";
     }
-    if (empty($password)) {
-        $errors[] = "La contraseña es requerida.";
+    if (empty($password) || strlen($password) < 6) {
+        $errors[] = "La contraseña es requerida y debe tener al menos 6 caracteres.";
     }
     if (empty($nombre_usuario)) {
         $errors[] = "El nombre de usuario es requerido.";
+    }
+
+    // Validar fecha de contratación
+    $fecha = DateTime::createFromFormat('Y-m-d', $fecha_contratacion);
+    if (!$fecha || $fecha->format('Y-m-d') !== $fecha_contratacion) {
+        $errors[] = "La fecha de contratación es inválida.";
+    } else {
+        $fecha_contratacion = new MongoDB\BSON\UTCDateTime($fecha->getTimestamp() * 1000);
     }
 
     if (empty($errors)) {
@@ -132,9 +154,9 @@ if (isset($_POST['update'])) {
             "tareas_asignadas" => $tareas_asignadas,
             "nombre_usuario" => $nombre_usuario
         ];
-        
+
         if (!empty($password)) {
-            $updateData["password"] = password_hash($password, PASSWORD_DEFAULT); // Actualizar contraseña cifrada
+            $updateData["password"] = password_hash($password, PASSWORD_DEFAULT);
         }
 
         try {
@@ -171,6 +193,16 @@ if (isset($_POST['delete'])) {
     } else {
         $errors[] = "Error al eliminar usuario.";
     }
+}
+
+// Mostrar mensajes de éxito
+foreach ($success as $message) {
+    echo "<div class='alert alert-success'>$message</div>";
+}
+
+// Mostrar mensajes de error
+foreach ($errors as $message) {
+    echo "<div class='alert alert-danger'>$message</div>";
 }
 
 
@@ -349,7 +381,7 @@ $total_tareas_completadas = $collection->countDocuments([
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="user.php">
+                <a class="nav-link" href="admin.php">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -469,7 +501,7 @@ $total_tareas_completadas = $collection->countDocuments([
   <!-- Begin Page Content -->
 <div class="container-fluid">
     <!-- Page Heading -->
-    <h1 class="h3 mb-4 text-gray-800">Perfil del Empleado</h1>
+    <h1 class="h3 mb-4 text-gray-800">Perfil Administrador</h1>
 
     <?php if ($_SESSION['rol'] === 'admin'): ?>
         <!-- Content Row -->

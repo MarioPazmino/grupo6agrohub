@@ -198,6 +198,27 @@ if (isset($_POST['assign_task'])) {
 // Asegúrate de que $usuarios se actualice después de asignar una tarea
 $usuarios = $collection->find()->toArray();
 
+
+
+
+// Inicializar un array para todas las tareas
+$tareas = [];
+
+// Iterar sobre cada usuario y sus tareas
+foreach ($usuarios as $usuario) {
+    if (!empty($usuario['tareas_asignadas'])) {
+        foreach ($usuario['tareas_asignadas'] as $tarea) {
+            // Añadir detalles del empleado a la tarea
+            $tareas[] = [
+                'empleado_nombre' => $usuario['nombre'] . ' ' . $usuario['apellido'],
+                'descripcion' => $tarea['descripcion'],
+                'estado' => $tarea['estado'],
+                'tarea_id' => (string)$tarea['tarea_id'] // Convertir ObjectId a string para manejarlo en PHP
+            ];
+        }
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -692,15 +713,10 @@ $usuarios = $collection->find()->toArray();
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (!empty($tareas)): // Suponiendo que $tareas es una lista de todas las tareas ?>
+                    <?php if (!empty($tareas)): ?>
                         <?php foreach ($tareas as $tarea): ?>
                             <tr>
-                                <td>
-                                    <?php 
-                                    // Mostrar nombre completo del empleado asociado a la tarea
-                                    echo htmlspecialchars($tarea['empleado_nombre']); // Aquí 'empleado_nombre' es un campo en tu tarea que contiene el nombre del empleado
-                                    ?>
-                                </td>
+                                <td><?php echo htmlspecialchars($tarea['empleado_nombre']); ?></td>
                                 <td><?php echo htmlspecialchars($tarea['descripcion']); ?></td>
                                 <td>
                                     <?php 
@@ -718,7 +734,7 @@ $usuarios = $collection->find()->toArray();
                                 <td>
                                     <!-- Botón de eliminar -->
                                     <form method="post" action="" class="d-inline">
-                                        <input type="hidden" name="tarea_id" value="<?php echo htmlspecialchars($tarea['_id']); ?>">
+                                        <input type="hidden" name="tarea_id" value="<?php echo htmlspecialchars($tarea['tarea_id']); ?>">
                                         <button type="submit" name="delete_task" class="btn btn-danger btn-sm" title="Eliminar">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
@@ -736,7 +752,6 @@ $usuarios = $collection->find()->toArray();
         </div>
     </div>
 </div>
-
 
 
                                     

@@ -165,16 +165,17 @@ if (isset($_POST['delete'])) {
 }
 
 
-    // Asignar tarea
+// Asignar tarea
 if (isset($_POST['assign_task'])) {
     $user_id = new MongoDB\BSON\ObjectId($_POST['user_id']);
     $tarea_descripcion = $_POST['tarea_descripcion'];
     $tarea_estado = $_POST['tarea_estado'];
 
     $nueva_tarea = [
-        "tarea_id" => new MongoDB\BSON\ObjectId(),
+        "_id" => new MongoDB\BSON\ObjectId(),
         "descripcion" => $tarea_descripcion,
-        "estado" => $tarea_estado
+        "estado" => $tarea_estado,
+        "fecha_asignacion" => new MongoDB\BSON\UTCDateTime()
     ];
 
     $result = $collection->updateOne(
@@ -566,27 +567,22 @@ if (isset($_POST['assign_task'])) {
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <form method="post" action="">
-                    <div class="modal-body">
-                        <input type="hidden" name="user_id" value="<?php echo $usuario['_id']; ?>">
-                        <div class="form-group">
-                            <label for="tarea_descripcion">Descripción de la Tarea:</label>
-                            <textarea class="form-control" id="tarea_descripcion" name="tarea_descripcion" rows="3" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="tarea_estado">Estado Inicial:</label>
-                            <select class="form-control" id="tarea_estado" name="tarea_estado">
-                                <option value="pendiente">Pendiente</option>
-                                <option value="en_progreso">En Progreso</option>
-                                <option value="completada">Completada</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" name="assign_task" class="btn btn-primary">Asignar Tarea</button>
-                    </div>
-                </form>
+               <form method="post" action="">
+    <input type="hidden" name="user_id" value="<?php echo $usuario['_id']; ?>">
+    <div class="form-group">
+        <label for="tarea_descripcion">Descripción de la Tarea:</label>
+        <textarea class="form-control" id="tarea_descripcion" name="tarea_descripcion" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="tarea_estado">Estado:</label>
+        <select class="form-control" id="tarea_estado" name="tarea_estado">
+            <option value="Pendiente">Pendiente</option>
+            <option value="En Progreso">En Progreso</option>
+            <option value="Completada">Completada</option>
+        </select>
+    </div>
+    <button type="submit" name="assign_task" class="btn btn-primary">Asignar Tarea</button>
+</form>
             </div>
         </div>
     </div>
@@ -668,56 +664,22 @@ if (isset($_POST['assign_task'])) {
 
 
                     
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Tareas Asignadas</h6>
-    </div>
-    <div class="card-body">
-        <?php if (!empty($empleado['tareas_asignadas'])): ?>
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Descripción</th>
-                            <th>Estado</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($empleado['tareas_asignadas'] as $index => $tarea): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($tarea['descripcion']) ?></td>
-                                <td>
-                                    <span class="task-status-<?= htmlspecialchars(strtolower(str_replace(' ', '-', $tarea['estado']))) ?>">
-                                        <?= htmlspecialchars($tarea['estado']) ?>
-                                    </span>
-                                </td>
+<?php if (!empty($usuario['tareas_asignadas'])): ?>
+    <h5>Tareas Asignadas:</h5>
+    <ul>
+    <?php foreach ($usuario['tareas_asignadas'] as $tarea): ?>
+        <li>
+            <?php echo htmlspecialchars($tarea['descripcion']); ?> - 
+            Estado: <?php echo htmlspecialchars($tarea['estado']); ?>
+        </li>
+    <?php endforeach; ?>
+    </ul>
+<?php else: ?>
+    <p>No hay tareas asignadas.</p>
+<?php endif; ?>
 
-<td class="text-center">
-    <form method="post" action="cambiar_estado_tarea.php" class="d-inline-flex align-items-center">
-        <input type="hidden" name="tarea_index" value="<?= $index ?>">
-        <input type="hidden" name="tarea_id" value="<?= $tarea['_id'] ?>">
-        <div class="form-group mb-0 mr-2">
-            <select name="estado" class="form-control">
-                <option value="Pendiente" <?= $tarea['estado'] === 'Pendiente' ? 'selected' : '' ?>>Pendiente</option>
-                <option value="En Progreso" <?= $tarea['estado'] === 'En Progreso' ? 'selected' : '' ?>>En Progreso</option>
-                <option value="Completada" <?= $tarea['estado'] === 'Completada' ? 'selected' : '' ?>>Completada</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Actualizar</button>
-    </form>
-</td>
 
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php else: ?>
-            <p>No hay tareas asignadas.</p>
-        <?php endif; ?>
-    </div>
-</div>
-
+                                    
                 </div>
                 <!-- /.container-fluid -->
             </div>

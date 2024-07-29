@@ -125,6 +125,19 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <!-- Custom styles for this template-->
     <link href="css/user/sb-admin-2.min.css" rel="stylesheet">
+    <style>
+        .task-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .task-card .card-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
 </head>
 <body id="page-top">
     <!-- Page Wrapper -->
@@ -285,40 +298,40 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                     
                  
                 <!-- Tareas Asignadas -->
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Tareas Asignadas</h6>
-    </div>
-    <div class="card-body">
-        <?php if (!empty($empleado->tareas_asignadas)): ?>
-            <div class="row">
-                <?php foreach ($empleado->tareas_asignadas as $tarea): ?>
-                    <div class="col-md-4 mb-3">
-                        <div class="card border-secondary">
-                            <div class="card-body">
-                                <h5 class="card-title">Tarea <?php echo htmlspecialchars($tarea->id); ?></h5>
-                                <p class="card-text">
-                                    <strong>Descripción:</strong> <?php echo htmlspecialchars($tarea->descripcion); ?> 
-                                    <br>
-                                    <strong>Estado:</strong> <?php echo htmlspecialchars($tarea->estado); ?>
-                                </p>
-                                <?php if ($tarea->estado === 'Pendiente'): ?>
-                                    <form action="update_task.php" method="post">
-                                        <input type="hidden" name="task_id" value="<?php echo htmlspecialchars($tarea->id); ?>">
-                                        <button type="submit" name="estado" value="Completo" class="btn btn-success">Marcar como Completo</button>
-                                    </form>
-                                <?php endif; ?>
-                            </div>
-                        </div>
+ <div class="container-fluid">
+                    <!-- Page Heading -->
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Tareas Asignadas</h1>
                     </div>
-                <?php endforeach; ?>
-            </div>
-        <?php else: ?>
-            <p>No tienes tareas asignadas.</p>
-        <?php endif; ?>
-    </div>
-</div>
-
+                    <div class="row">
+                        <!-- Display tasks horizontally -->
+                        <?php if (!empty($empleado['tareas_asignadas'])) : ?>
+                            <?php foreach ($empleado['tareas_asignadas'] as $index => $tarea) : ?>
+                                <div class="col-md-4 task-card">
+                                    <div class="card shadow mb-4">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><?= $tarea['descripcion']; ?></h5>
+                                            <p class="card-text">Estado: <?= $tarea['estado']; ?></p>
+                                            <form method="POST" action="cambiar_estado_tarea.php">
+                                                <input type="hidden" name="tarea_id" value="<?= $index; ?>">
+                                                <select name="nuevo_estado" class="form-control mb-2">
+                                                    <option value="pendiente" <?= $tarea['estado'] === 'pendiente' ? 'selected' : ''; ?>>Pendiente</option>
+                                                    <option value="en progreso" <?= $tarea['estado'] === 'en progreso' ? 'selected' : ''; ?>>En progreso</option>
+                                                    <option value="completada" <?= $tarea['estado'] === 'completada' ? 'selected' : ''; ?>>Completada</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-primary">Cambiar Estado</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <div class="col-12">
+                                <div class="alert alert-info" role="alert">No hay tareas asignadas.</div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
                     
                 <!-- /.container-fluid -->

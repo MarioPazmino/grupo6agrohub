@@ -358,40 +358,41 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                         </div>
                     </div>
 
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Tareas Asignadas</h6>
-                        </div>
-                        <div class="card-body">
-                            <?php
-                            if (!empty($empleado['tareas_asignadas'])) {
-                                foreach ($empleado['tareas_asignadas'] as $index => $tarea) {
-                                    echo '<div class="card mb-3 task-card">';
-                                    echo '<div class="card-body">';
-                                    echo '<p class="card-text">' . htmlspecialchars($tarea['descripcion']) . '</p>';
-                                    echo '<p class="card-text"><strong>Estado:</strong> <span class="task-status-' . htmlspecialchars(strtolower(str_replace(' ', '-', $tarea['estado']))) . '">' . htmlspecialchars($tarea['estado']) . '</span></p>';
-                                    echo '<form method="post" action="actualizar_tarea.php">';
-                                    echo '<input type="hidden" name="tarea_index" value="' . $index . '">';
-                                    echo '<input type="hidden" name="tarea_id" value="' . $tarea['_id'] . '">';
-                                    echo '<div class="form-group">';
-                                    echo '<label for="estado">Cambiar estado:</label>';
-                                    echo '<select name="estado" class="form-control">';
-                                    echo '<option value="Pendiente" ' . ($tarea['estado'] === 'Pendiente' ? 'selected' : '') . '>Pendiente</option>';
-                                    echo '<option value="En Progreso" ' . ($tarea['estado'] === 'En Progreso' ? 'selected' : '') . '>En Progreso</option>';
-                                    echo '<option value="Completada" ' . ($tarea['estado'] === 'Completada' ? 'selected' : '') . '>Completada</option>';
-                                    echo '</select>';
-                                    echo '</div>';
-                                    echo '<button type="submit" class="btn btn-primary">Actualizar</button>';
-                                    echo '</form>';
-                                    echo '</div>';
-                                    echo '</div>';
-                                }
-                            } else {
-                                echo '<p>No hay tareas asignadas.</p>';
-                            }
-                            ?>
-                        </div>
-                    </div>
+                  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Tareas Asignadas</h6>
+    </div>
+    <div class="card-body">
+        <?php
+        if (!empty($empleado['tareas_asignadas'])) {
+            echo '<ul class="list-group list-group-flush">';
+            foreach ($empleado['tareas_asignadas'] as $index => $tarea) {
+                echo '<li class="list-group-item">';
+                echo '<p class="card-text">' . htmlspecialchars($tarea['descripcion']) . '</p>';
+                echo '<p class="card-text"><strong>Estado:</strong> <span class="task-status-' . htmlspecialchars(strtolower(str_replace(' ', '-', $tarea['estado']))) . '">' . htmlspecialchars($tarea['estado']) . '</span></p>';
+                echo '<form method="post" action="actualizar_tarea.php">';
+                echo '<input type="hidden" name="tarea_index" value="' . $index . '">';
+                echo '<input type="hidden" name="tarea_id" value="' . $tarea['_id'] . '">';
+                echo '<div class="form-group">';
+                echo '<label for="estado">Cambiar estado:</label>';
+                echo '<select name="estado" class="form-control">';
+                echo '<option value="Pendiente" ' . ($tarea['estado'] === 'Pendiente' ? 'selected' : '') . '>Pendiente</option>';
+                echo '<option value="En Progreso" ' . ($tarea['estado'] === 'En Progreso' ? 'selected' : '') . '>En Progreso</option>';
+                echo '<option value="Completada" ' . ($tarea['estado'] === 'Completada' ? 'selected' : '') . '>Completada</option>';
+                echo '</select>';
+                echo '</div>';
+                echo '<button type="submit" class="btn btn-primary">Actualizar</button>';
+                echo '</form>';
+                echo '</li>';
+            }
+            echo '</ul>';
+        } else {
+            echo '<p>No hay tareas asignadas.</p>';
+        }
+        ?>
+    </div>
+</div>
+
                 </div>
                 <!-- /.container-fluid -->
             </div>

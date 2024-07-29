@@ -420,8 +420,7 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
             
 
   
-</div>
-</div>
+
 <!-- End of Main Content -->
 
 

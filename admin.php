@@ -1037,6 +1037,22 @@ function validateForm(form) {
                 </div>
             </div>
         </div>
+ <script>
+        // Mostrar modal si hay errores o mensajes de éxito
+        <?php if (!empty($errors) || !empty($success)): ?>
+            $(document).ready(function () {
+                $('#messageModal').modal('show');
+                <?php if (!empty($errors)): ?>
+                    console.error("Errores: <?php echo json_encode($errors); ?>");
+                <?php endif; ?>
+                <?php if (!empty($success)): ?>
+                    console.log("Éxito: <?php echo json_encode($success); ?>");
+                <?php endif; ?>
+            });
+        <?php endif; ?>
+    </script>
+
+    
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>

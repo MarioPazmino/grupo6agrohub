@@ -428,65 +428,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_task'])) {
 
                 
 
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
-                    <!-- Page Heading -->
-                    <h1 class="h3 mb-4 text-gray-800">Perfil del Empleado</h1>
+              <!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <h1 class="h3 mb-4 text-gray-800">Perfil del Empleado</h1>
 
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Datos del Perfil</h6>
+    <!-- Información Administrativa para Administradores -->
+    <?php if ($_SESSION['rol'] === 'admin'): ?>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Información Administrativa</h6>
+            </div>
+            <!-- Card Body - Admin Info -->
+            <div class="card-body">
+                <p><strong>Total de Empleados:</strong> <?php echo $total_empleados; ?></p>
+                <p><strong>Total de Tareas Pendientes:</strong> <?php echo $total_tareas_pendientes; ?></p>
+                <p><strong>Total de Tareas Completadas:</strong> <?php echo $total_tareas_completadas; ?></p>
+                <!-- Agrega más información relevante según lo necesario -->
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- Perfil del Usuario (Visible para todos los roles) -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Datos del Perfil</h6>
+        </div>
+        <!-- Card Body - User Info -->
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <img class="img-fluid rounded-circle" style="width: 150px;" src="assets/images/undraw_profile.svg" alt="Profile Image">
+                </div>
+                <div class="col-md-8">
+                    <form method="post" action="">
+                        <?php
+                        // Mostrar errores si existen
+                        if (!empty($errors)) {
+                            echo '<div class="alert alert-danger">';
+                            echo '<ul>';
+                            foreach ($errors as $error) {
+                                echo "<li>$error</li>";
+                            }
+                            echo '</ul>';
+                            echo '</div>';
+                        }
+                        ?>
+                        <div class="form-group">
+                            <label for="nombre_usuario">Nombre de Usuario:</label>
+                            <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo htmlspecialchars($_SESSION['nombre_usuario']); ?>" readonly>
                         </div>
-                        <!-- Card Body - User Info -->
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4 text-center">
-                                    <img class="img-fluid rounded-circle" style="width: 150px;" src="assets/images/undraw_profile.svg" alt="Profile Image">
-                                </div>
-                                <div class="col-md-8">
-                                    <form method="post" action="">
-                                        <?php
-                                        // Mostrar errores si existen
-                                        if (!empty($errors)) {
-                                            echo '<div class="alert alert-danger">';
-                                            echo '<ul>';
-                                            foreach ($errors as $error) {
-                                                echo "<li>$error</li>";
-                                            }
-                                            echo '</ul>';
-                                            echo '</div>';
-                                        }
-                                        ?>
-                                        <div class="form-group">
-                                            <label for="nombre_usuario">Nombre de Usuario:</label>
-                                            <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo $_SESSION['nombre_usuario']; ?>" readonly>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="nombre">Nombre:</label>
-                                            <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo $usuario['nombre']; ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="apellido">Apellido:</label>
-                                            <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo $usuario['apellido']; ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="email">Email:</label>
-                                            <input type="email" class="form-control" id="email" name="email" value="<?php echo $usuario['email']; ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="telefono">Teléfono:</label>
-                                            <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo $usuario['telefono']; ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="cedula">Cédula:</label>
-                                            <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo $usuario['cedula']; ?>">
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">Actualizar Perfil</button>
-                                    </form>
-                                </div>
-                            </div>
+                        <div class="form-group">
+                            <label for="nombre">Nombre:</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($usuario['nombre']); ?>">
                         </div>
-                    </div>
+                        <div class="form-group">
+                            <label for="apellido">Apellido:</label>
+                            <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($usuario['apellido']); ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($usuario['email']); ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono">Teléfono:</label>
+                            <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($usuario['telefono']); ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="cedula">Cédula:</label>
+                            <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo htmlspecialchars($usuario['cedula']); ?>">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Actualizar Perfil</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 

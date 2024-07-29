@@ -110,6 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Obtener el empleado con las tareas asignadas
 $empleado = $collection->findOne(['_id' => $usuario_id]);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -131,49 +132,36 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
 
     <!-- Custom styles for this template-->
     <link href="css/user/sb-admin-2.min.css" rel="stylesheet">
-    <style>
-        .task-card {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            flex: 1;
-            min-width: 250px; /* Ajusta el ancho mínimo de cada tarjeta */
-        }
+<style>
+    .task-card {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+    }
+    .task-card .card-body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%; /* Hacer el card más ancho */
+    }
+    .task-card .card-text {
+        font-size: 1.1rem;
+    }
+    .task-card .btn {
+        margin-top: 10px;
+    }
+    .task-status-pendiente {
+        color: #dc3545; /* Rojo para pendiente */
+    }
+    .task-status-en-progreso {
+        color: #ffc107; /* Amarillo para en progreso */
+    }
+    .task-status-completada {
+        color: #28a745; /* Verde para completada */
+    }
+</style>
 
-        .task-card .card-body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%; /* Hacer el card más ancho */
-        }
-
-        .task-card .card-text {
-            font-size: 1.1rem;
-        }
-
-        .task-card .btn {
-            margin-top: 10px;
-        }
-
-        .task-status-pendiente {
-            color: #dc3545; /* Rojo para pendiente */
-        }
-
-        .task-status-en-progreso {
-            color: #ffc107; /* Amarillo para en progreso */
-        }
-
-        .task-status-completada {
-            color: #28a745; /* Verde para completada */
-        }
-
-        .task-cards-container {
-            display: flex;
-            flex-wrap: wrap; /* Permite que las tarjetas se envuelvan en lugar de forzarlas en una sola línea */
-            gap: 15px; /* Espacio entre tarjetas */
-        }
-    </style>
 
 </head>
 
@@ -227,15 +215,17 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                 </div>
             </li>
 
+           
             <!-- Divider -->
             <hr class="sidebar-divider">
 
-            <!-- Nav Item - Charts -->
-            <li class="nav-item">
+                             <!-- Nav Item - Charts -->
+                             <li class="nav-item">
                 <a class="nav-link" href="ventas.php">
                     <i class="fas fa-fw fa-cart-plus"></i>
                     <span>Ventas</span></a>
             </li>
+
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
@@ -245,6 +235,7 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
 
+          
         </ul>
         <!-- End of Sidebar -->
 
@@ -262,8 +253,13 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                         <i class="fa fa-bars"></i>
                     </button>
 
+                  
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
+
+                        
+
+                       
 
                         <div class="topbar-divider d-none d-sm-block"></div>
 
@@ -272,10 +268,13 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($_SESSION['nombre_usuario']); ?></span>
-                                <img class="img-profile rounded-circle" src="assets/images/undraw_profile.svg">
+
+                                <img class="img-profile rounded-circle"
+                                    src="assets/images/undraw_profile.svg">
                             </a>
                             <!-- Dropdown - User Information -->
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
                                 <a class="dropdown-item" href="user.php">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
@@ -290,9 +289,10 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="logout.php">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Salir
-                                </a>
+    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+    Salir
+</a>
+
                             </div>
                         </li>
 
@@ -301,102 +301,174 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                 </nav>
                 <!-- End of Topbar -->
 
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
+                
+                
 
-                    <!-- Page Heading -->
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-                    </div>
 
-                    <!-- HTML y PHP para mostrar y editar los datos del usuario -->
-                    <div class="row justify-content-center">
-                        <div class="col-lg-8">
-                            <div class="card shadow mb-4">
-                                <!-- Card Header - User Info -->
-                                <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Información del Usuario</h6>
-                                </div>
-                                <!-- Card Body - User Info -->
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-4 text-center">
-                                            <img class="img-fluid rounded-circle" style="width: 150px;" src="assets/images/undraw_profile.svg" alt="Profile Image">
-                                        </div>
-                                        <div class="col-md-8">
-                                            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" onsubmit="return validateForm();">
-                                                <div class="form-group">
-                                                    <label for="nombre_usuario">Nombre de Usuario:</label>
-                                                    <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo $_SESSION['nombre_usuario']; ?>" readonly>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="nombre">Nombre:</label>
-                                                    <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo $_SESSION['nombre']; ?>">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="apellido">Apellido:</label>
-                                                    <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo $_SESSION['apellido']; ?>">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="email">Correo Electrónico:</label>
-                                                    <input type="email" class="form-control" id="email" name="email" value="<?php echo $_SESSION['email']; ?>">
-                                                </div>
-                                                <button type="submit" class="btn btn-primary">Actualizar</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Tareas Asignadas -->
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <h4 class="text-gray-800">Tareas Asignadas</h4>
-                            <div class="task-cards-container">
-                                <div class="task-card card border-left-primary shadow h-100 py-2">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Tarea 1</h5>
-                                        <p class="card-text task-status-en-progreso">En Progreso</p>
-                                        <a href="#" class="btn btn-primary">Ver Detalles</a>
-                                    </div>
-                                </div>
-                                <div class="task-card card border-left-warning shadow h-100 py-2">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Tarea 2</h5>
-                                        <p class="card-text task-status-pendiente">Pendiente</p>
-                                        <a href="#" class="btn btn-warning">Ver Detalles</a>
-                                    </div>
-                                </div>
-                                <div class="task-card card border-left-success shadow h-100 py-2">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Tarea 3</h5>
-                                        <p class="card-text task-status-completada">Completada</p>
-                                        <a href="#" class="btn btn-success">Ver Detalles</a>
-                                    </div>
-                                </div>
-                                <!-- Agrega más tarjetas aquí según sea necesario -->
-                            </div>
-                        </div>
-                    </div>
 
+
+
+
+
+
+
+
+<!-- Begin Page Content -->
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        
+    </div>
+
+    <!-- HTML y PHP para mostrar y editar los datos del usuario -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <!-- Card Header - User Info -->
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Información del Usuario</h6>
                 </div>
-                <!-- End of Main Content -->
+                <!-- Card Body - User Info -->
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <img class="img-fluid rounded-circle" style="width: 150px;" src="assets/images/undraw_profile.svg" alt="Profile Image">
+                        </div>
 
+
+                        <div class="col-md-8">
+    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" onsubmit="return validateForm();">
+        <div class="form-group">
+            <label for="nombre_usuario">Nombre de Usuario:</label>
+            <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo $_SESSION['nombre_usuario']; ?>" readonly>
+        </div>
+        <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo $_SESSION['nombre']; ?>">
+        </div>
+        <div class="form-group">
+            <label for="apellido">Apellido:</label>
+            <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo $_SESSION['apellido']; ?>">
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" class="form-control" id="email" name="email" value="<?php echo $_SESSION['email']; ?>">
+        </div>
+        <div class="form-group">
+            <label for="telefono">Teléfono:</label>
+            <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo $_SESSION['telefono']; ?>">
+        </div>
+        <div class="form-group">
+            <label for="cedula">Cédula:</label>
+            <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo $_SESSION['cedula']; ?>">
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    </form>
+</div>
+                        
+
+                    </div>
+                </div>
             </div>
-            <!-- End of Content Wrapper -->
+
+         <!-- Tareas Asignadas -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Tareas Asignadas</h1>
+    </div>
+    <div class="row">
+        <!-- Display tasks horizontally -->
+        <?php if (!empty($empleado['tareas_asignadas'])) : ?>
+            <?php foreach ($empleado['tareas_asignadas'] as $index => $tarea) : ?>
+                <div class="col-md-4 task-card">
+                    <div class="card shadow mb-4 task-card-body">
+                        <div class="card-body">
+                            <h5 class="card-title"><?= $tarea['descripcion']; ?></h5>
+                            <p class="card-text task-status-<?= $tarea['estado']; ?>">Estado: <?= ucfirst($tarea['estado']); ?></p>
+                            <form method="POST" action="cambiar_estado_tarea.php">
+                                <input type="hidden" name="tarea_id" value="<?= $index; ?>">
+                                <select name="nuevo_estado" class="form-control mb-2">
+                                    <option value="pendiente" <?= $tarea['estado'] === 'pendiente' ? 'selected' : ''; ?>>Pendiente</option>
+                                    <option value="en progreso" <?= $tarea['estado'] === 'en progreso' ? 'selected' : ''; ?>>En progreso</option>
+                                    <option value="completada" <?= $tarea['estado'] === 'completada' ? 'selected' : ''; ?>>Completada</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary">Cambiar Estado</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php else : ?>
+            <div class="col-12">
+                <div class="alert alert-info" role="alert">No hay tareas asignadas.</div>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+
+
+
+
+
+
+            
+
+  
+</div>
+</div>
+<!-- End of Main Content -->
+
+
+
+
+
+
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; AgroHUB 2024</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
 
         </div>
-        <!-- End of Page Wrapper -->
+        <!-- End of Content Wrapper -->
 
     </div>
-    <!-- End of Wrapper -->
+    <!-- End of Page Wrapper -->
 
     <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="login.html">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
@@ -406,9 +478,66 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
 
     <!-- Custom scripts for all pages-->
-    <script src="js/sb-admin-2.min.js"></script>
+    <script src="components/user/sb-admin-2.min.js"></script>
 
+    <!-- Page level plugins -->
+    <script src="vendor/chart.js/Chart.min.js"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="components/user/demo/chart-area-demo.js"></script>
+    <script src="components/user/demo/chart-pie-demo.js"></script>
+    <script>
+        function validateForm() {
+            let errors = [];
+            let nombre = document.getElementById('nombre').value;
+            let apellido = document.getElementById('apellido').value;
+            let email = document.getElementById('email').value;
+            let telefono = document.getElementById('telefono').value;
+            let cedula = document.getElementById('cedula').value;
+
+            // Validar nombre
+            if (nombre === "") {
+                errors.push("El nombre es requerido.");
+            } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/.test(nombre)) {
+                errors.push("Solo se permiten letras, espacios y tildes en el nombre.");
+            }
+
+            // Validar apellido
+            if (apellido === "") {
+                errors.push("El apellido es requerido.");
+            } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/.test(apellido)) {
+                errors.push("Solo se permiten letras, espacios y tildes en el apellido.");
+            }
+
+            // Validar email
+            if (email === "") {
+                errors.push("El email es requerido.");
+            } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+                errors.push("Formato de email inválido.");
+            }
+
+            // Validar teléfono
+            if (telefono === "") {
+                errors.push("El teléfono es requerido.");
+            } else if (!/^0[0-9]{9}$/.test(telefono)) {
+                errors.push("El teléfono debe tener 10 números y comenzar con 0.");
+            }
+
+            // Validar cédula
+            if (cedula === "") {
+                errors.push("La cédula es requerida.");
+            } else if (!/^[0-9]{10}$/.test(cedula)) {
+                errors.push("La cédula debe tener 10 números.");
+            }
+
+            if (errors.length > 0) {
+                alert(errors.join("\n"));
+                return false;
+            }
+
+            return true;
+        }
+    </script>
 </body>
 
 </html>
-

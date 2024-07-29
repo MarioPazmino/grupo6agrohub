@@ -1,0 +1,230 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    height: 100%;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+     
+}
+.modal-content h2 {
+    display: block;
+    font-size: 1.5em;
+    margin-block-start: 0.83em;
+    margin-block-end: 0.83em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
+}
+
+.logo {
+    font-size: 1.5rem;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+}
+/* Estilos para los modales */
+.modal {
+    display: none; /* Inicialmente oculto */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semitransparente */
+    overflow: auto; /* Permite hacer scroll si es necesario */
+}
+
+.modal.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 60px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    width: 300px; /* Ancho del modal */
+    max-width: 80%; /* Ancho máximo */
+    opacity: 0; /* Inicialmente transparente */
+    transform: translateY(-50px); /* Desplazamiento inicial hacia arriba */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.modal.active .modal-content {
+    opacity: 1; /* Mostrar el modal */
+    transform: translateY(0); /* Transición hacia la posición normal */
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+}
+
+.modal-content h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.modal-content form {
+    display: grid; /* Utilizamos grid para mejor control de la disposición */
+    gap: 10px; /* Espacio entre las filas y columnas de grid */
+}
+
+.modal-content form .user-box {
+    position: relative;
+}
+
+.modal-content form .user-box input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    outline: none;
+    background: none;
+    color: #000;
+    transition: all 0.3s ease;
+}
+
+.modal-content form .user-box label {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 10px 0;
+    pointer-events: none;
+    color: #999;
+    transition: 0.3s;
+}
+
+.modal-content form .user-box input:focus ~ label,
+.modal-content form .user-box input:valid ~ label {
+    top: -18px;
+    left: 10px;
+    color: #333;
+    font-size: 12px;
+    font-weight: bold;
+    background-color: #fff;
+    padding: 0 5px;
+}
+
+.modal-content form button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-content form button:hover {
+    background-color: #45a049;
+}
+
+.modal-content form button span {
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform: scaleX(0);
+    transform-origin: left;
+    background: #333;
+    transition: transform 0.5s;
+}
+
+.modal-content form button:hover span {
+    transform: scaleX(1);
+    transform-origin: right;
+}
+
+/* Media query para hacer el modal responsive */
+@media screen and (max-width: 600px) {
+    .modal-content {
+        width: 90%;
+        max-width: 90%;
+    }
+}
+
+
+.hero {
+    background: url('https://www.eta-transport-marignol.com/sx-content/uploads/bloc/medium/img-travaux.jpg') no-repeat center center/cover;
+    height: calc(100vh - 60px); /* Ajusta según la altura de tu encabezado */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    padding: 0 1rem;
+}
+
+
+
+
+
+.hero h1 {
+    font-size: 4rem;
+    font-weight: normal;
+    margin: 0;
+}
+
+.hero p {
+    font-size: 1.5rem;
+    margin: 1rem 0;
+}
+
+.buttons {
+    display: flex;
+    gap: 2rem;
+}
+
+.btn {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.5rem 2rem;
+    text-decoration: none;
+    border: 2px solid white;
+    border-radius: 5px;
+    transition: background-color 0.3s, border-color 0.3s;
+    font-size: 1rem;
+}
+
+.btn:hover {
+    background-color: white;
+    color: #333;
+    border-color: #333;
+}

@@ -644,7 +644,6 @@ $total_tareas_completadas = $collection->countDocuments([
 
 
 
-
 <!-- Listado de Usuarios -->
 <div class="card shadow mb-4">
     <div class="card-header py-3">
@@ -704,40 +703,40 @@ $total_tareas_completadas = $collection->countDocuments([
                                                     <span aria-hidden="true">×</span>
                                                 </button>
                                             </div>
-                                            <form method="post" action="">
+                                            <form method="post" action="" onsubmit="return validateForm(this);">
                                                 <div class="modal-body">
                                                     <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
                                                     <!-- Formulario para editar usuario -->
                                                     <div class="form-group">
                                                         <label for="nombre">Nombre:</label>
-                                                        <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($usuario['nombre']); ?>">
+                                                        <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($usuario['nombre']); ?>" required>
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="apellido">Apellido:</label>
-                                                        <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($usuario['apellido']); ?>">
+                                                        <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($usuario['apellido']); ?>" required>
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="email">Email:</label>
-                                                        <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($usuario['email']); ?>">
+                                                        <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($usuario['email']); ?>" required>
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="telefono">Teléfono:</label>
-                                                        <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($usuario['telefono']); ?>">
+                                                        <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($usuario['telefono']); ?>" pattern="\d{10}" title="El teléfono debe tener exactamente 10 dígitos." required>
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="cedula">Cédula:</label>
-                                                        <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo htmlspecialchars($usuario['cedula']); ?>">
+                                                        <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo htmlspecialchars($usuario['cedula']); ?>" pattern="\d{10}" title="La cédula debe tener exactamente 10 dígitos." required>
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="rol">Rol:</label>
-                                                        <select class="form-control" id="rol" name="rol">
+                                                        <select class="form-control" id="rol" name="rol" required>
                                                             <option value="empleado" <?php if ($usuario['rol'] == 'empleado') echo 'selected'; ?>>Empleado</option>
                                                             <option value="admin" <?php if ($usuario['rol'] == 'admin') echo 'selected'; ?>>Admin</option>
                                                         </select>
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="fecha_contratacion">Fecha de Contratación:</label>
-                                                        <input type="date" class="form-control" id="fecha_contratacion" name="fecha_contratacion" value="<?php echo $usuario['fecha_contratacion']->toDateTime()->format('Y-m-d'); ?>">
+                                                        <input type="date" class="form-control" id="fecha_contratacion" name="fecha_contratacion" value="<?php echo $usuario['fecha_contratacion']->toDateTime()->format('Y-m-d'); ?>" required>
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="password">Contraseña:</label>
@@ -745,7 +744,7 @@ $total_tareas_completadas = $collection->countDocuments([
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="nombre_usuario">Nombre de Usuario:</label>
-                                                        <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo htmlspecialchars($usuario['nombre_usuario']); ?>">
+                                                        <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo htmlspecialchars($usuario['nombre_usuario']); ?>" required>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
@@ -802,60 +801,78 @@ $total_tareas_completadas = $collection->countDocuments([
     </div>
 </div>
 
+<script>
+function validateForm(form) {
+    const fechaContratacion = new Date(form.fecha_contratacion.value);
+    const hoy = new Date();
+    
+    // Verificar que la fecha de contratación no sea futura
+    if (fechaContratacion > hoy) {
+        alert("La fecha de contratación no puede ser futura.");
+        return false;
+    }
+    
+    return true;
+}
+</script>
 
 
 
-                    <!-- Formulario para agregar nuevo usuario -->
+
+<!-- Formulario para agregar nuevo usuario -->
 <div class="card shadow mb-4">
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">Agregar Usuario</h6>
     </div>
     <div class="card-body">
-        <form method="post" action="">
+        <form method="post" action="" onsubmit="return validateForm(this);">
             <div class="row">
                 <!-- Columna 1 -->
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group">
                         <label for="nombre">Nombre:</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre">
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
                     </div>
                     <div class="form-group">
                         <label for="apellido">Apellido:</label>
-                        <input type="text" class="form-control" id="apellido" name="apellido">
+                        <input type="text" class="form-control" id="apellido" name="apellido" required>
                     </div>
                     <div class="form-group">
                         <label for="email">Email:</label>
-                        <input type="email" class="form-control" id="email" name="email">
-                    </div>
-                    <div class="form-group">
-                        <label for="telefono">Teléfono:</label>
-                        <input type="text" class="form-control" id="telefono" name="telefono">
+                        <input type="email" class="form-control" id="email" name="email" required>
                     </div>
                 </div>
                 <!-- Columna 2 -->
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="telefono">Teléfono:</label>
+                        <input type="text" class="form-control" id="telefono" name="telefono" pattern="\d{10}" title="El teléfono debe tener exactamente 10 dígitos." required>
+                    </div>
                     <div class="form-group">
                         <label for="cedula">Cédula:</label>
-                        <input type="text" class="form-control" id="cedula" name="cedula">
+                        <input type="text" class="form-control" id="cedula" name="cedula" pattern="\d{10}" title="La cédula debe tener exactamente 10 dígitos." required>
                     </div>
                     <div class="form-group">
                         <label for="rol">Rol:</label>
-                        <select class="form-control" id="rol" name="rol">
+                        <select class="form-control" id="rol" name="rol" required>
                             <option value="empleado">Empleado</option>
                             <option value="admin">Admin</option>
                         </select>
                     </div>
+                </div>
+                <!-- Columna 3 -->
+                <div class="col-md-4">
                     <div class="form-group">
                         <label for="fecha_contratacion">Fecha de Contratación:</label>
-                        <input type="date" class="form-control" id="fecha_contratacion" name="fecha_contratacion">
+                        <input type="date" class="form-control" id="fecha_contratacion" name="fecha_contratacion" required>
                     </div>
                     <div class="form-group">
                         <label for="password">Contraseña:</label>
-                        <input type="password" class="form-control" id="password" name="password">
+                        <input type="password" class="form-control" id="password" name="password" required>
                     </div>
                     <div class="form-group">
                         <label for="nombre_usuario">Nombre de Usuario:</label>
-                        <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario">
+                        <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" required>
                     </div>
                 </div>
             </div>
@@ -863,6 +880,21 @@ $total_tareas_completadas = $collection->countDocuments([
         </form>
     </div>
 </div>
+
+<script>
+function validateForm(form) {
+    const fechaContratacion = new Date(form.fecha_contratacion.value);
+    const hoy = new Date();
+    
+    // Verificar que la fecha de contratación no sea futura
+    if (fechaContratacion > hoy) {
+        alert("La fecha de contratación no puede ser futura.");
+        return false;
+    }
+    
+    return true;
+}
+</script>
 
 
 

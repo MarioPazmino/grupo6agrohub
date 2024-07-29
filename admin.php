@@ -451,12 +451,17 @@ if (isset($_POST['delete'])) {
                                                 <td><?php echo htmlspecialchars($usuario['rol']); ?></td>
                                                 <td><?php echo htmlspecialchars($usuario['fecha_contratacion']->toDateTime()->format('Y-m-d')); ?></td>
                                                 <td>
-                                                    <!-- Botones para modificar y eliminar -->
-                                                    <form method="post" action="" class="d-inline-flex align-items-center">
-                                                        <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
-                                                        <button type="submit" name="delete" class="btn btn-danger btn-sm">Eliminar</button>
-                                                    </form>
-                                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal<?php echo $usuario['_id']; ?>">Modificar</button>
+                                                   <!-- Botones para modificar y eliminar -->
+<form method="post" action="" class="d-inline-flex align-items-center">
+    <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
+    <button type="submit" name="delete" class="btn btn-danger btn-sm" title="Eliminar">
+        <i class="fas fa-trash-alt"></i> <!-- Ícono de eliminar -->
+    </button>
+</form>
+<button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal<?php echo $usuario['_id']; ?>" title="Modificar">
+    <i class="fas fa-edit"></i> <!-- Ícono de modificar -->
+</button>
+
 
                                                     <!-- Modal para modificar usuario -->
                                                     <div class="modal fade" id="editModal<?php echo $usuario['_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">

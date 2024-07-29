@@ -675,53 +675,61 @@ $usuarios = $collection->find()->toArray();
 
 
 
-                    
-<?php if (!empty($usuario['tareas_asignadas'])): ?>
-    <h5 class="mb-4">Tareas Asignadas:</h5>
-    <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Empleado</th>
-                    <th>Descripción de la Tarea</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($usuario['tareas_asignadas'] as $tarea): ?>
-                    <tr>
-                        <td>
-                            <?php 
-                            // Mostrar nombre completo o correo según el rol
-                            if (isset($usuario['rol']) && $usuario['rol'] === 'empleado') {
-                                echo htmlspecialchars($usuario['email']); 
-                            } else {
-                                echo htmlspecialchars($usuario['nombre'] . ' ' . $usuario['apellido']); 
-                            }
-                            ?>
-                        </td>
-                        <td><?php echo htmlspecialchars($tarea['descripcion']); ?></td>
-                        <td>
-                            <?php 
-                            $estado = htmlspecialchars($tarea['estado']);
-                            // Aplicar clases de Bootstrap según el estado
-                            if ($estado === 'pendiente') {
-                                echo '<span class="badge badge-warning">Pendiente</span>';
-                            } elseif ($estado === 'en_proceso') {
-                                echo '<span class="badge badge-info">En Proceso</span>';
-                            } elseif ($estado === 'completada') {
-                                echo '<span class="badge badge-success">Completada</span>';
-                            }
-                            ?>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+   <!-- Listado de Tareas Asignadas -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Tareas Asignadas</h6>
     </div>
-<?php else: ?>
-    <p class="text-muted">No hay tareas asignadas.</p>
-<?php endif; ?>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Empleado</th>
+                        <th>Descripción</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($usuario['tareas_asignadas'])): ?>
+                        <?php foreach ($usuario['tareas_asignadas'] as $tarea): ?>
+                            <tr>
+                                <td>
+                                    <?php 
+                                    // Mostrar nombre completo o correo según el rol
+                                    if (isset($usuario['rol']) && $usuario['rol'] === 'empleado') {
+                                        echo htmlspecialchars($usuario['email']); 
+                                    } else {
+                                        echo htmlspecialchars($usuario['nombre'] . ' ' . $usuario['apellido']); 
+                                    }
+                                    ?>
+                                </td>
+                                <td><?php echo htmlspecialchars($tarea['descripcion']); ?></td>
+                                <td>
+                                    <?php 
+                                    $estado = htmlspecialchars($tarea['estado']);
+                                    // Aplicar clases de Bootstrap según el estado
+                                    if ($estado === 'pendiente') {
+                                        echo '<span class="badge badge-warning">Pendiente</span>';
+                                    } elseif ($estado === 'en_proceso') {
+                                        echo '<span class="badge badge-info">En Proceso</span>';
+                                    } elseif ($estado === 'completada') {
+                                        echo '<span class="badge badge-success">Completada</span>';
+                                    }
+                                    ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">No hay tareas asignadas.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 
                                     

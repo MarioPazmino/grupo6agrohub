@@ -219,6 +219,26 @@ foreach ($usuarios as $usuario) {
     }
 }
 
+
+
+
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_task'])) {
+    $tarea_id = $_POST['tarea_id'];
+    
+   
+    
+    // Eliminar la tarea
+    $result = $collection->updateMany(
+        [],
+        ['$pull' => ['tareas_asignadas' => ['tarea_id' => new MongoDB\BSON\ObjectId($tarea_id)]]]
+    );
+    
+    // Luego, redirige o actualiza la página
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
+}
 ?>
 
 <!DOCTYPE html>

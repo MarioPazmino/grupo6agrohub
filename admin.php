@@ -166,16 +166,17 @@ if (isset($_POST['delete'])) {
 
 
 // Asignar tarea
+// Asignar tarea
 if (isset($_POST['assign_task'])) {
     $user_id = new MongoDB\BSON\ObjectId($_POST['user_id']);
     $tarea_descripcion = $_POST['tarea_descripcion'];
     $tarea_estado = $_POST['tarea_estado'];
 
     $nueva_tarea = [
-        "_id" => new MongoDB\BSON\ObjectId(),
+        "tarea_id" => new MongoDB\BSON\ObjectId(),
         "descripcion" => $tarea_descripcion,
         "estado" => $tarea_estado,
-        "fecha_asignacion" => new MongoDB\BSON\UTCDateTime()
+        // Eliminamos la línea de fecha_asignacion si no existe
     ];
 
     try {
@@ -196,6 +197,7 @@ if (isset($_POST['assign_task'])) {
 
 // Asegúrate de que $usuarios se actualice después de asignar una tarea
 $usuarios = $collection->find()->toArray();
+
 ?>
 
 <!DOCTYPE html>
@@ -452,163 +454,162 @@ $usuarios = $collection->find()->toArray();
 
 
 
- <!-- Listado de Usuarios -->
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Lista de Usuarios</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Nombre</th>
-                                            <th>Apellido</th>
-                                            <th>Email</th>
-                                            <th>Teléfono</th>
-                                            <th>Cédula</th>
-                                            <th>Rol</th>
-                                            <th>Fecha de Contratación</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($usuarios as $usuario): ?>
-                                            <tr>
-                                                <td><?php echo htmlspecialchars($usuario['nombre']); ?></td>
-                                                <td><?php echo htmlspecialchars($usuario['apellido']); ?></td>
-                                                <td><?php echo htmlspecialchars($usuario['email']); ?></td>
-                                                <td><?php echo htmlspecialchars($usuario['telefono']); ?></td>
-                                                <td><?php echo htmlspecialchars($usuario['cedula']); ?></td>
-                                                <td><?php echo htmlspecialchars($usuario['rol']); ?></td>
-                                                <td><?php echo htmlspecialchars($usuario['fecha_contratacion']->toDateTime()->format('Y-m-d')); ?></td>
-<td>
-    <!-- Botones para modificar, eliminar y asignar tareas -->
-    <div class="d-flex">
-        <form method="post" action="" class="mr-2">
-            <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
-            <button type="submit" name="delete" class="btn btn-danger btn-sm" title="Eliminar">
-                <i class="fas fa-trash-alt"></i>
-            </button>
-        </form>
-        <button class="btn btn-primary btn-sm mr-2" data-toggle="modal" data-target="#editModal<?php echo $usuario['_id']; ?>" title="Modificar">
-            <i class="fas fa-edit"></i>
-        </button>
-        <?php if ($usuario['rol'] === 'empleado'): ?>
-            <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#taskModal<?php echo $usuario['_id']; ?>" title="Asignar Tarea">
-                <i class="fas fa-tasks"></i>
-            </button>
-        <?php endif; ?>
+<!-- Listado de Usuarios -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Lista de Usuarios</h6>
     </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Cédula</th>
+                        <th>Rol</th>
+                        <th>Fecha de Contratación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($usuarios as $usuario): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($usuario['nombre']); ?></td>
+                            <td><?php echo htmlspecialchars($usuario['apellido']); ?></td>
+                            <td><?php echo htmlspecialchars($usuario['email']); ?></td>
+                            <td><?php echo htmlspecialchars($usuario['telefono']); ?></td>
+                            <td><?php echo htmlspecialchars($usuario['cedula']); ?></td>
+                            <td><?php echo htmlspecialchars($usuario['rol']); ?></td>
+                            <td><?php echo htmlspecialchars($usuario['fecha_contratacion']->toDateTime()->format('Y-m-d')); ?></td>
+                            <td>
+                                <!-- Botones para modificar, eliminar y asignar tareas -->
+                                <div class="d-flex">
+                                    <form method="post" action="" class="mr-2">
+                                        <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
+                                        <button type="submit" name="delete" class="btn btn-danger btn-sm" title="Eliminar">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                    <button class="btn btn-primary btn-sm mr-2" data-toggle="modal" data-target="#editModal<?php echo $usuario['_id']; ?>" title="Modificar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <?php if ($usuario['rol'] === 'empleado'): ?>
+                                        <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#taskModal<?php echo $usuario['_id']; ?>" title="Asignar Tarea">
+                                            <i class="fas fa-tasks"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
 
-    <!-- Modal para modificar usuario -->
-    <div class="modal fade" id="editModal<?php echo $usuario['_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Modificar Usuario</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <form method="post" action="">
-                    <div class="modal-body">
-                        <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
+                                <!-- Modal para modificar usuario -->
+                                <div class="modal fade" id="editModal<?php echo $usuario['_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editModalLabel">Modificar Usuario</h5>
+                                                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">×</span>
+                                                </button>
+                                            </div>
+                                            <form method="post" action="">
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
+                                                    <!-- Formulario para editar usuario -->
+                                                    <div class="form-group">
+                                                        <label for="nombre">Nombre:</label>
+                                                        <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($usuario['nombre']); ?>">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="apellido">Apellido:</label>
+                                                        <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($usuario['apellido']); ?>">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="email">Email:</label>
+                                                        <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($usuario['email']); ?>">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="telefono">Teléfono:</label>
+                                                        <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($usuario['telefono']); ?>">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="cedula">Cédula:</label>
+                                                        <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo htmlspecialchars($usuario['cedula']); ?>">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="rol">Rol:</label>
+                                                        <select class="form-control" id="rol" name="rol">
+                                                            <option value="empleado" <?php if ($usuario['rol'] == 'empleado') echo 'selected'; ?>>Empleado</option>
+                                                            <option value="admin" <?php if ($usuario['rol'] == 'admin') echo 'selected'; ?>>Admin</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="fecha_contratacion">Fecha de Contratación:</label>
+                                                        <input type="date" class="form-control" id="fecha_contratacion" name="fecha_contratacion" value="<?php echo $usuario['fecha_contratacion']->toDateTime()->format('Y-m-d'); ?>">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="password">Contraseña:</label>
+                                                        <input type="password" class="form-control" id="password" name="password" value="<?php echo htmlspecialchars($usuario['password']); ?>">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="nombre_usuario">Nombre de Usuario:</label>
+                                                        <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo htmlspecialchars($usuario['nombre_usuario']); ?>">
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" name="update" class="btn btn-primary">Actualizar</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        
-                                                                        <div class="form-group">
-                                                                            <label for="nombre">Nombre:</label>
-                                                                            <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($usuario['nombre']); ?>">
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label for="apellido">Apellido:</label>
-                                                                            <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($usuario['apellido']); ?>">
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label for="email">Email:</label>
-                                                                            <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($usuario['email']); ?>">
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label for="telefono">Teléfono:</label>
-                                                                            <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($usuario['telefono']); ?>">
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label for="cedula">Cédula:</label>
-                                                                            <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo htmlspecialchars($usuario['cedula']); ?>">
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label for="rol">Rol:</label>
-                                                                            <select class="form-control" id="rol" name="rol">
-                                                                                <option value="empleado" <?php if ($usuario['rol'] == 'empleado') echo 'selected'; ?>>Empleado</option>
-                                                                                <option value="admin" <?php if ($usuario['rol'] == 'admin') echo 'selected'; ?>>Admin</option>
-                                                                            </select>
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label for="fecha_contratacion">Fecha de Contratación:</label>
-                                                                            <input type="date" class="form-control" id="fecha_contratacion" name="fecha_contratacion" value="<?php echo $usuario['fecha_contratacion']->toDateTime()->format('Y-m-d'); ?>">
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label for="password">Contraseña:</label>
-                                                                            <input type="password" class="form-control" id="password" name="password" value="<?php echo htmlspecialchars($usuario['password']); ?>">
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label for="nombre_usuario">Nombre de Usuario:</label>
-                                                                            <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo htmlspecialchars($usuario['nombre_usuario']); ?>">
-                                                                        </div>
-                                                                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" name="update" class="btn btn-primary">Actualizar</button>
-                    </div>
-                </form>
-            </div>
-<?php if ($usuario['rol'] === 'empleado'): ?>
-    <!-- Modal para asignar tarea -->
-    <div class="modal fade" id="taskModal<?php echo $usuario['_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="taskModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="taskModalLabel">Asignar Tarea a <?php echo htmlspecialchars($usuario['nombre'] . ' ' . $usuario['apellido']); ?></h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <form method="post" action="">
-                    <div class="modal-body">
-                        <input type="hidden" name="user_id" value="<?php echo $usuario['_id']; ?>">
-                        <div class="form-group">
-                            <label for="tarea_descripcion">Descripción de la Tarea:</label>
-                            <textarea class="form-control" id="tarea_descripcion" name="tarea_descripcion" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="tarea_estado">Estado:</label>
-                            <select class="form-control" id="tarea_estado" name="tarea_estado">
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="En Progreso">En Progreso</option>
-                                <option value="Completada">Completada</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" name="assign_task" class="btn btn-primary">Asignar Tarea</button>
-                    </div>
-                </form>
-            </div>
+                                <?php if ($usuario['rol'] === 'empleado'): ?>
+                                    <!-- Modal para asignar tarea -->
+                                    <div class="modal fade" id="taskModal<?php echo $usuario['_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="taskModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="taskModalLabel">Asignar Tarea a <?php echo htmlspecialchars($usuario['nombre'] . ' ' . $usuario['apellido']); ?></h5>
+                                                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">×</span>
+                                                    </button>
+                                                </div>
+                                                <form method="post" action="">
+                                                    <div class="modal-body">
+                                                        <input type="hidden" name="user_id" value="<?php echo $usuario['_id']; ?>">
+                                                        <div class="form-group">
+                                                            <label for="tarea_descripcion">Descripción de la Tarea:</label>
+                                                            <textarea class="form-control" id="tarea_descripcion" name="tarea_descripcion" required></textarea>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="tarea_estado">Estado:</label>
+                                                            <select class="form-control" id="tarea_estado" name="tarea_estado">
+                                                                <option value="pendiente">Pendiente</option>
+                                                                <option value="en_proceso">En Proceso</option>
+                                                                <option value="completada">Completada</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" name="assign_task" class="btn btn-success">Asignar Tarea</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
-<?php endif; ?>
-</td>
-
-
-            
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+</div>
 
 
 

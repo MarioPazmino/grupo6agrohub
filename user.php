@@ -347,41 +347,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
 
             <!-- Card for displaying purchased products -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Productos Comprados</h6>
-                </div>
-                <div class="card-body">
-                    <?php if (!empty($compras)): ?>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Nombre Producto</th>
-                                    <th>Cantidad</th>
-                                    <th>Precio Total</th>
-                                    <th>Fecha de Compra</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($compras as $compra): ?>
-                                    <?php
-                                    // Obtener información del producto
-                                    $producto = $productosCollection->findOne(['_id' => $compra['producto_id']]);
-                                    ?>
-                                    <tr>
-                                        <td><?php echo $producto['nombre']; ?></td>
-                                        <td><?php echo $compra['cantidad']; ?></td>
-                                        <td><?php echo $compra['precio_total']; ?></td>
-                                        <td><?php echo $compra['fecha_compra']->toDateTime()->format('Y-m-d'); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    <?php else: ?>
-                        <p>No has realizado ninguna compra.</p>
-                    <?php endif; ?>
-                </div>
-            </div>
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Tareas Asignadas</h6>
+    </div>
+    <div class="card-body">
+        <?php if (!empty($empleado)): ?>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Descripción de Tarea</th>
+                        <th>Estado</th>
+                        <th>Fecha de Contratación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($empleado['tareas_asignadas'] as $tarea): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($tarea['descripcion']); ?></td>
+                            <td><?php echo htmlspecialchars($tarea['estado']); ?></td>
+                            <td><?php echo htmlspecialchars($empleado['fecha_contratacion']->toDateTime()->format('Y-m-d')); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <p>No tienes tareas asignadas.</p>
+        <?php endif; ?>
+    </div>
+</div>
+
         </div>
     </div>
 

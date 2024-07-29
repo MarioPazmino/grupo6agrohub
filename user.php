@@ -279,27 +279,46 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                             </form>
                         </div>
                     </div>
+
+
+
+                    
                     <!-- Tareas Asignadas -->
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Tareas Asignadas</h6>
-                        </div>
-                        <div class="card-body">
-                            <?php if (!empty($empleado->tareas_asignadas)): ?>
-                                <ul class="list-group">
-                                    <?php foreach ($empleado->tareas_asignadas as $tarea): ?>
-                                        <li class="list-group-item">
-                                            <strong>Descripción:</strong> <?php echo htmlspecialchars($tarea->descripcion); ?> 
-                                            <br>
-                                            <strong>Estado:</strong> <?php echo htmlspecialchars($tarea->estado); ?>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php else: ?>
-                                <p>No tienes tareas asignadas.</p>
-                            <?php endif; ?>
+                   <!-- Tareas Asignadas -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Tareas Asignadas</h6>
+    </div>
+    <div class="card-body">
+        <?php if (!empty($empleado->tareas_asignadas)): ?>
+            <div class="row">
+                <?php foreach ($empleado->tareas_asignadas as $tarea): ?>
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-secondary">
+                            <div class="card-body">
+                                <h5 class="card-title">Tarea <?php echo htmlspecialchars($tarea->id); ?></h5>
+                                <p class="card-text">
+                                    <strong>Descripción:</strong> <?php echo htmlspecialchars($tarea->descripcion); ?> 
+                                    <br>
+                                    <strong>Estado:</strong> <?php echo htmlspecialchars($tarea->estado); ?>
+                                </p>
+                                <?php if ($tarea->estado === 'Pendiente'): ?>
+                                    <form action="update_task.php" method="post">
+                                        <input type="hidden" name="task_id" value="<?php echo htmlspecialchars($tarea->id); ?>">
+                                        <button type="submit" name="estado" value="Completo" class="btn btn-success">Marcar como Completo</button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <p>No tienes tareas asignadas.</p>
+        <?php endif; ?>
+    </div>
+</div>
+
                 </div>
                 <!-- /.container-fluid -->
             </div>

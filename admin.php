@@ -20,9 +20,6 @@ $collection = $mongoClient->grupo6_agrohub->usuarios;
 $errors = [];
 $success = [];
 
-// Obtener lista de usuarios
-$usuarios = $collection->find()->toArray();
-
 // Agregar nuevo usuario
 if (isset($_POST['add'])) {
     $nombre = $_POST['nombre'];
@@ -67,13 +64,21 @@ if (isset($_POST['add'])) {
         $fecha_contratacion = new MongoDB\BSON\UTCDateTime($fecha->getTimestamp() * 1000);
     }
 
+    // Verificar si el email o la cédula ya existen
+    $usuarioExistente = $collection->findOne([
+        '$or' => [
+            ['email' => $email],
+            ['cedula' => $cedula]
+        ]
+    ]);
+
+    if ($usuarioExistente) {
+        $errors[] = "El email o la cédula ya existen en el sistema.";
+    }
+
     // Insertar en la base de datos si no hay errores
     if (empty($errors)) {
-        // Verificar si el nombre de usuario ya existe
-        $usuarioExistente = $collection->findOne(['nombre_usuario' => $nombre_usuario]);
-        if ($usuarioExistente) {
-            $errors[] = "El nombre de usuario ya existe.";
-        } else {
+        try {
             $result = $collection->insertOne([
                 "nombre" => $nombre,
                 "apellido" => $apellido,
@@ -92,6 +97,8 @@ if (isset($_POST['add'])) {
             } else {
                 $errors[] = "Error al agregar usuario.";
             }
+        } catch (Exception $e) {
+            $errors[] = "Error al agregar usuario: " . $e->getMessage();
         }
     }
 }
@@ -111,7 +118,6 @@ if (isset($_POST['update'])) {
     $nombre_usuario = $_POST['nombre_usuario'];
 
     // Validar datos
-    $errors = [];
     if (empty($nombre) || !preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/", $nombre)) {
         $errors[] = "El nombre es inválido.";
     }
@@ -140,6 +146,21 @@ if (isset($_POST['update'])) {
         $errors[] = "La fecha de contratación es inválida.";
     } else {
         $fecha_contratacion = new MongoDB\BSON\UTCDateTime($fecha->getTimestamp() * 1000);
+    }
+
+    // Verificar si el email o la cédula ya existen, excluyendo el usuario actual
+    $usuarioExistente = $collection->findOne([
+        '$and' => [
+            ['_id' => ['$ne' => $id]],
+            ['$or' => [
+                ['email' => $email],
+                ['cedula' => $cedula]
+            ]]
+        ]
+    ]);
+
+    if ($usuarioExistente) {
+        $errors[] = "El email o la cédula ya existen en el sistema.";
     }
 
     if (empty($errors)) {
@@ -173,11 +194,6 @@ if (isset($_POST['update'])) {
         } catch (Exception $e) {
             $errors[] = "Error al actualizar usuario: " . $e->getMessage();
         }
-    } else {
-        // Mostrar errores si los hay
-        foreach ($errors as $error) {
-            echo "<div class='alert alert-danger'>$error</div>";
-        }
     }
 }
 
@@ -185,25 +201,21 @@ if (isset($_POST['update'])) {
 if (isset($_POST['delete'])) {
     $id = new MongoDB\BSON\ObjectId($_POST['id']);
 
-    // Eliminar de la base de datos
-    $result = $collection->deleteOne(['_id' => $id]);
+    try {
+        $result = $collection->deleteOne(['_id' => $id]);
 
-    if ($result->getDeletedCount() > 0) {
-        $success[] = "Usuario eliminado exitosamente.";
-    } else {
-        $errors[] = "Error al eliminar usuario.";
+        if ($result->getDeletedCount() > 0) {
+            $success[] = "Usuario eliminado exitosamente.";
+        } else {
+            $errors[] = "Error al eliminar usuario.";
+        }
+    } catch (Exception $e) {
+        $errors[] = "Error al eliminar usuario: " . $e->getMessage();
     }
 }
 
-// Mostrar mensajes de éxito
-foreach ($success as $message) {
-    echo "<div class='alert alert-success'>$message</div>";
-}
 
-// Mostrar mensajes de error
-foreach ($errors as $message) {
-    echo "<div class='alert alert-danger'>$message</div>";
-}
+
 
 
 // Asignar tarea
@@ -991,7 +1003,40 @@ function validateForm(form) {
             </div>
         </div>
     </div>
+<!-- Modal para mostrar mensajes de error o éxito -->
+        <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="messageModalLabel">Mensajes</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <?php if (!empty($errors)): ?>
+                            <div class="alert alert-danger">
+                                <ul>
+                                    <?php foreach ($errors as $error): ?>
+                                        <li><?php echo $error; ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        <?php endif; ?>
 
+                        <?php if (!empty($success)): ?>
+                            <div class="alert alert-success">
+                                <ul>
+                                    <?php foreach ($success as $message): ?>
+                                        <li><?php echo $message; ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>

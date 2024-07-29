@@ -384,7 +384,7 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                                 </td>
 
 <td>
-                                    <form method="post" action="actualizar_tarea.php">
+                                    <form method="post" action="actualizar_tarea.php" class="d-flex align-items-center">
                                         <input type="hidden" name="tarea_index" value="<?= $index ?>">
                                         <input type="hidden" name="tarea_id" value="<?= $tarea['_id'] ?>">
                                          <div class="form-group mb-0 mr-2">

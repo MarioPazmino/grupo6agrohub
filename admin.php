@@ -12,104 +12,159 @@ require __DIR__ . '/vendor/autoload.php';
 use MongoDB\Client;
 use MongoDB\Exception\Exception;
 
-// Conexión a MongoDB con la URL actualizada
+// Conexión a MongoDB con la URL proporcionada
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
-$db = $mongoClient->selectDatabase("grupo6_agrohub");
-$collection = $db->usuarios; // Nombre de la colección en MongoDB
+$collection = $mongoClient->grupo6_agrohub->usuarios;
 
-$usuario_id = new MongoDB\BSON\ObjectId($_SESSION['usuario_id']);
-$usuario = $collection->findOne(['_id' => $usuario_id]);
+$errors = [];
+$success = [];
 
-// Inicializar el array de errores
-$errors = array();
+// Obtener lista de usuarios
+$usuarios = $collection->find()->toArray();
 
-// Procesar el formulario de actualización
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Obtener los datos del formulario
+// Agregar nuevo usuario
+if (isset($_POST['add'])) {
     $nombre = $_POST['nombre'];
     $apellido = $_POST['apellido'];
     $email = $_POST['email'];
     $telefono = $_POST['telefono'];
-    $cedula = $_POST['cedula']; // Nuevo campo: cedula
+    $cedula = $_POST['cedula'];
+    $rol = $_POST['rol'];
+    $fecha_contratacion = new MongoDB\BSON\UTCDateTime(strtotime($_POST['fecha_contratacion']) * 1000);
+    $tareas_asignadas = []; // Puedes agregar tareas si es necesario
+    $password = $_POST['password'];
+    $nombre_usuario = $_POST['nombre_usuario'];
 
-    // Validar los campos del formulario
-    if (empty($nombre)) {
-        $errors['nombre'] = "El nombre es requerido.";
-    } elseif (!preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/", $nombre)) {
-        $errors['nombre'] = "Solo se permiten letras, espacios y tildes en el nombre.";
+    // Validar datos
+    if (empty($nombre) || !preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/", $nombre)) {
+        $errors[] = "El nombre es inválido.";
+    }
+    if (empty($apellido) || !preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/", $apellido)) {
+        $errors[] = "El apellido es inválido.";
+    }
+    if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "El email es inválido.";
+    }
+    if (empty($telefono) || !preg_match("/^0[0-9]{9}$/", $telefono)) {
+        $errors[] = "El teléfono es inválido.";
+    }
+    if (empty($cedula) || !preg_match("/^[0-9]{10}$/", $cedula)) {
+        $errors[] = "La cédula es inválida.";
+    }
+    if (empty($password)) {
+        $errors[] = "La contraseña es requerida.";
+    }
+    if (empty($nombre_usuario)) {
+        $errors[] = "El nombre de usuario es requerido.";
     }
 
-    if (empty($apellido)) {
-        $errors['apellido'] = "El apellido es requerido.";
-    } elseif (!preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/", $apellido)) {
-        $errors['apellido'] = "Solo se permiten letras, espacios y tildes en el apellido.";
-    }
-
-    if (empty($email)) {
-        $errors['email'] = "El email es requerido.";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors['email'] = "Formato de email inválido.";
-    }
-
-    if (empty($telefono)) {
-        $errors['telefono'] = "El teléfono es requerido.";
-    } elseif (!preg_match("/^0[0-9]{9}$/", $telefono)) {
-        $errors['telefono'] = "El teléfono debe tener 10 números y comenzar con 0.";
-    }
-
-    if (empty($cedula)) {
-        $errors['cedula'] = "La cédula es requerida.";
-    } elseif (!preg_match("/^[0-9]{10}$/", $cedula)) {
-        $errors['cedula'] = "La cédula debe tener 10 números.";
-    }
-
-    // Si no hay errores, actualizar los datos en la base de datos
+    // Insertar en la base de datos si no hay errores
     if (empty($errors)) {
-        // Construir el filtro para encontrar el usuario por ID
-        $filter = ['_id' => $usuario_id];
+        $result = $collection->insertOne([
+            "nombre" => $nombre,
+            "apellido" => $apellido,
+            "email" => $email,
+            "telefono" => $telefono,
+            "cedula" => $cedula,
+            "rol" => $rol,
+            "fecha_contratacion" => $fecha_contratacion,
+            "tareas_asignadas" => $tareas_asignadas,
+            "password" => password_hash($password, PASSWORD_DEFAULT), // Asegúrate de cifrar la contraseña
+            "nombre_usuario" => $nombre_usuario
+        ]);
 
-        // Construir el objeto de actualización
-        $update = [
-            '$set' => [
-                'nombre' => $nombre,
-                'apellido' => $apellido,
-                'email' => $email,
-                'telefono' => $telefono,
-                'cedula' => $cedula, // Agregar cedula al documento
-                'fecha_actualizacion' => new MongoDB\BSON\UTCDateTime(), // Fecha de actualización
-                'rol' => 'empleado' // Asegúrate de que el rol sea 'empleado'
-            ]
-        ];
-
-        // Actualizar el documento del usuario en MongoDB
-        try {
-            $result = $collection->updateOne($filter, $update);
-
-            if ($result->getModifiedCount() > 0) {
-                // Éxito: mostrar mensaje y actualizar datos en sesión
-                echo "<div class='alert alert-success'>Datos actualizados correctamente.</div>";
-                // Actualizar los datos en la sesión también para reflejar los cambios
-                $_SESSION['nombre'] = $nombre;
-                $_SESSION['apellido'] = $apellido;
-                $_SESSION['email'] = $email;
-                $_SESSION['telefono'] = $telefono;
-                $_SESSION['cedula'] = $cedula; // Actualizar cedula en la sesión
-
-                // Actualizar la variable $usuario con los nuevos datos
-                $usuario = $collection->findOne(['_id' => $usuario_id]);
-            } else {
-                echo "<div class='alert alert-danger'>No se pudo actualizar los datos.</div>";
-            }
-        } catch (Exception $e) {
-            echo "<div class='alert alert-danger'>Error al actualizar los datos: " . $e->getMessage() . "</div>";
+        if ($result->getInsertedCount() > 0) {
+            $success[] = "Usuario agregado exitosamente.";
+        } else {
+            $errors[] = "Error al agregar usuario.";
         }
     }
 }
 
-// Obtener el empleado con las tareas asignadas
-$empleado = $collection->findOne(['_id' => $usuario_id]);
+// Modificar usuario
+if (isset($_POST['update'])) {
+    $id = new MongoDB\BSON\ObjectId($_POST['id']);
+    $nombre = $_POST['nombre'];
+    $apellido = $_POST['apellido'];
+    $email = $_POST['email'];
+    $telefono = $_POST['telefono'];
+    $cedula = $_POST['cedula'];
+    $rol = $_POST['rol'];
+    $fecha_contratacion = new MongoDB\BSON\UTCDateTime(strtotime($_POST['fecha_contratacion']) * 1000);
+    $tareas_asignadas = []; // Puedes actualizar tareas si es necesario
+    $password = $_POST['password'];
+    $nombre_usuario = $_POST['nombre_usuario'];
+
+    // Validar datos
+    if (empty($nombre) || !preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/", $nombre)) {
+        $errors[] = "El nombre es inválido.";
+    }
+    if (empty($apellido) || !preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/", $apellido)) {
+        $errors[] = "El apellido es inválido.";
+    }
+    if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "El email es inválido.";
+    }
+    if (empty($telefono) || !preg_match("/^0[0-9]{9}$/", $telefono)) {
+        $errors[] = "El teléfono es inválido.";
+    }
+    if (empty($cedula) || !preg_match("/^[0-9]{10}$/", $cedula)) {
+        $errors[] = "La cédula es inválida.";
+    }
+    if (empty($password)) {
+        $errors[] = "La contraseña es requerida.";
+    }
+    if (empty($nombre_usuario)) {
+        $errors[] = "El nombre de usuario es requerido.";
+    }
+
+    // Actualizar en la base de datos si no hay errores
+    if (empty($errors)) {
+        $updateData = [
+            "nombre" => $nombre,
+            "apellido" => $apellido,
+            "email" => $email,
+            "telefono" => $telefono,
+            "cedula" => $cedula,
+            "rol" => $rol,
+            "fecha_contratacion" => $fecha_contratacion,
+            "tareas_asignadas" => $tareas_asignadas,
+            "nombre_usuario" => $nombre_usuario
+        ];
+        
+        if (!empty($password)) {
+            $updateData["password"] = password_hash($password, PASSWORD_DEFAULT); // Actualizar contraseña cifrada
+        }
+
+        $result = $collection->updateOne(
+            ['_id' => $id],
+            ['$set' => $updateData]
+        );
+
+        if ($result->getModifiedCount() > 0) {
+            $success[] = "Usuario actualizado exitosamente.";
+        } else {
+            $errors[] = "Error al actualizar usuario.";
+        }
+    }
+}
+
+// Eliminar usuario
+if (isset($_POST['delete'])) {
+    $id = new MongoDB\BSON\ObjectId($_POST['id']);
+
+    // Eliminar de la base de datos
+    $result = $collection->deleteOne(['_id' => $id]);
+
+    if ($result->getDeletedCount() > 0) {
+        $success[] = "Usuario eliminado exitosamente.";
+    } else {
+        $errors[] = "Error al eliminar usuario.";
+    }
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

@@ -217,7 +217,6 @@ if (isset($_POST['delete'])) {
 
 
 
-
 // Asignar tarea
 // Asignar tarea
 if (isset($_POST['assign_task'])) {
@@ -515,6 +514,24 @@ $total_tareas_completadas = $collection->countDocuments([
     <!-- Page Heading -->
     <h1 class="h3 mb-4 text-gray-800">Perfil Administrador</h1>
 
+
+<!-- Mostrar mensajes de error -->
+        <?php if (!empty($errors)): ?>
+            <div class="alert alert-danger notification">
+                <?php foreach ($errors as $error): ?>
+                    <p><?php echo $error; ?></p>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Mostrar mensajes de éxito -->
+        <?php if (!empty($success)): ?>
+            <div class="alert alert-success notification">
+                <?php foreach ($success as $msg): ?>
+                    <p><?php echo $msg; ?></p>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     <?php if ($_SESSION['rol'] === 'admin'): ?>
         <!-- Content Row -->
         <div class="row">
@@ -1003,54 +1020,6 @@ function validateForm(form) {
             </div>
         </div>
     </div>
-<!-- Modal para mostrar mensajes de error o éxito -->
-        <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="messageModalLabel">Mensajes</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <?php if (!empty($errors)): ?>
-                            <div class="alert alert-danger">
-                                <ul>
-                                    <?php foreach ($errors as $error): ?>
-                                        <li><?php echo $error; ?></li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if (!empty($success)): ?>
-                            <div class="alert alert-success">
-                                <ul>
-                                    <?php foreach ($success as $message): ?>
-                                        <li><?php echo $message; ?></li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-        </div>
- <script>
-        // Mostrar modal si hay errores o mensajes de éxito
-        <?php if (!empty($errors) || !empty($success)): ?>
-            $(document).ready(function () {
-                $('#messageModal').modal('show');
-                <?php if (!empty($errors)): ?>
-                    console.error("Errores: <?php echo json_encode($errors); ?>");
-                <?php endif; ?>
-                <?php if (!empty($success)): ?>
-                    console.log("Éxito: <?php echo json_encode($success); ?>");
-                <?php endif; ?>
-            });
-        <?php endif; ?>
-    </script>
 
     
     <!-- Bootstrap core JavaScript-->

@@ -169,7 +169,7 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="user.php">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="admin.php">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-laugh-wink"></i>
                 </div>
@@ -181,7 +181,7 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="user.php">
+                <a class="nav-link" href="admin.php">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -210,17 +210,15 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                 </div>
             </li>
 
-           
             <!-- Divider -->
             <hr class="sidebar-divider">
 
-                             <!-- Nav Item - Charts -->
-                             <li class="nav-item">
+            <!-- Nav Item - Charts -->
+            <li class="nav-item">
                 <a class="nav-link" href="ventas.php">
                     <i class="fas fa-fw fa-cart-plus"></i>
                     <span>Ventas</span></a>
             </li>
-
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
@@ -230,7 +228,6 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
 
-          
         </ul>
         <!-- End of Sidebar -->
 
@@ -248,13 +245,8 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                         <i class="fa fa-bars"></i>
                     </button>
 
-                  
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
-
-                        
-
-                       
 
                         <div class="topbar-divider d-none d-sm-block"></div>
 
@@ -263,14 +255,13 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($_SESSION['nombre_usuario']); ?></span>
-
                                 <img class="img-profile rounded-circle"
                                     src="assets/images/undraw_profile.svg">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="user.php">
+                                <a class="dropdown-item" href="admin.php">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
                                 </a>
@@ -284,10 +275,9 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="logout.php">
-    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-    Salir
-</a>
-
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Salir
+                                </a>
                             </div>
                         </li>
 
@@ -296,132 +286,83 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                 </nav>
                 <!-- End of Topbar -->
 
-                
-
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-4 text-gray-800">Perfil del Empleado</h1>
+                    <h1 class="h3 mb-4 text-gray-800">Administrar Empleados</h1>
 
+                    <!-- Agregar Nuevo Empleado -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Datos del Perfil</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Agregar Nuevo Empleado</h6>
                         </div>
-                        <!-- Card Body - User Info -->
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4 text-center">
-                                    <img class="img-fluid rounded-circle" style="width: 150px;" src="assets/images/undraw_profile.svg" alt="Profile Image">
+                            <form method="post" action="agregar_empleado.php">
+                                <div class="form-group">
+                                    <label for="nombre">Nombre:</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
                                 </div>
-                                <div class="col-md-8">
-                                    <form method="post" action="">
-                                        <?php
-                                        // Mostrar errores si existen
-                                        if (!empty($errors)) {
-                                            echo '<div class="alert alert-danger">';
-                                            echo '<ul>';
-                                            foreach ($errors as $error) {
-                                                echo "<li>$error</li>";
-                                            }
-                                            echo '</ul>';
-                                            echo '</div>';
-                                        }
-                                        ?>
-                                        <div class="form-group">
-                                            <label for="nombre_usuario">Nombre de Usuario:</label>
-                                            <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo $_SESSION['nombre_usuario']; ?>" readonly>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="nombre">Nombre:</label>
-                                            <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo $usuario['nombre']; ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="apellido">Apellido:</label>
-                                            <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo $usuario['apellido']; ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="email">Email:</label>
-                                            <input type="email" class="form-control" id="email" name="email" value="<?php echo $usuario['email']; ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="telefono">Teléfono:</label>
-                                            <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo $usuario['telefono']; ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="cedula">Cédula:</label>
-                                            <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo $usuario['cedula']; ?>">
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">Actualizar Perfil</button>
-                                    </form>
+                                <div class="form-group">
+                                    <label for="apellido">Apellido:</label>
+                                    <input type="text" class="form-control" id="apellido" name="apellido" required>
                                 </div>
-                            </div>
+                                <div class="form-group">
+                                    <label for="email">Email:</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="telefono">Teléfono:</label>
+                                    <input type="text" class="form-control" id="telefono" name="telefono" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cedula">Cédula:</label>
+                                    <input type="text" class="form-control" id="cedula" name="cedula" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Contraseña:</label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Agregar Empleado</button>
+                            </form>
                         </div>
                     </div>
 
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Tareas Asignadas</h6>
-    </div>
-    <div class="card-body">
-        <?php if (!empty($empleado['tareas_asignadas'])): ?>
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Descripción</th>
-                            <th>Estado</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($empleado['tareas_asignadas'] as $index => $tarea): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($tarea['descripcion']) ?></td>
-                                <td>
-                                    <span class="task-status-<?= htmlspecialchars(strtolower(str_replace(' ', '-', $tarea['estado']))) ?>">
-                                        <?= htmlspecialchars($tarea['estado']) ?>
-                                    </span>
-                                </td>
-
-<td class="text-center">
-    <form method="post" action="cambiar_estado_tarea.php" class="d-inline-flex align-items-center">
-        <input type="hidden" name="tarea_index" value="<?= $index ?>">
-        <input type="hidden" name="tarea_id" value="<?= $tarea['_id'] ?>">
-        <div class="form-group mb-0 mr-2">
-            <select name="estado" class="form-control">
-                <option value="Pendiente" <?= $tarea['estado'] === 'Pendiente' ? 'selected' : '' ?>>Pendiente</option>
-                <option value="En Progreso" <?= $tarea['estado'] === 'En Progreso' ? 'selected' : '' ?>>En Progreso</option>
-                <option value="Completada" <?= $tarea['estado'] === 'Completada' ? 'selected' : '' ?>>Completada</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Actualizar</button>
-    </form>
-</td>
-
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php else: ?>
-            <p>No hay tareas asignadas.</p>
-        <?php endif; ?>
-    </div>
-</div>
-
+                    <!-- Lista de Empleados -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Lista de Empleados</h6>
+                        </div>
+                        <div class="card-body">
+                            <?php
+                            // Conectar a la base de datos y obtener la lista de empleados
+                            require 'conexion.php';
+                            $query = $db->query("SELECT * FROM usuarios WHERE rol = 'empleado'");
+                            echo '<table class="table table-striped">';
+                            echo '<thead><tr><th>Nombre</th><th>Apellido</th><th>Email</th><th>Teléfono</th><th>Cédula</th><th>Acciones</th></tr></thead>';
+                            echo '<tbody>';
+                            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                echo '<tr>';
+                                echo '<td>' . htmlspecialchars($row['nombre']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['apellido']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['email']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['telefono']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['cedula']) . '</td>';
+                                echo '<td>';
+                                echo '<a href="editar_empleado.php?id=' . $row['id'] . '" class="btn btn-warning btn-sm">Editar</a> ';
+                                echo '<a href="eliminar_empleado.php?id=' . $row['id'] . '" class="btn btn-danger btn-sm">Eliminar</a>';
+                                echo '</td>';
+                                echo '</tr>';
+                            }
+                            echo '</tbody>';
+                            echo '</table>';
+                            ?>
+                        </div>
+                    </div>
                 </div>
                 <!-- /.container-fluid -->
+
             </div>
             <!-- End of Main Content -->
-    
-            <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; AgroHUB 2024</span>
-                    </div>
-                </div>
-            </footer>
-            <!-- End of Footer -->
 
         </div>
         <!-- End of Content Wrapper -->
@@ -448,11 +389,12 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                 <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
+                    <a class="btn btn-primary" href="logout.php">Logout</a>
                 </div>
             </div>
         </div>
     </div>
+
 
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>

@@ -346,42 +346,41 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                 </div>
             </div>
 
-            <!-- Card for displaying purchased products -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Productos Comprados</h6>
+         <!-- Tareas Asignadas -->
+ <div class="container-fluid">
+                    <!-- Page Heading -->
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Tareas Asignadas</h1>
+                    </div>
+                    <div class="row">
+                        <!-- Display tasks horizontally -->
+                        <?php if (!empty($empleado['tareas_asignadas'])) : ?>
+                            <?php foreach ($empleado['tareas_asignadas'] as $index => $tarea) : ?>
+                                <div class="col-md-4 task-card">
+                                    <div class="card shadow mb-4">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><?= $tarea['descripcion']; ?></h5>
+                                            <p class="card-text">Estado: <?= $tarea['estado']; ?></p>
+                                            <form method="POST" action="cambiar_estado_tarea.php">
+                                                <input type="hidden" name="tarea_id" value="<?= $index; ?>">
+                                                <select name="nuevo_estado" class="form-control mb-2">
+                                                    <option value="pendiente" <?= $tarea['estado'] === 'pendiente' ? 'selected' : ''; ?>>Pendiente</option>
+                                                    <option value="en progreso" <?= $tarea['estado'] === 'en progreso' ? 'selected' : ''; ?>>En progreso</option>
+                                                    <option value="completada" <?= $tarea['estado'] === 'completada' ? 'selected' : ''; ?>>Completada</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-primary">Cambiar Estado</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <div class="col-12">
+                                <div class="alert alert-info" role="alert">No hay tareas asignadas.</div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <?php if (!empty($compras)): ?>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Nombre Producto</th>
-                                    <th>Cantidad</th>
-                                    <th>Precio Total</th>
-                                    <th>Fecha de Compra</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($compras as $compra): ?>
-                                    <?php
-                                    // Obtener información del producto
-                                    $producto = $productosCollection->findOne(['_id' => $compra['producto_id']]);
-                                    ?>
-                                    <tr>
-                                        <td><?php echo $producto['nombre']; ?></td>
-                                        <td><?php echo $compra['cantidad']; ?></td>
-                                        <td><?php echo $compra['precio_total']; ?></td>
-                                        <td><?php echo $compra['fecha_compra']->toDateTime()->format('Y-m-d'); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    <?php else: ?>
-                        <p>No has realizado ninguna compra.</p>
-                    <?php endif; ?>
-                </div>
-            </div>
         </div>
     </div>
 

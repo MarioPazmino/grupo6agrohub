@@ -97,6 +97,7 @@ if (isset($_POST['update'])) {
     $nombre_usuario = $_POST['nombre_usuario'];
 
     // Validar datos
+    $errors = [];
     if (empty($nombre) || !preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/", $nombre)) {
         $errors[] = "El nombre es inválido.";
     }
@@ -119,7 +120,6 @@ if (isset($_POST['update'])) {
         $errors[] = "El nombre de usuario es requerido.";
     }
 
-    // Actualizar en la base de datos si no hay errores
     if (empty($errors)) {
         $updateData = [
             "nombre" => $nombre,
@@ -137,15 +137,24 @@ if (isset($_POST['update'])) {
             $updateData["password"] = password_hash($password, PASSWORD_DEFAULT); // Actualizar contraseña cifrada
         }
 
-        $result = $collection->updateOne(
-            ['_id' => $id],
-            ['$set' => $updateData]
-        );
+        try {
+            $result = $collection->updateOne(
+                ['_id' => $id],
+                ['$set' => $updateData]
+            );
 
-        if ($result->getModifiedCount() > 0) {
-            $success[] = "Usuario actualizado exitosamente.";
-        } else {
-            $errors[] = "Error al actualizar usuario.";
+            if ($result->getModifiedCount() > 0) {
+                $success[] = "Usuario actualizado exitosamente.";
+            } else {
+                $errors[] = "Error al actualizar usuario o no se realizaron cambios.";
+            }
+        } catch (Exception $e) {
+            $errors[] = "Error al actualizar usuario: " . $e->getMessage();
+        }
+    } else {
+        // Mostrar errores si los hay
+        foreach ($errors as $error) {
+            echo "<div class='alert alert-danger'>$error</div>";
         }
     }
 }

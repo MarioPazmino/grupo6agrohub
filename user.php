@@ -396,10 +396,47 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                 <!-- /.container-fluid -->
             </div>
             <!-- End of Main Content -->
+    
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; AgroHUB 2024</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
         </div>
         <!-- End of Content Wrapper -->
+
     </div>
     <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="login.html">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
@@ -409,7 +446,66 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
 
     <!-- Custom scripts for all pages-->
-    <script src="js/sb-admin-2.min.js"></script>
+    <script src="components/user/sb-admin-2.min.js"></script>
+
+    <!-- Page level plugins -->
+    <script src="vendor/chart.js/Chart.min.js"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="components/user/demo/chart-area-demo.js"></script>
+    <script src="components/user/demo/chart-pie-demo.js"></script>
+    <script>
+        function validateForm() {
+            let errors = [];
+            let nombre = document.getElementById('nombre').value;
+            let apellido = document.getElementById('apellido').value;
+            let email = document.getElementById('email').value;
+            let telefono = document.getElementById('telefono').value;
+            let cedula = document.getElementById('cedula').value;
+
+            // Validar nombre
+            if (nombre === "") {
+                errors.push("El nombre es requerido.");
+            } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/.test(nombre)) {
+                errors.push("Solo se permiten letras, espacios y tildes en el nombre.");
+            }
+
+            // Validar apellido
+            if (apellido === "") {
+                errors.push("El apellido es requerido.");
+            } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/.test(apellido)) {
+                errors.push("Solo se permiten letras, espacios y tildes en el apellido.");
+            }
+
+            // Validar email
+            if (email === "") {
+                errors.push("El email es requerido.");
+            } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+                errors.push("Formato de email inválido.");
+            }
+
+            // Validar teléfono
+            if (telefono === "") {
+                errors.push("El teléfono es requerido.");
+            } else if (!/^0[0-9]{9}$/.test(telefono)) {
+                errors.push("El teléfono debe tener 10 números y comenzar con 0.");
+            }
+
+            // Validar cédula
+            if (cedula === "") {
+                errors.push("La cédula es requerida.");
+            } else if (!/^[0-9]{10}$/.test(cedula)) {
+                errors.push("La cédula debe tener 10 números.");
+            }
+
+            if (errors.length > 0) {
+                alert(errors.join("\n"));
+                return false;
+            }
+
+            return true;
+        }
+    </script>
 </body>
 
 </html>

@@ -191,6 +191,7 @@ if (isset($_POST['assign_task'])) {
 }
 ?>
 
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -794,4 +795,4 @@ if (isset($_POST['assign_task'])) {
     </script>
 </body>
 
-</html>
+</html> 

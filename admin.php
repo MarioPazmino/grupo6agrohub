@@ -163,6 +163,31 @@ if (isset($_POST['delete'])) {
         $errors[] = "Error al eliminar usuario.";
     }
 }
+
+
+    // Asignar tarea
+if (isset($_POST['assign_task'])) {
+    $user_id = new MongoDB\BSON\ObjectId($_POST['user_id']);
+    $tarea_descripcion = $_POST['tarea_descripcion'];
+    $tarea_estado = $_POST['tarea_estado'];
+
+    $nueva_tarea = [
+        "tarea_id" => new MongoDB\BSON\ObjectId(),
+        "descripcion" => $tarea_descripcion,
+        "estado" => $tarea_estado
+    ];
+
+    $result = $collection->updateOne(
+        ['_id' => $user_id],
+        ['$push' => ['tareas_asignadas' => $nueva_tarea]]
+    );
+
+    if ($result->getModifiedCount() > 0) {
+        $success[] = "Tarea asignada exitosamente.";
+    } else {
+        $errors[] = "Error al asignar la tarea.";
+    }
+}
 ?>
 
 
@@ -451,7 +476,7 @@ if (isset($_POST['delete'])) {
                                                 <td><?php echo htmlspecialchars($usuario['rol']); ?></td>
                                                 <td><?php echo htmlspecialchars($usuario['fecha_contratacion']->toDateTime()->format('Y-m-d')); ?></td>
 <td>
-    <!-- Botones para modificar y eliminar -->
+    <!-- Botones para modificar, eliminar y asignar tareas -->
     <div class="d-flex">
         <form method="post" action="" class="mr-2">
             <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
@@ -459,9 +484,14 @@ if (isset($_POST['delete'])) {
                 <i class="fas fa-trash-alt"></i>
             </button>
         </form>
-        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal<?php echo $usuario['_id']; ?>" title="Modificar">
+        <button class="btn btn-primary btn-sm mr-2" data-toggle="modal" data-target="#editModal<?php echo $usuario['_id']; ?>" title="Modificar">
             <i class="fas fa-edit"></i>
         </button>
+        <?php if ($usuario['rol'] === 'empleado'): ?>
+            <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#taskModal<?php echo $usuario['_id']; ?>" title="Asignar Tarea">
+                <i class="fas fa-tasks"></i>
+            </button>
+        <?php endif; ?>
     </div>
 
     <!-- Modal para modificar usuario -->
@@ -525,9 +555,46 @@ if (isset($_POST['delete'])) {
                     </div>
                 </form>
             </div>
+ <?php if ($usuario['rol'] === 'empleado'): ?>
+    <!-- Modal para asignar tarea -->
+    <div class="modal fade" id="taskModal<?php echo $usuario['_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="taskModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="taskModalLabel">Asignar Tarea a <?php echo htmlspecialchars($usuario['nombre'] . ' ' . $usuario['apellido']); ?></h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form method="post" action="">
+                    <div class="modal-body">
+                        <input type="hidden" name="user_id" value="<?php echo $usuario['_id']; ?>">
+                        <div class="form-group">
+                            <label for="tarea_descripcion">Descripción de la Tarea:</label>
+                            <textarea class="form-control" id="tarea_descripcion" name="tarea_descripcion" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="tarea_estado">Estado Inicial:</label>
+                            <select class="form-control" id="tarea_estado" name="tarea_estado">
+                                <option value="pendiente">Pendiente</option>
+                                <option value="en_progreso">En Progreso</option>
+                                <option value="completada">Completada</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" name="assign_task" class="btn btn-primary">Asignar Tarea</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
+    <?php endif; ?>
 </td>
+
+
+            
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>

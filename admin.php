@@ -534,62 +534,67 @@ if (isset($_POST['delete'])) {
                         </div>
                     </div>
 
+
+
+
                     <!-- Formulario para agregar nuevo usuario -->
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Agregar Usuario</h6>
-                        </div>
-                        <div class="card-body">
-                            <form method="post" action="">
-                                <div class="form-group">
-                                    <label for="nombre">Nombre:</label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre">
-                                </div>
-                                <div class="form-group">
-                                    <label for="apellido">Apellido:</label>
-                                    <input type="text" class="form-control" id="apellido" name="apellido">
-                                </div>
-                                <div class="form-group">
-                                    <label for="email">Email:</label>
-                                    <input type="email" class="form-control" id="email" name="email">
-                                </div>
-                                <div class="form-group">
-                                    <label for="telefono">Teléfono:</label>
-                                    <input type="text" class="form-control" id="telefono" name="telefono">
-                                </div>
-                                <div class="form-group">
-                                    <label for="cedula">Cédula:</label>
-                                    <input type="text" class="form-control" id="cedula" name="cedula">
-                                </div>
-                                <div class="form-group">
-                                    <label for="rol">Rol:</label>
-                                    <select class="form-control" id="rol" name="rol">
-                                        <option value="empleado">Empleado</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="fecha_contratacion">Fecha de Contratación:</label>
-                                    <input type="date" class="form-control" id="fecha_contratacion" name="fecha_contratacion">
-                                </div>
-                                <div class="form-group">
-                                    <label for="password">Contraseña:</label>
-                                    <input type="password" class="form-control" id="password" name="password">
-                                </div>
-                                <div class="form-group">
-                                    <label for="nombre_usuario">Nombre de Usuario:</label>
-                                    <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario">
-                                </div>
-                                <button type="submit" name="add" class="btn btn-primary">Agregar</button>
-                            </form>
-                        </div>
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Agregar Usuario</h6>
+    </div>
+    <div class="card-body">
+        <form method="post" action="">
+            <div class="row">
+                <!-- Columna 1 -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre">
                     </div>
-
+                    <div class="form-group">
+                        <label for="apellido">Apellido:</label>
+                        <input type="text" class="form-control" id="apellido" name="apellido">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="telefono">Teléfono:</label>
+                        <input type="text" class="form-control" id="telefono" name="telefono">
+                    </div>
                 </div>
-                <!-- End of Main Content -->
-
+                <!-- Columna 2 -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="cedula">Cédula:</label>
+                        <input type="text" class="form-control" id="cedula" name="cedula">
+                    </div>
+                    <div class="form-group">
+                        <label for="rol">Rol:</label>
+                        <select class="form-control" id="rol" name="rol">
+                            <option value="empleado">Empleado</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha_contratacion">Fecha de Contratación:</label>
+                        <input type="date" class="form-control" id="fecha_contratacion" name="fecha_contratacion">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="password" class="form-control" id="password" name="password">
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre_usuario">Nombre de Usuario:</label>
+                        <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario">
+                    </div>
+                </div>
             </div>
-
+            <button type="submit" name="add" class="btn btn-primary">Agregar</button>
+        </form>
+    </div>
+</div>
 
 
 

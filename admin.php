@@ -365,10 +365,10 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
 
 
 
-<!-- Listado de Empleados -->
+ <!-- Listado de Usuarios -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Lista de Empleados</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Lista de Usuarios</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -380,61 +380,84 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                                             <th>Email</th>
                                             <th>Teléfono</th>
                                             <th>Cédula</th>
+                                            <th>Rol</th>
+                                            <th>Fecha de Contratación</th>
                                             <th>Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($empleados as $empleado): ?>
+                                        <?php foreach ($usuarios as $usuario): ?>
                                             <tr>
-                                                <td><?php echo htmlspecialchars($empleado['nombre']); ?></td>
-                                                <td><?php echo htmlspecialchars($empleado['apellido']); ?></td>
-                                                <td><?php echo htmlspecialchars($empleado['email']); ?></td>
-                                                <td><?php echo htmlspecialchars($empleado['telefono']); ?></td>
-                                                <td><?php echo htmlspecialchars($empleado['cedula']); ?></td>
+                                                <td><?php echo htmlspecialchars($usuario['nombre']); ?></td>
+                                                <td><?php echo htmlspecialchars($usuario['apellido']); ?></td>
+                                                <td><?php echo htmlspecialchars($usuario['email']); ?></td>
+                                                <td><?php echo htmlspecialchars($usuario['telefono']); ?></td>
+                                                <td><?php echo htmlspecialchars($usuario['cedula']); ?></td>
+                                                <td><?php echo htmlspecialchars($usuario['rol']); ?></td>
+                                                <td><?php echo htmlspecialchars($usuario['fecha_contratacion']->toDateTime()->format('Y-m-d')); ?></td>
                                                 <td>
                                                     <!-- Botones para modificar y eliminar -->
                                                     <form method="post" action="" class="d-inline-flex align-items-center">
-                                                        <input type="hidden" name="id" value="<?php echo $empleado['id']; ?>">
+                                                        <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
                                                         <button type="submit" name="delete" class="btn btn-danger btn-sm">Eliminar</button>
                                                     </form>
-                                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal<?php echo $empleado['id']; ?>">Modificar</button>
+                                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal<?php echo $usuario['_id']; ?>">Modificar</button>
 
-                                                    <!-- Modal para modificar empleado -->
-                                                    <div class="modal fade" id="editModal<?php echo $empleado['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+                                                    <!-- Modal para modificar usuario -->
+                                                    <div class="modal fade" id="editModal<?php echo $usuario['_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
                                                         <div class="modal-dialog" role="document">
                                                             <div class="modal-content">
                                                                 <div class="modal-header">
-                                                                    <h5 class="modal-title" id="editModalLabel">Modificar Empleado</h5>
+                                                                    <h5 class="modal-title" id="editModalLabel">Modificar Usuario</h5>
                                                                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                                                                         <span aria-hidden="true">×</span>
                                                                     </button>
                                                                 </div>
                                                                 <form method="post" action="">
                                                                     <div class="modal-body">
-                                                                        <input type="hidden" name="id" value="<?php echo $empleado['id']; ?>">
+                                                                        <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
                                                                         <div class="form-group">
                                                                             <label for="nombre">Nombre:</label>
-                                                                            <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($empleado['nombre']); ?>">
+                                                                            <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($usuario['nombre']); ?>">
                                                                         </div>
                                                                         <div class="form-group">
                                                                             <label for="apellido">Apellido:</label>
-                                                                            <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($empleado['apellido']); ?>">
+                                                                            <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($usuario['apellido']); ?>">
                                                                         </div>
                                                                         <div class="form-group">
                                                                             <label for="email">Email:</label>
-                                                                            <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($empleado['email']); ?>">
+                                                                            <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($usuario['email']); ?>">
                                                                         </div>
                                                                         <div class="form-group">
                                                                             <label for="telefono">Teléfono:</label>
-                                                                            <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($empleado['telefono']); ?>">
+                                                                            <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($usuario['telefono']); ?>">
                                                                         </div>
                                                                         <div class="form-group">
                                                                             <label for="cedula">Cédula:</label>
-                                                                            <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo htmlspecialchars($empleado['cedula']); ?>">
+                                                                            <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo htmlspecialchars($usuario['cedula']); ?>">
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label for="rol">Rol:</label>
+                                                                            <select class="form-control" id="rol" name="rol">
+                                                                                <option value="empleado" <?php if ($usuario['rol'] == 'empleado') echo 'selected'; ?>>Empleado</option>
+                                                                                <option value="admin" <?php if ($usuario['rol'] == 'admin') echo 'selected'; ?>>Admin</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label for="fecha_contratacion">Fecha de Contratación:</label>
+                                                                            <input type="date" class="form-control" id="fecha_contratacion" name="fecha_contratacion" value="<?php echo $usuario['fecha_contratacion']->toDateTime()->format('Y-m-d'); ?>">
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label for="password">Contraseña:</label>
+                                                                            <input type="password" class="form-control" id="password" name="password" value="<?php echo htmlspecialchars($usuario['password']); ?>">
+                                                                        </div>
+                                                                        <div class="form-group">
+                                                                            <label for="nombre_usuario">Nombre de Usuario:</label>
+                                                                            <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo htmlspecialchars($usuario['nombre_usuario']); ?>">
                                                                         </div>
                                                                     </div>
                                                                     <div class="modal-footer">
-                                                                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+                                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
                                                                         <button type="submit" name="update" class="btn btn-primary">Actualizar</button>
                                                                     </div>
                                                                 </form>
@@ -450,10 +473,10 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                         </div>
                     </div>
 
-                    <!-- Formulario para agregar nuevo empleado -->
+                    <!-- Formulario para agregar nuevo usuario -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Agregar Nuevo Empleado</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Agregar Usuario</h6>
                         </div>
                         <div class="card-body">
                             <form method="post" action="">
@@ -477,6 +500,25 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                                     <label for="cedula">Cédula:</label>
                                     <input type="text" class="form-control" id="cedula" name="cedula">
                                 </div>
+                                <div class="form-group">
+                                    <label for="rol">Rol:</label>
+                                    <select class="form-control" id="rol" name="rol">
+                                        <option value="empleado">Empleado</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="fecha_contratacion">Fecha de Contratación:</label>
+                                    <input type="date" class="form-control" id="fecha_contratacion" name="fecha_contratacion">
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Contraseña:</label>
+                                    <input type="password" class="form-control" id="password" name="password">
+                                </div>
+                                <div class="form-group">
+                                    <label for="nombre_usuario">Nombre de Usuario:</label>
+                                    <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario">
+                                </div>
                                 <button type="submit" name="add" class="btn btn-primary">Agregar</button>
                             </form>
                         </div>
@@ -485,9 +527,7 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                 </div>
                 <!-- End of Main Content -->
 
-
-
-</div>
+            </div>
 
 
 

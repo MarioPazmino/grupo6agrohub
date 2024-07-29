@@ -450,33 +450,35 @@ if (isset($_POST['delete'])) {
                                                 <td><?php echo htmlspecialchars($usuario['cedula']); ?></td>
                                                 <td><?php echo htmlspecialchars($usuario['rol']); ?></td>
                                                 <td><?php echo htmlspecialchars($usuario['fecha_contratacion']->toDateTime()->format('Y-m-d')); ?></td>
-                                                <td>
-                                                   <!-- Botones para modificar y eliminar -->
-<form method="post" action="" class="d-inline-flex align-items-center">
-    <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
-    <button type="submit" name="delete" class="btn btn-danger btn-sm" title="Eliminar">
-        <i class="fas fa-trash-alt"></i> <!-- Ícono de eliminar -->
-    </button>
-    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal<?php echo $usuario['_id']; ?>" title="Modificar">
-    <i class="fas fa-edit"></i> <!-- Ícono de modificar -->
-</button>
-</form>
+<td>
+    <!-- Botones para modificar y eliminar -->
+    <div class="d-flex">
+        <form method="post" action="" class="mr-2">
+            <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
+            <button type="submit" name="delete" class="btn btn-danger btn-sm" title="Eliminar">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </form>
+        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal<?php echo $usuario['_id']; ?>" title="Modificar">
+            <i class="fas fa-edit"></i>
+        </button>
+    </div>
 
+    <!-- Modal para modificar usuario -->
+    <div class="modal fade" id="editModal<?php echo $usuario['_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Modificar Usuario</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form method="post" action="">
+                    <div class="modal-body">
+                        <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
 
-
-                                                    <!-- Modal para modificar usuario -->
-                                                    <div class="modal fade" id="editModal<?php echo $usuario['_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
-                                                        <div class="modal-dialog" role="document">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title" id="editModalLabel">Modificar Usuario</h5>
-                                                                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                                                                        <span aria-hidden="true">×</span>
-                                                                    </button>
-                                                                </div>
-                                                                <form method="post" action="">
-                                                                    <div class="modal-body">
-                                                                        <input type="hidden" name="id" value="<?php echo $usuario['_id']; ?>">
+                        
                                                                         <div class="form-group">
                                                                             <label for="nombre">Nombre:</label>
                                                                             <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($usuario['nombre']); ?>">
@@ -517,15 +519,15 @@ if (isset($_POST['delete'])) {
                                                                             <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo htmlspecialchars($usuario['nombre_usuario']); ?>">
                                                                         </div>
                                                                     </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                                                                        <button type="submit" name="update" class="btn btn-primary">Actualizar</button>
-                                                                    </div>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" name="update" class="btn btn-primary">Actualizar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>

@@ -288,7 +288,11 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                             <?php if (!empty($empleado->tareas_asignadas)): ?>
                                 <ul class="list-group">
                                     <?php foreach ($empleado->tareas_asignadas as $tarea): ?>
-                                        <li class="list-group-item"><?php echo htmlspecialchars($tarea); ?></li>
+                                        <li class="list-group-item">
+                                            <strong>Descripción:</strong> <?php echo htmlspecialchars($tarea->descripcion); ?> 
+                                            <br>
+                                            <strong>Estado:</strong> <?php echo htmlspecialchars($tarea->estado); ?>
+                                        </li>
                                     <?php endforeach; ?>
                                 </ul>
                             <?php else: ?>

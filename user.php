@@ -174,11 +174,8 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="user.php">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
-                </div>
-                <div class="sidebar-brand-text mx-3">Agro HUB  <sup></sup></div>
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
+                <div class="sidebar-brand-text mx-3">AgroHub</div>
             </a>
 
             <!-- Divider -->
@@ -186,7 +183,7 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="user.php">
+                <a class="nav-link" href="dashboard_empleado.php">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -196,36 +193,23 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
 
             <!-- Heading -->
             <div class="sidebar-heading">
-                Interface
+                Interfaz Empleado
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-                    aria-expanded="true" aria-controls="collapseTwo">
-                    <i class="fas fa-fw fa-tractor"></i>
-                    <span>Agrícola</span>
-                </a>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Mi granja:</h6>
-                        <a class="collapse-item" href="sembrio.php">Sembríos</a>
-                        <a class="collapse-item" href="cosechas.php">Cosechas</a>
-                    </div>
-                </div>
-            </li>
 
-           
+            <!-- Nav Item - Utilities Collapse Menu -->
+
             <!-- Divider -->
             <hr class="sidebar-divider">
 
-                             <!-- Nav Item - Charts -->
-                             <li class="nav-item">
-                <a class="nav-link" href="ventas.php">
-                    <i class="fas fa-fw fa-cart-plus"></i>
-                    <span>Ventas</span></a>
-            </li>
+            <!-- Heading -->
 
+            <!-- Nav Item - Pages Collapse Menu -->
+
+            <!-- Nav Item - Charts -->
+
+            <!-- Nav Item - Tables -->
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
@@ -235,7 +219,7 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
 
-          
+
         </ul>
         <!-- End of Sidebar -->
 
@@ -253,13 +237,10 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                         <i class="fa fa-bars"></i>
                     </button>
 
-                  
+
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
 
-                        
-
-                       
 
                         <div class="topbar-divider d-none d-sm-block"></div>
 
@@ -267,32 +248,22 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($_SESSION['nombre_usuario']); ?></span>
-
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo $_SESSION['nombre_usuario']; ?></span>
                                 <img class="img-profile rounded-circle"
-                                    src="assets/images/undraw_profile.svg">
+                                    src="img/user.png">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="user.php">
+                                <a class="dropdown-item" href="profile.php">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Settings
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Activity Log
+                                    Perfil
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="logout.php">
-    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-    Salir
-</a>
-
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Cerrar sesión
+                                </a>
                             </div>
                         </li>
 
@@ -301,139 +272,104 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
                 </nav>
                 <!-- End of Topbar -->
 
-                
-                
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
 
+                    <!-- Page Heading -->
+                    <h1 class="h3 mb-4 text-gray-800">Perfil del Empleado</h1>
 
-
-
-
-
-
-
-
-
-
-<!-- Begin Page Content -->
-<div class="container-fluid">
-
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-12">
-        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-        
-    </div>
-
-    <!-- HTML y PHP para mostrar y editar los datos del usuario -->
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <!-- Card Header - User Info -->
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Información del Usuario</h6>
-                </div>
-                <!-- Card Body - User Info -->
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 text-center">
-                            <img class="img-fluid rounded-circle" style="width: 150px;" src="assets/images/undraw_profile.svg" alt="Profile Image">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Datos del Perfil</h6>
                         </div>
-
-
-                        <div class="col-md-8">
-    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" onsubmit="return validateForm();">
-        <div class="form-group">
-            <label for="nombre_usuario">Nombre de Usuario:</label>
-            <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo $_SESSION['nombre_usuario']; ?>" readonly>
-        </div>
-        <div class="form-group">
-            <label for="nombre">Nombre:</label>
-            <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo $_SESSION['nombre']; ?>">
-        </div>
-        <div class="form-group">
-            <label for="apellido">Apellido:</label>
-            <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo $_SESSION['apellido']; ?>">
-        </div>
-        <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" class="form-control" id="email" name="email" value="<?php echo $_SESSION['email']; ?>">
-        </div>
-        <div class="form-group">
-            <label for="telefono">Teléfono:</label>
-            <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo $_SESSION['telefono']; ?>">
-        </div>
-        <div class="form-group">
-            <label for="cedula">Cédula:</label>
-            <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo $_SESSION['cedula']; ?>">
-        </div>
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-    </form>
-</div>
-                        
-
-                    </div>
-                </div>
-            </div>
-
-         <!-- Tareas Asignadas -->
-<div class="container-fluid">
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Tareas Asignadas</h1>
-    </div>
-    <div class="row">
-        <!-- Display tasks horizontally -->
-        <?php if (!empty($empleado['tareas_asignadas'])) : ?>
-            <?php foreach ($empleado['tareas_asignadas'] as $index => $tarea) : ?>
-                <div class="col-md-4 task-card">
-                    <div class="card shadow mb-4 task-card-body">
                         <div class="card-body">
-                            <h5 class="card-title"><?= $tarea['descripcion']; ?></h5>
-                            <p class="card-text task-status-<?= $tarea['estado']; ?>">Estado: <?= ucfirst($tarea['estado']); ?></p>
-                            <form method="POST" action="cambiar_estado_tarea.php">
-                                <input type="hidden" name="tarea_id" value="<?= $index; ?>">
-                                <select name="nuevo_estado" class="form-control mb-2">
-                                    <option value="pendiente" <?= $tarea['estado'] === 'pendiente' ? 'selected' : ''; ?>>Pendiente</option>
-                                    <option value="en progreso" <?= $tarea['estado'] === 'en progreso' ? 'selected' : ''; ?>>En progreso</option>
-                                    <option value="completada" <?= $tarea['estado'] === 'completada' ? 'selected' : ''; ?>>Completada</option>
-                                </select>
-                                <button type="submit" class="btn btn-primary">Cambiar Estado</button>
+                            <form method="post" action="">
+
+                                <?php
+                                // Mostrar errores si existen
+                                if (!empty($errors)) {
+                                    echo '<div class="alert alert-danger">';
+                                    echo '<ul>';
+                                    foreach ($errors as $error) {
+                                        echo "<li>$error</li>";
+                                    }
+                                    echo '</ul>';
+                                    echo '</div>';
+                                }
+                                ?>
+
+                                <div class="form-group">
+                                    <label for="nombre">Nombre:</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo $usuario['nombre']; ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="apellido">Apellido:</label>
+                                    <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo $usuario['apellido']; ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email:</label>
+                                    <input type="email" class="form-control" id="email" name="email" value="<?php echo $usuario['email']; ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="telefono">Teléfono:</label>
+                                    <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo $usuario['telefono']; ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cedula">Cédula:</label>
+                                    <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo $usuario['cedula']; ?>">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Actualizar Perfil</button>
                             </form>
                         </div>
                     </div>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Tareas Asignadas</h6>
+                        </div>
+                        <div class="card-body">
+                            <?php
+                            if (!empty($empleado['tareas_asignadas'])) {
+                                foreach ($empleado['tareas_asignadas'] as $index => $tarea) {
+                                    echo '<div class="card mb-3 task-card">';
+                                    echo '<div class="card-body">';
+                                    echo '<p class="card-text">' . htmlspecialchars($tarea['descripcion']) . '</p>';
+                                    echo '<p class="card-text"><strong>Estado:</strong> <span class="task-status-' . htmlspecialchars(strtolower(str_replace(' ', '-', $tarea['estado']))) . '">' . htmlspecialchars($tarea['estado']) . '</span></p>';
+                                    echo '<form method="post" action="actualizar_tarea.php">';
+                                    echo '<input type="hidden" name="tarea_index" value="' . $index . '">';
+                                    echo '<input type="hidden" name="tarea_id" value="' . $tarea['_id'] . '">';
+                                    echo '<div class="form-group">';
+                                    echo '<label for="estado">Cambiar estado:</label>';
+                                    echo '<select name="estado" class="form-control">';
+                                    echo '<option value="Pendiente" ' . ($tarea['estado'] === 'Pendiente' ? 'selected' : '') . '>Pendiente</option>';
+                                    echo '<option value="En progreso" ' . ($tarea['estado'] === 'En progreso' ? 'selected' : '') . '>En progreso</option>';
+                                    echo '<option value="Completada" ' . ($tarea['estado'] === 'Completada' ? 'selected' : '') . '>Completada</option>';
+                                    echo '</select>';
+                                    echo '</div>';
+                                    echo '<button type="submit" class="btn btn-primary">Actualizar Estado</button>';
+                                    echo '</form>';
+                                    echo '</div>';
+                                    echo '</div>';
+                                }
+                            } else {
+                                echo '<div class="alert alert-info">No hay tareas asignadas.</div>';
+                            }
+                            ?>
+                        </div>
+                    </div>
+
                 </div>
-            <?php endforeach; ?>
-        <?php else : ?>
-            <div class="col-12">
-                <div class="alert alert-info" role="alert">No hay tareas asignadas.</div>
+                <!-- /.container-fluid -->
+
             </div>
-        <?php endif; ?>
-    </div>
-</div>
-
-
-
-
-
-
-
-            
-
-  
-</div>
-</div>
-<!-- End of Main Content -->
-
-
-
-
-
-
+            <!-- End of Main Content -->
 
             <!-- Footer -->
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; AgroHUB 2024</span>
+                        <span>AgroHub 2024</span>
                     </div>
                 </div>
             </footer>
@@ -456,15 +392,16 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">¿Listo para salir?</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-body">Seleccione "Cerrar sesión" a continuación si está listo para finalizar su sesión
+                    actual.</div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+                    <a class="btn btn-primary" href="logout.php">Cerrar sesión</a>
                 </div>
             </div>
         </div>
@@ -478,66 +415,8 @@ $empleado = $collection->findOne(['_id' => $usuario_id]);
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
 
     <!-- Custom scripts for all pages-->
-    <script src="components/user/sb-admin-2.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
 
-    <!-- Page level plugins -->
-    <script src="vendor/chart.js/Chart.min.js"></script>
-
-    <!-- Page level custom scripts -->
-    <script src="components/user/demo/chart-area-demo.js"></script>
-    <script src="components/user/demo/chart-pie-demo.js"></script>
-    <script>
-        function validateForm() {
-            let errors = [];
-            let nombre = document.getElementById('nombre').value;
-            let apellido = document.getElementById('apellido').value;
-            let email = document.getElementById('email').value;
-            let telefono = document.getElementById('telefono').value;
-            let cedula = document.getElementById('cedula').value;
-
-            // Validar nombre
-            if (nombre === "") {
-                errors.push("El nombre es requerido.");
-            } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/.test(nombre)) {
-                errors.push("Solo se permiten letras, espacios y tildes en el nombre.");
-            }
-
-            // Validar apellido
-            if (apellido === "") {
-                errors.push("El apellido es requerido.");
-            } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]*$/.test(apellido)) {
-                errors.push("Solo se permiten letras, espacios y tildes en el apellido.");
-            }
-
-            // Validar email
-            if (email === "") {
-                errors.push("El email es requerido.");
-            } else if (!/^\S+@\S+\.\S+$/.test(email)) {
-                errors.push("Formato de email inválido.");
-            }
-
-            // Validar teléfono
-            if (telefono === "") {
-                errors.push("El teléfono es requerido.");
-            } else if (!/^0[0-9]{9}$/.test(telefono)) {
-                errors.push("El teléfono debe tener 10 números y comenzar con 0.");
-            }
-
-            // Validar cédula
-            if (cedula === "") {
-                errors.push("La cédula es requerida.");
-            } else if (!/^[0-9]{10}$/.test(cedula)) {
-                errors.push("La cédula debe tener 10 números.");
-            }
-
-            if (errors.length > 0) {
-                alert(errors.join("\n"));
-                return false;
-            }
-
-            return true;
-        }
-    </script>
 </body>
 
 </html>

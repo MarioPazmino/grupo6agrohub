@@ -178,17 +178,24 @@ if (isset($_POST['assign_task'])) {
         "fecha_asignacion" => new MongoDB\BSON\UTCDateTime()
     ];
 
-    $result = $collection->updateOne(
-        ['_id' => $user_id],
-        ['$push' => ['tareas_asignadas' => $nueva_tarea]]
-    );
+    try {
+        $result = $collection->updateOne(
+            ['_id' => $user_id],
+            ['$push' => ['tareas_asignadas' => $nueva_tarea]]
+        );
 
-    if ($result->getModifiedCount() > 0) {
-        $success[] = "Tarea asignada exitosamente.";
-    } else {
-        $errors[] = "Error al asignar la tarea.";
+        if ($result->getModifiedCount() > 0) {
+            $success[] = "Tarea asignada exitosamente.";
+        } else {
+            $errors[] = "Error al asignar la tarea. No se modificó ningún documento.";
+        }
+    } catch (Exception $e) {
+        $errors[] = "Error al asignar la tarea: " . $e->getMessage();
     }
 }
+
+// Asegúrate de que $usuarios se actualice después de asignar una tarea
+$usuarios = $collection->find()->toArray();
 ?>
 
 <!DOCTYPE html>
@@ -555,7 +562,7 @@ if (isset($_POST['assign_task'])) {
                     </div>
                 </form>
             </div>
- <?php if ($usuario['rol'] === 'empleado'): ?>
+<?php if ($usuario['rol'] === 'empleado'): ?>
     <!-- Modal para asignar tarea -->
     <div class="modal fade" id="taskModal<?php echo $usuario['_id']; ?>" tabindex="-1" role="dialog" aria-labelledby="taskModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -566,26 +573,31 @@ if (isset($_POST['assign_task'])) {
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-               <form method="post" action="">
-    <input type="hidden" name="user_id" value="<?php echo $usuario['_id']; ?>">
-    <div class="form-group">
-        <label for="tarea_descripcion">Descripción de la Tarea:</label>
-        <textarea class="form-control" id="tarea_descripcion" name="tarea_descripcion" required></textarea>
-    </div>
-    <div class="form-group">
-        <label for="tarea_estado">Estado:</label>
-        <select class="form-control" id="tarea_estado" name="tarea_estado">
-            <option value="Pendiente">Pendiente</option>
-            <option value="En Progreso">En Progreso</option>
-            <option value="Completada">Completada</option>
-        </select>
-    </div>
-    <button type="submit" name="assign_task" class="btn btn-primary">Asignar Tarea</button>
-</form>
+                <form method="post" action="">
+                    <div class="modal-body">
+                        <input type="hidden" name="user_id" value="<?php echo $usuario['_id']; ?>">
+                        <div class="form-group">
+                            <label for="tarea_descripcion">Descripción de la Tarea:</label>
+                            <textarea class="form-control" id="tarea_descripcion" name="tarea_descripcion" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="tarea_estado">Estado:</label>
+                            <select class="form-control" id="tarea_estado" name="tarea_estado">
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="En Progreso">En Progreso</option>
+                                <option value="Completada">Completada</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" name="assign_task" class="btn btn-primary">Asignar Tarea</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <?php endif; ?>
+<?php endif; ?>
 </td>
 
 

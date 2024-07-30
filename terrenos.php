@@ -105,17 +105,52 @@ $terrenos = obtenerTerrenos($collection);
 
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <!-- Bootstrap CSS -->
-    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>SB Admin 2 - Dashboard</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
     <!-- Custom styles for this template-->
-    <link href="css/sb-admin-2.min.css" rel="stylesheet">
-    <!-- FontAwesome icons -->
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="css/user/sb-admin-2.min.css" rel="stylesheet">
+    <style>
+        .task-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .task-card .card-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%; /* Hacer el card más ancho */
+        }
+        .task-card .card-text {
+            font-size: 1.1rem;
+        }
+        .task-card .btn {
+            margin-top: 10px;
+        }
+        .task-status-pendiente {
+            color: #dc3545; /* Rojo para pendiente */
+        }
+        .task-status-en-progreso {
+            color: #ffc107; /* Amarillo para en progreso */
+        }
+        .task-status-completada {
+            color: #28a745; /* Verde para completada */
+        }
+    </style>
 </head>
 <body id="page-top">
 
@@ -396,6 +431,23 @@ $terrenos = obtenerTerrenos($collection);
                 modal.find('.modal-body #edit_descripcion').val(descripcion)
             })
         </script>
+   <!-- Bootstrap core JavaScript-->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-    </body>
+    <!-- Core plugin JavaScript-->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="components/user/sb-admin-2.min.js"></script>
+
+    <!-- Page level plugins -->
+    <script src="vendor/chart.js/Chart.min.js"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="components/user/demo/chart-area-demo.js"></script>
+    <script src="components/user/demo/chart-pie-demo.js"></script>
+
+</body>
+
 </html>

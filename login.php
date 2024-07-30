@@ -26,8 +26,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ]);
 
         if ($user) {
-            // Verificar la contraseña
-            if ($password === $user['password']) {
+            // Verificar la contraseña encriptada
+            if (password_verify($password, $user['password'])) {
                 session_start();
                 $_SESSION['usuario_id'] = (string)$user['_id'];
                 $_SESSION['rol'] = $user['rol'];
@@ -48,11 +48,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } else {
                 echo "Contraseña incorrecta.";
                 header("Location: index.php");
+                exit();
             }
-    
+
         } else {
             echo "Usuario no encontrado.";
             header("Location: index.php");
+            exit();
         }
 
     } catch (Exception $e) {

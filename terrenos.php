@@ -1,54 +1,71 @@
 <?php
 session_start();
 
-// Conectar a la base de datos (ajustar según tu configuración)
-require 'db_connection.php';
+// Conectar a la base de datos MongoDB
+require __DIR__ . '/vendor/autoload.php';
+
+use MongoDB\Client;
+use MongoDB\Exception\Exception;
 
 // Verificar si el usuario está autenticado
-if (!isset($_SESSION['usuario'])) {
-    header('Location: login.php');
+if (!isset($_SESSION['rol'])) {
+    header("Location: index.php");
     exit();
 }
 
+// Conexión a MongoDB con la URL proporcionada
+$mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
+$mongoClient = new Client($mongoUri);
+$collection = $mongoClient->grupo6_agrohub->terrenos;
+
 // Función para obtener los terrenos
-function obtenerTerrenos($db) {
-    $query = "SELECT * FROM terrenos";
-    $stmt = $db->prepare($query);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_OBJ);
+function obtenerTerrenos($collection) {
+    return $collection->find()->toArray();
 }
 
 // Función para agregar un terreno
-function agregarTerreno($db, $nombre, $ubicacion, $tamano, $estado, $descripcion) {
-    $query = "INSERT INTO terrenos (nombre, ubicacion, tamano, estado, descripcion) VALUES (:nombre, :ubicacion, :tamano, :estado, :descripcion)";
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(':nombre', $nombre);
-    $stmt->bindParam(':ubicacion', $ubicacion);
-    $stmt->bindParam(':tamano', $tamano);
-    $stmt->bindParam(':estado', $estado);
-    $stmt->bindParam(':descripcion', $descripcion);
-    return $stmt->execute();
+function agregarTerreno($collection, $nombre, $ubicacion, $tamano, $estado, $descripcion) {
+    try {
+        $result = $collection->insertOne([
+            'nombre' => $nombre,
+            'ubicacion' => $ubicacion,
+            'tamano' => $tamano,
+            'estado' => $estado,
+            'descripcion' => $descripcion
+        ]);
+        return $result->getInsertedCount() > 0;
+    } catch (Exception $e) {
+        return false;
+    }
 }
 
 // Función para actualizar un terreno
-function actualizarTerreno($db, $id, $nombre, $ubicacion, $tamano, $estado, $descripcion) {
-    $query = "UPDATE terrenos SET nombre = :nombre, ubicacion = :ubicacion, tamano = :tamano, estado = :estado, descripcion = :descripcion WHERE id = :id";
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(':id', $id);
-    $stmt->bindParam(':nombre', $nombre);
-    $stmt->bindParam(':ubicacion', $ubicacion);
-    $stmt->bindParam(':tamano', $tamano);
-    $stmt->bindParam(':estado', $estado);
-    $stmt->bindParam(':descripcion', $descripcion);
-    return $stmt->execute();
+function actualizarTerreno($collection, $id, $nombre, $ubicacion, $tamano, $estado, $descripcion) {
+    try {
+        $result = $collection->updateOne(
+            ['_id' => new MongoDB\BSON\ObjectId($id)],
+            ['$set' => [
+                'nombre' => $nombre,
+                'ubicacion' => $ubicacion,
+                'tamano' => $tamano,
+                'estado' => $estado,
+                'descripcion' => $descripcion
+            ]]
+        );
+        return $result->getModifiedCount() > 0;
+    } catch (Exception $e) {
+        return false;
+    }
 }
 
 // Función para eliminar un terreno
-function eliminarTerreno($db, $id) {
-    $query = "DELETE FROM terrenos WHERE id = :id";
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(':id', $id);
-    return $stmt->execute();
+function eliminarTerreno($collection, $id) {
+    try {
+        $result = $collection->deleteOne(['_id' => new MongoDB\BSON\ObjectId($id)]);
+        return $result->getDeletedCount() > 0;
+    } catch (Exception $e) {
+        return false;
+    }
 }
 
 // Procesar solicitudes de formularios
@@ -59,14 +76,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         if ($_POST['action'] === 'add') {
             // Agregar terreno
-            if (agregarTerreno($db, $_POST['nombre'], $_POST['ubicacion'], $_POST['tamano'], $_POST['estado'], $_POST['descripcion'])) {
+            if (agregarTerreno($collection, $_POST['nombre'], $_POST['ubicacion'], $_POST['tamano'], $_POST['estado'], $_POST['descripcion'])) {
                 $success[] = 'Terreno agregado exitosamente.';
             } else {
                 $errors[] = 'Error al agregar terreno.';
             }
         } elseif ($_POST['action'] === 'update') {
             // Actualizar terreno
-            if (actualizarTerreno($db, $_POST['id'], $_POST['nombre'], $_POST['ubicacion'], $_POST['tamano'], $_POST['estado'], $_POST['descripcion'])) {
+            if (actualizarTerreno($collection, $_POST['id'], $_POST['nombre'], $_POST['ubicacion'], $_POST['tamano'], $_POST['estado'], $_POST['descripcion'])) {
                 $success[] = 'Terreno actualizado exitosamente.';
             } else {
                 $errors[] = 'Error al actualizar terreno.';
@@ -75,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 } elseif (isset($_GET['delete'])) {
     // Eliminar terreno
-    if (eliminarTerreno($db, $_GET['delete'])) {
+    if (eliminarTerreno($collection, $_GET['delete'])) {
         $success[] = 'Terreno eliminado exitosamente.';
     } else {
         $errors[] = 'Error al eliminar terreno.';
@@ -83,8 +100,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Obtener terrenos
-$terrenos = obtenerTerrenos($db);
+$terrenos = obtenerTerrenos($collection);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">

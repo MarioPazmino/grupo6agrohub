@@ -115,21 +115,44 @@ foreach ($productos as $producto) {
 
 
 
-// Agregar variedad
-if (isset($_POST['nombre']) && isset($_POST['caracteristicas']) && isset($_POST['product_id'])) {
-    $nombre_variedad = $_POST['nombre'];
-    $caracteristicas = $_POST['caracteristicas'];
-    $product_id = $_POST['product_id'];
+try {
+    // Ejemplo de datos para agregar una variedad
+    $productoId = new \MongoDB\BSON\ObjectId('ID_DEL_PRODUCTO'); // Reemplaza con el ID real del producto
+    $nuevaVariedad = [
+        "nombre_variedad" => "Nueva Variedad",
+        "caracteristicas" => "Descripción de la nueva variedad."
+    ];
 
-    $collection = $db->productos;
-    $collection->updateOne(
-        ['_id' => new MongoDB\BSON\ObjectId($product_id)],
-        ['$push' => ['variedades' => ['nombre_variedad' => $nombre_variedad, 'caracteristicas' => $caracteristicas]]]
+    // Agregar variedad
+    $result = $productosCollection->updateOne(
+        ['_id' => $productoId],
+        ['$push' => ['variedades' => $nuevaVariedad]]
     );
-    header('Location: productos.php');
-    exit();
-}
 
+    if ($result->getModifiedCount() > 0) {
+        echo "Variedad agregada exitosamente.";
+    } else {
+        echo "No se pudo agregar la variedad.";
+    }
+
+    // Ejemplo de datos para eliminar una variedad
+    $variedadNombre = "Nueva Variedad"; // Nombre de la variedad a eliminar
+
+    // Eliminar variedad
+    $result = $productosCollection->updateOne(
+        ['_id' => $productoId],
+        ['$pull' => ['variedades' => ['nombre_variedad' => $variedadNombre]]]
+    );
+
+    if ($result->getModifiedCount() > 0) {
+        echo "Variedad eliminada exitosamente.";
+    } else {
+        echo "No se pudo eliminar la variedad.";
+    }
+
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
 // Eliminar variedad
 if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
     $product_id = $_GET['product_id'];
@@ -694,82 +717,88 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-                <form id="variedadesForm">
-                    <div class="form-group">
-                        <label for="nuevaVariedad">Nueva Variedad</label>
-                        <input type="text" class="form-control" id="nuevaVariedad" placeholder="Ingrese variedad" required>
-                    </div>
-                    <button type="button" class="btn btn-primary" id="agregarVariedad">Agregar Variedad</button>
-                </form>
-                <ul class="list-group mt-3" id="variedadesList">
-                    <!-- La lista de variedades se llenará dinámicamente aquí -->
+                <ul id="variedadesList" class="list-group">
+                    <!-- Aquí se mostrarán las variedades -->
                 </ul>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="guardarVariedades">Guardar Cambios</button>
+                <hr>
+                <h6>Agregar Nueva Variedad</h6>
+                <form id="addVariedadForm">
+                    <div class="form-group">
+                        <label for="nombreVariedad">Nombre de la Variedad:</label>
+                        <input type="text" class="form-control" id="nombreVariedad" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="caracteristicasVariedad">Características:</label>
+                        <textarea class="form-control" id="caracteristicasVariedad" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Variables globales
     let variedades = [];
+    let productoId = '';
 
-    // Función para actualizar la lista de variedades en el modal
     function actualizarListaVariedades() {
         const listElement = document.getElementById('variedadesList');
-        listElement.innerHTML = ''; // Limpiar la lista actual
+        listElement.innerHTML = '';
         variedades.forEach((variedad, index) => {
             const li = document.createElement('li');
             li.className = 'list-group-item d-flex justify-content-between align-items-center';
             li.innerHTML = `
-                ${variedad}
+                ${variedad.nombre_variedad} - ${variedad.caracteristicas}
                 <button type="button" class="btn btn-danger btn-sm" onclick="eliminarVariedad(${index})">Eliminar</button>
             `;
             listElement.appendChild(li);
         });
     }
 
-    // Agregar variedad a la lista
     document.getElementById('agregarVariedad').addEventListener('click', () => {
-        const nuevaVariedad = document.getElementById('nuevaVariedad').value.trim();
-        if (nuevaVariedad) {
-            variedades.push(nuevaVariedad);
+        const nombre = document.getElementById('nuevaVariedadNombre').value.trim();
+        const caracteristicas = document.getElementById('nuevaVariedadCaracteristicas').value.trim();
+        if (nombre && caracteristicas) {
+            variedades.push({ nombre_variedad: nombre, caracteristicas: caracteristicas });
             actualizarListaVariedades();
-            document.getElementById('nuevaVariedad').value = ''; // Limpiar el campo de entrada
+            document.getElementById('nuevaVariedadNombre').value = '';
+            document.getElementById('nuevaVariedadCaracteristicas').value = '';
         }
     });
 
-    // Eliminar variedad de la lista
     function eliminarVariedad(index) {
         variedades.splice(index, 1);
         actualizarListaVariedades();
     }
 
-    // Guardar variedades al cerrar el modal
     document.getElementById('guardarVariedades').addEventListener('click', () => {
-        // Enviar las variedades al servidor o realizar las acciones necesarias
-        console.log('Variedades guardadas:', variedades);
-        $('#variedadesModal').modal('hide');
+        fetch('productos.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: productoId, variedades: variedades })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Variedades guardadas correctamente.');
+                $('#variedadesModal').modal('hide');
+            } else {
+                alert('Hubo un error al guardar las variedades.');
+            }
+        });
     });
 
-    // Configurar el modal cuando se abre
     $('#variedadesModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var variedadesData = button.data('variedades');
-
-        // Si hay variedades iniciales, actualizarlas
-        if (Array.isArray(variedadesData)) {
-            variedades = variedadesData;
-            actualizarListaVariedades();
-        } else {
-            variedades = [];
-            actualizarListaVariedades();
-        }
+        const button = $(event.relatedTarget);
+        productoId = button.data('id');
+        variedades = button.data('variedades') || [];
+        actualizarListaVariedades();
     });
 </script>
+
 
 
 <script>

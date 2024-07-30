@@ -387,78 +387,153 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
-    <?php if ($_SESSION['rol'] === 'admin'): ?>
-    <!-- Formulario para agregar terrenos -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Agregar Terreno</h6>
+<?php if ($_SESSION['rol'] === 'admin'): ?>
+    <!-- Contenedor para el formulario y la tabla en dos columnas -->
+    <div class="row">
+        <!-- Formulario para agregar terrenos -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Agregar Terreno</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="">
+                        <input type="hidden" name="accion" value="insertar">
+                        <div class="form-group">
+                            <label for="nombre">Nombre:</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ubicacion">Ubicación:</label>
+                            <input type="text" class="form-control" id="ubicacion" name="ubicacion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tamano">Tamaño (hectáreas):</label>
+                            <input type="number" class="form-control" id="tamano" name="tamano" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="estado">Estado:</label>
+                            <select class="form-control" id="estado" name="estado" required>
+                                <option value="disponible">Disponible</option>
+                                <option value="ocupado">Ocupado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="descripcion">Descripción:</label>
+                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Agregar Terreno</button>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <form method="post" action="">
-                <input type="hidden" name="accion" value="insertar">
-                <div class="form-group">
-                    <label for="nombre">Nombre:</label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+
+        <!-- Mostrar terrenos -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Terrenos Registrados</h6>
                 </div>
-                <div class="form-group">
-                    <label for="ubicacion">Ubicación:</label>
-                    <input type="text" class="form-control" id="ubicacion" name="ubicacion" required>
+                <div class="card-body">
+                    <?php if (!empty($terrenos)): ?>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Ubicación</th>
+                                    <th>Tamaño</th>
+                                    <th>Estado</th>
+                                    <th>Descripción</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($terrenos as $terreno): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($terreno->nombre); ?></td>
+                                        <td><?php echo htmlspecialchars($terreno->ubicacion); ?></td>
+                                        <td><?php echo htmlspecialchars($terreno->tamano); ?></td>
+                                        <td><?php echo htmlspecialchars($terreno->estado); ?></td>
+                                        <td><?php echo htmlspecialchars($terreno->descripcion); ?></td>
+                                        <td>
+                                            <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal" data-id="<?php echo htmlspecialchars($terreno->id); ?>" data-nombre="<?php echo htmlspecialchars($terreno->nombre); ?>" data-ubicacion="<?php echo htmlspecialchars($terreno->ubicacion); ?>" data-tamano="<?php echo htmlspecialchars($terreno->tamano); ?>" data-estado="<?php echo htmlspecialchars($terreno->estado); ?>" data-descripcion="<?php echo htmlspecialchars($terreno->descripcion); ?>">Editar</button>
+                                            <a href="delete_terreno.php?id=<?php echo htmlspecialchars($terreno->id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este terreno?');">Eliminar</a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    <?php else: ?>
+                        <p>No hay terrenos registrados.</p>
+                    <?php endif; ?>
                 </div>
-                <div class="form-group">
-                    <label for="tamano">Tamaño (hectáreas):</label>
-                    <input type="number" class="form-control" id="tamano" name="tamano" required>
-                </div>
-                <div class="form-group">
-                    <label for="estado">Estado:</label>
-                    <select class="form-control" id="estado" name="estado" required>
-                        <option value="disponible">Disponible</option>
-                        <option value="ocupado">Ocupado</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="descripcion">Descripción:</label>
-                    <textarea class="form-control" id="descripcion" name="descripcion" rows="3"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Agregar Terreno</button>
-            </form>
+            </div>
         </div>
     </div>
 
-    <!-- Mostrar terrenos -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Terrenos Registrados</h6>
-        </div>
-        <div class="card-body">
-            <?php if (!empty($terrenos)): ?>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Ubicación</th>
-                            <th>Tamaño</th>
-                            <th>Estado</th>
-                            <th>Descripción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($terrenos as $terreno): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($terreno->nombre); ?></td>
-                                <td><?php echo htmlspecialchars($terreno->ubicacion); ?></td>
-                                <td><?php echo htmlspecialchars($terreno->tamano); ?></td>
-                                <td><?php echo htmlspecialchars($terreno->estado); ?></td>
-                                <td><?php echo htmlspecialchars($terreno->descripcion); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <p>No hay terrenos registrados.</p>
-            <?php endif; ?>
+    <!-- Modal para editar terreno -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Editar Terreno</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="update_terreno.php">
+                        <input type="hidden" name="accion" value="actualizar">
+                        <input type="hidden" id="edit_id" name="id">
+                        <div class="form-group">
+                            <label for="edit_nombre">Nombre:</label>
+                            <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_ubicacion">Ubicación:</label>
+                            <input type="text" class="form-control" id="edit_ubicacion" name="ubicacion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_tamano">Tamaño (hectáreas):</label>
+                            <input type="number" class="form-control" id="edit_tamano" name="tamano" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_estado">Estado:</label>
+                            <select class="form-control" id="edit_estado" name="estado" required>
+                                <option value="disponible">Disponible</option>
+                                <option value="ocupado">Ocupado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_descripcion">Descripción:</label>
+                            <textarea class="form-control" id="edit_descripcion" name="descripcion" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Actualizar Terreno</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        $('#editModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var id = button.data('id'); // Extract info from data-* attributes
+            var nombre = button.data('nombre');
+            var ubicacion = button.data('ubicacion');
+            var tamano = button.data('tamano');
+            var estado = button.data('estado');
+            var descripcion = button.data('descripcion');
+
+            var modal = $(this);
+            modal.find('#edit_id').val(id);
+            modal.find('#edit_nombre').val(nombre);
+            modal.find('#edit_ubicacion').val(ubicacion);
+            modal.find('#edit_tamano').val(tamano);
+            modal.find('#edit_estado').val(estado);
+            modal.find('#edit_descripcion').val(descripcion);
+        });
+    </script>
 
 <?php else: ?>
     <!-- Mostrar terrenos para empleados sin la opción de modificar -->

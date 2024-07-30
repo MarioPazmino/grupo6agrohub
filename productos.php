@@ -117,8 +117,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
     exit();
 }
 
-
-
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
 $total_tareas_pendientes = 0;
@@ -151,6 +149,7 @@ if ($_SESSION['rol'] === 'admin') {
 
 // Aquí comienza el HTML
 ?>
+
 
 
 <!DOCTYPE html>

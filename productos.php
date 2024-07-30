@@ -25,7 +25,6 @@ $errors = [];
 // Manejo de la eliminación de productos
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $id = $_GET['id'];
-    error_log("Intentando eliminar producto con ID: " . $id);
     
     try {
         if (strlen($id) == 24 && ctype_xdigit($id)) {
@@ -42,133 +41,81 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
         $errors[] = 'Error al eliminar el producto: ' . $e->getMessage();
     }
 
-    // Redireccionar después de procesar la eliminación
     header("Location: productos.php");
     exit();
 }
 
 // Manejo de la actualización y agregación de productos
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    error_log('POST data: ' . print_r($_POST, true));
+    try {
+        $variedades = json_decode($_POST['variedades'], true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('El formato JSON para variedades no es válido.');
+        }
 
-    if (isset($_POST['id'])) {
-        // Actualizar producto
-        try {
-            $variedades = json_decode($_POST['variedades'], true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new Exception('El formato JSON para variedades no es válido.');
-            }
+        $productoData = [
+            'nombre' => $_POST['nombre'],
+            'descripcion' => $_POST['descripcion'],
+            'tipo' => $_POST['tipo'],
+            'precio_unitario' => floatval($_POST['precio_unitario']),
+            'unidad' => $_POST['unidad'],
+            'variedades' => $variedades
+        ];
 
+        if (isset($_POST['id']) && strlen($_POST['id']) == 24) {
+            // Actualizar producto
             $result = $productosCollection->updateOne(
                 ['_id' => new ObjectId($_POST['id'])],
-                ['$set' => [
-                    'nombre' => $_POST['nombre'],
-                    'descripcion' => $_POST['descripcion'],
-                    'tipo' => $_POST['tipo'],
-                    'precio_unitario' => floatval($_POST['precio_unitario']),
-                    'unidad' => $_POST['unidad'],
-                    'variedades' => $variedades
-                ]]
+                ['$set' => $productoData]
             );
             if ($result->getModifiedCount() > 0) {
                 $success[] = 'Producto actualizado exitosamente.';
             } else {
                 $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
             }
-        } catch (Exception $e) {
-            $errors[] = 'Error al actualizar el producto: ' . $e->getMessage();
-        }
-    } else {
-        // Agregar producto
-        try {
-            $variedades = json_decode($_POST['variedades'], true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new Exception('El formato JSON para variedades no es válido.');
-            }
-
-            $result = $productosCollection->insertOne([
-                'nombre' => $_POST['nombre'],
-                'descripcion' => $_POST['descripcion'],
-                'tipo' => $_POST['tipo'],
-                'precio_unitario' => floatval($_POST['precio_unitario']),
-                'unidad' => $_POST['unidad'],
-                'variedades' => $variedades
-            ]);
+        } else {
+            // Agregar producto
+            $result = $productosCollection->insertOne($productoData);
             if ($result->getInsertedCount() > 0) {
                 $success[] = 'Producto agregado exitosamente.';
             } else {
                 $errors[] = 'Error al agregar el producto.';
             }
-        } catch (Exception $e) {
-            $errors[] = 'Error al agregar el producto: ' . $e->getMessage();
         }
+    } catch (Exception $e) {
+        $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
     }
 }
 
 // Obtener productos para mostrar en la tabla
-$productos = $productosCollection->find()->toArray();
-
-// Debug: Imprimir IDs de productos
-foreach ($productos as $producto) {
-    error_log("Producto ID: " . $producto->_id);
-}
-
-
-
 try {
-    // Ejemplo de datos para agregar una variedad
-    $productoId = new \MongoDB\BSON\ObjectId('ID_DEL_PRODUCTO'); // Reemplaza con el ID real del producto
-    $nuevaVariedad = [
-        "nombre_variedad" => "Nueva Variedad",
-        "caracteristicas" => "Descripción de la nueva variedad."
-    ];
-
-    // Agregar variedad
-    $result = $productosCollection->updateOne(
-        ['_id' => $productoId],
-        ['$push' => ['variedades' => $nuevaVariedad]]
-    );
-
-    if ($result->getModifiedCount() > 0) {
-        echo "Variedad agregada exitosamente.";
-    } else {
-        echo "No se pudo agregar la variedad.";
-    }
-
-    // Ejemplo de datos para eliminar una variedad
-    $variedadNombre = "Nueva Variedad"; // Nombre de la variedad a eliminar
-
-    // Eliminar variedad
-    $result = $productosCollection->updateOne(
-        ['_id' => $productoId],
-        ['$pull' => ['variedades' => ['nombre_variedad' => $variedadNombre]]]
-    );
-
-    if ($result->getModifiedCount() > 0) {
-        echo "Variedad eliminada exitosamente.";
-    } else {
-        echo "No se pudo eliminar la variedad.";
-    }
-
+    $productos = $productosCollection->find()->toArray();
 } catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+    $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
 }
-// Eliminar variedad
+
+// Manejo de la eliminación de variedades
 if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
     $product_id = $_GET['product_id'];
     $variedad_nombre = $_GET['variedad_nombre'];
 
-    $collection = $db->productos;
-    $collection->updateOne(
-        ['_id' => new MongoDB\BSON\ObjectId($product_id)],
-        ['$pull' => ['variedades' => ['nombre_variedad' => $variedad_nombre]]]
-    );
+    try {
+        $result = $productosCollection->updateOne(
+            ['_id' => new ObjectId($product_id)],
+            ['$pull' => ['variedades' => ['nombre_variedad' => $variedad_nombre]]]
+        );
+        if ($result->getModifiedCount() > 0) {
+            $success[] = 'Variedad eliminada exitosamente.';
+        } else {
+            $errors[] = 'No se pudo eliminar la variedad.';
+        }
+    } catch (Exception $e) {
+        $errors[] = 'Error al eliminar la variedad: ' . $e->getMessage();
+    }
+
     header('Location: productos.php');
     exit();
 }
-
-
-
 
 
 

@@ -389,6 +389,17 @@ if ($_SESSION['rol'] === 'admin') {
                     <!-- Content Row -->
                     <div class="row">
 
+
+<!-- Botón para Agregar Producto -->
+<?php if ($_SESSION['rol'] === 'admin'): ?>
+<div class="mb-3">
+    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addProductoModal">
+        Agregar Producto
+    </button>
+</div>
+<?php endif; ?>
+
+                        
 <!-- Tabla de productos -->
 <div class="table-responsive mt-4">
     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -541,6 +552,85 @@ if ($_SESSION['rol'] === 'admin') {
     }
 </script>
 
+<script>
+    $('#variedadesModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        var variedades = button.data('variedades');
+
+        var modal = $(this);
+        var tbody = modal.find('#variedadesTableBody');
+        tbody.empty();
+
+        variedades.forEach(function(variedad) {
+            tbody.append(
+                '<tr>' +
+                '<td>' + variedad.nombre_variedad + '</td>' +
+                '<td>' + variedad.caracteristicas + '</td>' +
+                <?php if ($_SESSION['rol'] === 'admin'): ?> 
+                '<td>' +
+                '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariedad(\'' + id + '\', \'' + variedad.nombre_variedad + '\')">Eliminar</button>' +
+                '</td>' +
+                <?php endif; ?>
+                '</tr>'
+            );
+        });
+
+        modal.find('#addVariedadButton').off('click').on('click', function() {
+            $('#variedad_product_id').val(id);
+            $('#addVariedadModal').modal('show');
+        });
+    });
+
+    function deleteVariedad(productId, variedadNombre) {
+        if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
+            window.location.href = 'productos.php?action=delete_variedad&product_id=' + productId + '&variedad_nombre=' + variedadNombre;
+        }
+    }
+</script>
+<!-- Modal Agregar Producto -->
+<div class="modal fade" id="addProductoModal" tabindex="-1" role="dialog" aria-labelledby="addProductoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductoModalLabel">Agregar Producto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductoForm" action="productos.php" method="POST">
+                    <div class="form-group">
+                        <label for="producto_nombre">Nombre</label>
+                        <input type="text" class="form-control" id="producto_nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto_descripcion">Descripción</label>
+                        <textarea class="form-control" id="producto_descripcion" name="descripcion" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto_tipo">Tipo</label>
+                        <input type="text" class="form-control" id="producto_tipo" name="tipo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto_precio_unitario">Precio Unitario</label>
+                        <input type="number" step="0.01" class="form-control" id="producto_precio_unitario" name="precio_unitario" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto_unidad">Unidad</label>
+                        <input type="text" class="form-control" id="producto_unidad" name="unidad" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto_variedades">Variedades (JSON)</label>
+                        <textarea class="form-control" id="producto_variedades" name="variedades"></textarea>
+                        <small class="form-text text-muted">Introduzca variedades en formato JSON.</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Agregar Producto</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
         <!-- Scroll to Top Button-->
         <a class="scroll-to-top rounded" href="#page-top">

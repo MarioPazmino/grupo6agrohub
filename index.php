@@ -5,7 +5,6 @@ require __DIR__ . '/vendor/autoload.php';
 use MongoDB\Client;
 use MongoDB\Exception\Exception;
 
-// Función para manejar el registro de usuarios
 function registrarUsuario($datos)
 {
     // Validación básica
@@ -65,7 +64,7 @@ function registrarUsuario($datos)
             'nombre_usuario' => $datos['nombre_usuario'],
             'telefono' => $datos['telefono'],
             'email' => $datos['email'],
-            'password' => $datos['password'], // Guardar la contraseña como string simple
+            'password' => password_hash($datos['password'], PASSWORD_BCRYPT), // Encriptar la contraseña
             'direccion' => $datos['direccion'],
             'rol' => 'empleado', // Asignar el rol como empleado
             'cedula' => $datos['cedula'],

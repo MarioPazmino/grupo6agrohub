@@ -10,57 +10,50 @@ if (!isset($_SESSION['rol'])) {
 require __DIR__ . '/vendor/autoload.php';
 
 use MongoDB\Client;
-use MongoDB\Exception\Exception;
+use MongoDB\BSON\ObjectId;
 
-// Conexión a MongoDB con la URL proporcionada
+// Conexión a MongoDB
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
 $terrenosCollection = $mongoClient->grupo6_agrohub->terrenos;
-$usuariosCollection = $mongoClient->grupo6_agrohub->usuarios;
 
-// Variables para mensajes de éxito y error
+// Variables para mensajes
 $success = [];
 $errors = [];
 
 // Manejo de la eliminación de terrenos
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $id = $_GET['id'];
-    error_log("Intentando eliminar terreno con ID: " . $id);
-    
     try {
-        if (strlen($id) == 24 && ctype_xdigit($id)) {
-            $result = $terrenosCollection->deleteOne(['_id' => new MongoDB\BSON\ObjectId($id)]);
-            if ($result->getDeletedCount() > 0) {
-                $success[] = 'Terreno eliminado exitosamente.';
-            } else {
-                $errors[] = 'No se encontró el terreno para eliminar.';
-            }
+        $result = $terrenosCollection->deleteOne(['_id' => new ObjectId($id)]);
+        if ($result->getDeletedCount() > 0) {
+            $success[] = 'Terreno eliminado exitosamente.';
         } else {
-            $errors[] = 'ID de terreno inválido.';
+            $errors[] = 'No se encontró el terreno para eliminar.';
         }
     } catch (Exception $e) {
         $errors[] = 'Error al eliminar el terreno: ' . $e->getMessage();
     }
-
-    // Redireccionar después de procesar la eliminación
     header("Location: terrenos.php");
     exit();
 }
 
-// Manejo de la actualización de terrenos
+// Manejo de la actualización y creación de terrenos
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['id'])) {
+    $terrenoData = [
+        'nombre' => $_POST['nombre'],
+        'ubicacion' => $_POST['ubicacion'],
+        'tamano' => floatval($_POST['tamano']),  // Convertir a número
+        'estado' => $_POST['estado'],
+        'descripcion' => $_POST['descripcion']
+    ];
+
+    if (isset($_POST['id']) && !empty($_POST['id'])) {
         // Actualizar terreno
         try {
             $result = $terrenosCollection->updateOne(
-                ['_id' => new MongoDB\BSON\ObjectId($_POST['id'])],
-                ['$set' => [
-                    'nombre' => $_POST['nombre'],
-                    'ubicacion' => $_POST['ubicacion'],
-                    'tamano' => $_POST['tamano'],
-                    'estado' => $_POST['estado'],
-                    'descripcion' => $_POST['descripcion']
-                ]]
+                ['_id' => new ObjectId($_POST['id'])],
+                ['$set' => $terrenoData]
             );
             if ($result->getModifiedCount() > 0) {
                 $success[] = 'Terreno actualizado exitosamente.';
@@ -73,14 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Agregar terreno
         try {
-            $result = $terrenosCollection->insertOne([
-                'nombre' => $_POST['nombre'],
-                'ubicacion' => $_POST['ubicacion'],
-                'tamano' => $_POST['tamano'],
-                'estado' => $_POST['estado'],
-                'descripcion' => $_POST['descripcion']
-            ]);
-            if ($result->getInsertedCount() > 0) {
+            $result = $terrenosCollection->insertOne($terrenoData);
+            if ($result->getInsertedId()) {
                 $success[] = 'Terreno agregado exitosamente.';
             }
         } catch (Exception $e) {
@@ -451,35 +438,33 @@ if ($_SESSION['rol'] === 'admin') {
                         <?php endif; ?>
                     </tr>
                 </thead>
-                <tbody>
-                    <?php foreach ($terrenos as $terreno): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($terreno->nombre); ?></td>
-                        <td><?php echo htmlspecialchars($terreno->ubicacion); ?></td>
-                        <td><?php echo htmlspecialchars($terreno->tamano); ?></td>
-                        <td class="<?php echo $terreno->estado === 'activo' ? 'text-success' : 'text-danger'; ?>">
-                            <?php echo htmlspecialchars($terreno->estado); ?>
-                        </td>
-                        <td><?php echo htmlspecialchars($terreno->descripcion); ?></td>
-                        <?php if ($_SESSION['rol'] === 'admin'): ?>
-                        <td>
-                            <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarTerrenoModal"
-                                    data-id="<?php echo $terreno->id; ?>"
-                                    data-nombre="<?php echo htmlspecialchars($terreno->nombre); ?>"
-                                    data-ubicacion="<?php echo htmlspecialchars($terreno->ubicacion); ?>"
-                                    data-tamano="<?php echo htmlspecialchars($terreno->tamano); ?>"
-                                    data-estado="<?php echo htmlspecialchars($terreno->estado); ?>"
-                                    data-descripcion="<?php echo htmlspecialchars($terreno->descripcion); ?>">
-                                Editar
-                            </button>
-                           <a href="?action=delete&id=<?php echo $terreno->_id; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este terreno?');">
-    Eliminar
-</a>
-                        </td>
-                        <?php endif; ?>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
+               <tbody>
+    <?php foreach ($terrenos as $terreno): ?>
+    <tr>
+        <td><?php echo htmlspecialchars($terreno->nombre); ?></td>
+        <td><?php echo htmlspecialchars($terreno->ubicacion); ?></td>
+        <td><?php echo htmlspecialchars($terreno->tamano); ?></td>
+        <td><?php echo htmlspecialchars($terreno->estado); ?></td>
+        <td><?php echo htmlspecialchars($terreno->descripcion); ?></td>
+        <?php if ($_SESSION['rol'] === 'admin'): ?>
+        <td>
+            <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarTerrenoModal"
+                    data-id="<?php echo $terreno->_id; ?>"
+                    data-nombre="<?php echo htmlspecialchars($terreno->nombre); ?>"
+                    data-ubicacion="<?php echo htmlspecialchars($terreno->ubicacion); ?>"
+                    data-tamano="<?php echo htmlspecialchars($terreno->tamano); ?>"
+                    data-estado="<?php echo htmlspecialchars($terreno->estado); ?>"
+                    data-descripcion="<?php echo htmlspecialchars($terreno->descripcion); ?>">
+                Editar
+            </button>
+            <a href="?action=delete&id=<?php echo $terreno->_id; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este terreno?');">
+                Eliminar
+            </a>
+        </td>
+        <?php endif; ?>
+    </tr>
+    <?php endforeach; ?>
+</tbody>
             </table>
         </div>
     </div>
@@ -611,26 +596,25 @@ if ($_SESSION['rol'] === 'admin') {
         <!-- Page level custom scripts -->
         <script src="js/demo/datatables-demo.js"></script>
 
-        <!-- Scripts para modales -->
-        <script>
-            $('#editarTerrenoModal').on('show.bs.modal', function (event) {
-                var button = $(event.relatedTarget) // Button that triggered the modal
-                var id = button.data('id')
-                var nombre = button.data('nombre')
-                var ubicacion = button.data('ubicacion')
-                var tamano = button.data('tamano')
-                var estado = button.data('estado')
-                var descripcion = button.data('descripcion')
+<script>
+$('#editarTerrenoModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget)
+    var id = button.data('id')
+    var nombre = button.data('nombre')
+    var ubicacion = button.data('ubicacion')
+    var tamano = button.data('tamano')
+    var estado = button.data('estado')
+    var descripcion = button.data('descripcion')
 
-                var modal = $(this)
-                modal.find('.modal-body #edit_id').val(id)
-                modal.find('.modal-body #edit_nombre').val(nombre)
-                modal.find('.modal-body #edit_ubicacion').val(ubicacion)
-                modal.find('.modal-body #edit_tamano').val(tamano)
-                modal.find('.modal-body #edit_estado').val(estado)
-                modal.find('.modal-body #edit_descripcion').val(descripcion)
-            })
-        </script>
+    var modal = $(this)
+    modal.find('.modal-body #edit_id').val(id)
+    modal.find('.modal-body #edit_nombre').val(nombre)
+    modal.find('.modal-body #edit_ubicacion').val(ubicacion)
+    modal.find('.modal-body #edit_tamano').val(tamano)
+    modal.find('.modal-body #edit_estado').val(estado)
+    modal.find('.modal-body #edit_descripcion').val(descripcion)
+})
+</script>
 
     </body>
 

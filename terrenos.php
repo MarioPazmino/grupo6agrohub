@@ -21,60 +21,56 @@ $collection = $mongoClient->grupo6_agrohub->terrenos;
 $success = [];
 $errors = [];
 
-// Manejo del formulario de inserción de terreno para administradores
+// Manejo de la eliminación de terrenos
+if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
+    $id = $_GET['id'];
+    $query = 'DELETE FROM terrenos WHERE id = :id';
+    $stmt = $pdo->prepare($query);
+    $stmt->execute(['id' => $id]);
+
+    $success[] = 'Terreno eliminado exitosamente.';
+}
+
+// Manejo de la actualización de terrenos
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['accion'])) {
-        try {
-            if ($_POST['accion'] === 'insertar' && $_SESSION['rol'] === 'admin') {
-                $nombre = $_POST['nombre'];
-                $ubicacion = $_POST['ubicacion'];
-                $tamano = (int)$_POST['tamano'];
-                $estado = $_POST['estado'];
-                $descripcion = $_POST['descripcion'];
+    if (isset($_POST['id'])) {
+        // Actualizar terreno
+        $query = 'UPDATE terrenos SET nombre = :nombre, ubicacion = :ubicacion, tamano = :tamano, estado = :estado, descripcion = :descripcion WHERE id = :id';
+        $stmt = $pdo->prepare($query);
+        $stmt->execute([
+            'id' => $_POST['id'],
+            'nombre' => $_POST['nombre'],
+            'ubicacion' => $_POST['ubicacion'],
+            'tamano' => $_POST['tamano'],
+            'estado' => $_POST['estado'],
+            'descripcion' => $_POST['descripcion']
+        ]);
 
-                $result = $collection->insertOne([
-                    "nombre" => $nombre,
-                    "ubicacion" => $ubicacion,
-                    "tamano" => $tamano,
-                    "estado" => $estado,
-                    "descripcion" => $descripcion
-                ]);
+        $success[] = 'Terreno actualizado exitosamente.';
+    } else {
+        // Agregar terreno
+        $query = 'INSERT INTO terrenos (nombre, ubicacion, tamano, estado, descripcion) VALUES (:nombre, :ubicacion, :tamano, :estado, :descripcion)';
+        $stmt = $pdo->prepare($query);
+        $stmt->execute([
+            'nombre' => $_POST['nombre'],
+            'ubicacion' => $_POST['ubicacion'],
+            'tamano' => $_POST['tamano'],
+            'estado' => $_POST['estado'],
+            'descripcion' => $_POST['descripcion']
+        ]);
 
-                $success[] = "Terreno agregado exitosamente.";
-            } elseif ($_POST['accion'] === 'actualizar' && $_SESSION['rol'] === 'admin') {
-                $id = $_POST['id'];
-                $nombre = $_POST['nombre'];
-                $ubicacion = $_POST['ubicacion'];
-                $tamano = (int)$_POST['tamano'];
-                $estado = $_POST['estado'];
-                $descripcion = $_POST['descripcion'];
-
-                $result = $collection->updateOne(
-                    ['_id' => new MongoDB\BSON\ObjectId($id)],
-                    ['$set' => [
-                        "nombre" => $nombre,
-                        "ubicacion" => $ubicacion,
-                        "tamano" => $tamano,
-                        "estado" => $estado,
-                        "descripcion" => $descripcion
-                    ]]
-                );
-
-                $success[] = "Terreno actualizado exitosamente.";
-            }
-        } catch (Exception $e) {
-            $errors[] = "Error al procesar la solicitud: " . $e->getMessage();
-        }
+        $success[] = 'Terreno agregado exitosamente.';
     }
 }
 
-// Leer terrenos
-$terrenos = [];
-if ($_SESSION['rol'] === 'admin') {
-    $terrenos = $collection->find()->toArray();
-} else if ($_SESSION['rol'] === 'empleado') {
-    $terrenos = $collection->find()->toArray();
-}
+// Obtener terrenos para mostrar en la tabla
+$query = 'SELECT * FROM terrenos';
+$statement = $pdo->query($query);
+$terrenos = $statement->fetchAll(PDO::FETCH_OBJ);
+
+
+
+
 
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;

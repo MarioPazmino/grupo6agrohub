@@ -665,11 +665,78 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-                <div id="variedadesContent"></div>
+                <form id="variedadesForm">
+                    <div id="variedadesContent"></div>
+                    <div class="form-group">
+                        <label for="nuevaVariedad">Agregar nueva variedad</label>
+                        <input type="text" class="form-control" id="nuevaVariedad" placeholder="Ingrese una nueva variedad">
+                    </div>
+                    <button type="button" class="btn btn-success" id="agregarVariedad">Agregar</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="guardarVariedades">Guardar cambios</button>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar la apertura del modal y cargar las variedades
+    $('#variedadesModal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget);
+        var variedades = button.data('variedades');
+        var id = button.data('id');
+        var modal = $(this);
+        var content = '<ul id="variedadesList">';
+        variedades.forEach(function(variedad, index) {
+            content += '<li data-index="' + index + '">' + variedad + ' <button type="button" class="btn btn-danger btn-sm eliminarVariedad" data-index="' + index + '">Eliminar</button></li>';
+        });
+        content += '</ul>';
+        modal.find('#variedadesContent').html(content);
+    });
+
+    // Agregar nueva variedad a la lista
+    $('#agregarVariedad').on('click', function() {
+        var nuevaVariedad = $('#nuevaVariedad').val();
+        if (nuevaVariedad.trim() !== '') {
+            var index = $('#variedadesList li').length;
+            $('#variedadesList').append('<li data-index="' + index + '">' + nuevaVariedad + ' <button type="button" class="btn btn-danger btn-sm eliminarVariedad" data-index="' + index + '">Eliminar</button></li>');
+            $('#nuevaVariedad').val('');
+        }
+    });
+
+    // Eliminar variedad de la lista
+    $(document).on('click', '.eliminarVariedad', function() {
+        $(this).parent().remove();
+    });
+
+    // Guardar los cambios en las variedades
+    $('#guardarVariedades').on('click', function() {
+        var variedades = [];
+        $('#variedadesList li').each(function() {
+            variedades.push($(this).text().replace(' Eliminar', ''));
+        });
+        var id = $('#variedadesModal').find('#variedadesList').data('id');
+
+        // Enviar datos al servidor para guardar
+        $.ajax({
+            url: 'guardar_variedades.php',
+            type: 'POST',
+            data: {
+                id: id,
+                variedades: variedades
+            },
+            success: function(response) {
+                $('#variedadesModal').modal('hide');
+                // Opcional: Recargar la página o actualizar la tabla de productos
+            }
+        });
+    });
+});
+</script>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

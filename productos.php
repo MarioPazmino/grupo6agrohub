@@ -654,7 +654,12 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 <?php endif; ?>
 
-<!-- Modal Variedades -->
+
+
+
+
+
+                    <!-- Modal Variedades -->
 <div class="modal fade" id="variedadesModal" tabindex="-1" role="dialog" aria-labelledby="variedadesModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -668,8 +673,12 @@ if ($_SESSION['rol'] === 'admin') {
                 <form id="variedadesForm">
                     <div id="variedadesContent"></div>
                     <div class="form-group">
-                        <label for="nuevaVariedad">Agregar nueva variedad</label>
-                        <input type="text" class="form-control" id="nuevaVariedad" placeholder="Ingrese una nueva variedad">
+                        <label for="nombreVariedad">Nombre de la variedad</label>
+                        <input type="text" class="form-control" id="nombreVariedad" placeholder="Ingrese el nombre de la variedad">
+                    </div>
+                    <div class="form-group">
+                        <label for="caracteristicasVariedad">Características</label>
+                        <textarea class="form-control" id="caracteristicasVariedad" placeholder="Ingrese las características"></textarea>
                     </div>
                     <button type="button" class="btn btn-success" id="agregarVariedad">Agregar</button>
                 </form>
@@ -691,7 +700,9 @@ document.addEventListener('DOMContentLoaded', function() {
         var modal = $(this);
         var content = '<ul id="variedadesList">';
         variedades.forEach(function(variedad, index) {
-            content += '<li data-index="' + index + '">' + variedad + ' <button type="button" class="btn btn-danger btn-sm eliminarVariedad" data-index="' + index + '">Eliminar</button></li>';
+            content += '<li data-index="' + index + '">' + 
+                       variedad.nombre_variedad + ' - ' + variedad.caracteristicas + 
+                       ' <button type="button" class="btn btn-danger btn-sm eliminarVariedad" data-index="' + index + '">Eliminar</button></li>';
         });
         content += '</ul>';
         modal.find('#variedadesContent').html(content);
@@ -699,11 +710,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Agregar nueva variedad a la lista
     $('#agregarVariedad').on('click', function() {
-        var nuevaVariedad = $('#nuevaVariedad').val();
-        if (nuevaVariedad.trim() !== '') {
+        var nombreVariedad = $('#nombreVariedad').val();
+        var caracteristicasVariedad = $('#caracteristicasVariedad').val();
+        if (nombreVariedad.trim() !== '' && caracteristicasVariedad.trim() !== '') {
             var index = $('#variedadesList li').length;
-            $('#variedadesList').append('<li data-index="' + index + '">' + nuevaVariedad + ' <button type="button" class="btn btn-danger btn-sm eliminarVariedad" data-index="' + index + '">Eliminar</button></li>');
-            $('#nuevaVariedad').val('');
+            $('#variedadesList').append('<li data-index="' + index + '">' + 
+                                        nombreVariedad + ' - ' + caracteristicasVariedad + 
+                                        ' <button type="button" class="btn btn-danger btn-sm eliminarVariedad" data-index="' + index + '">Eliminar</button></li>');
+            $('#nombreVariedad').val('');
+            $('#caracteristicasVariedad').val('');
         }
     });
 
@@ -716,7 +731,12 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#guardarVariedades').on('click', function() {
         var variedades = [];
         $('#variedadesList li').each(function() {
-            variedades.push($(this).text().replace(' Eliminar', ''));
+            var text = $(this).text().replace(' Eliminar', '');
+            var parts = text.split(' - ');
+            variedades.push({
+                nombre_variedad: parts[0],
+                caracteristicas: parts[1]
+            });
         });
         var id = $('#variedadesModal').find('#variedadesList').data('id');
 
@@ -724,10 +744,11 @@ document.addEventListener('DOMContentLoaded', function() {
         $.ajax({
             url: 'guardar_variedades.php',
             type: 'POST',
-            data: {
+            data: JSON.stringify({
                 id: id,
                 variedades: variedades
-            },
+            }),
+            contentType: 'application/json',
             success: function(response) {
                 $('#variedadesModal').modal('hide');
                 // Opcional: Recargar la página o actualizar la tabla de productos
@@ -736,6 +757,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
 
 
 <script>

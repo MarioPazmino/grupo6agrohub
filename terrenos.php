@@ -410,151 +410,139 @@ if ($_SESSION['rol'] === 'admin') {
                                     </button>
                                     <?php endif; ?>
 
-                                    <!-- Tabla de terrenos -->
-                                    <div class="table-responsive mt-4">
-                                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Nombre</th>
-                                                    <th>Ubicación</th>
-                                                    <th>Tamaño (m²)</th>
-                                                    <th>Estado</th>
-                                                    <th>Descripción</th>
-                                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
-                                                    <th>Acciones</th>
-                                                    <?php endif; ?>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php foreach ($terrenos as $terreno): ?>
-                                                <tr>
-                                                    <td><?php echo htmlspecialchars($terreno->nombre); ?></td>
-                                                    <td><?php echo htmlspecialchars($terreno->ubicacion); ?></td>
-                                                    <td><?php echo htmlspecialchars($terreno->tamano); ?></td>
-                                                    <td class="<?php echo $terreno->estado === 'activo' ? 'text-success' : 'text-danger'; ?>">
-                                                        <?php echo htmlspecialchars($terreno->estado); ?>
-                                                    </td>
-                                                    <td><?php echo htmlspecialchars($terreno->descripcion); ?></td>
-                                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
-                                                    <td>
-                                                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarTerrenoModal" 
-                                                                data-id="<?php echo $terreno->_id; ?>"
-                                                                data-nombre="<?php echo htmlspecialchars($terreno->nombre); ?>"
-                                                                data-ubicacion="<?php echo htmlspecialchars($terreno->ubicacion); ?>"
-                                                                data-tamano="<?php echo htmlspecialchars($terreno->tamano); ?>"
-                                                                data-estado="<?php echo htmlspecialchars($terreno->estado); ?>"
-                                                                data-descripcion="<?php echo htmlspecialchars($terreno->descripcion); ?>">
-                                                            Editar
-                                                        </button>
-                                                        <a href="delete_terreno.php?id=<?php echo $terreno->_id; ?>" class="btn btn-danger btn-sm">
-                                                            Eliminar
-                                                        </a>
-                                                    </td>
-                                                    <?php endif; ?>
-                                                </tr>
-                                                <?php endforeach; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                                   <!-- Tabla de terrenos -->
+        <div class="table-responsive mt-4">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Ubicación</th>
+                        <th>Tamaño (m²)</th>
+                        <th>Estado</th>
+                        <th>Descripción</th>
+                        <?php if ($_SESSION['rol'] === 'admin'): ?>
+                        <th>Acciones</th>
+                        <?php endif; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($terrenos as $terreno): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($terreno->nombre); ?></td>
+                        <td><?php echo htmlspecialchars($terreno->ubicacion); ?></td>
+                        <td><?php echo htmlspecialchars($terreno->tamano); ?></td>
+                        <td class="<?php echo $terreno->estado === 'activo' ? 'text-success' : 'text-danger'; ?>">
+                            <?php echo htmlspecialchars($terreno->estado); ?>
+                        </td>
+                        <td><?php echo htmlspecialchars($terreno->descripcion); ?></td>
+                        <?php if ($_SESSION['rol'] === 'admin'): ?>
+                        <td>
+                            <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarTerrenoModal"
+                                    data-id="<?php echo $terreno->id; ?>"
+                                    data-nombre="<?php echo htmlspecialchars($terreno->nombre); ?>"
+                                    data-ubicacion="<?php echo htmlspecialchars($terreno->ubicacion); ?>"
+                                    data-tamano="<?php echo htmlspecialchars($terreno->tamano); ?>"
+                                    data-estado="<?php echo htmlspecialchars($terreno->estado); ?>"
+                                    data-descripcion="<?php echo htmlspecialchars($terreno->descripcion); ?>">
+                                Editar
+                            </button>
+                            <a href="?action=delete&id=<?php echo $terreno->id; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este terreno?');">
+                                Eliminar
+                            </a>
+                        </td>
+                        <?php endif; ?>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Terreno -->
+    <div class="modal fade" id="agregarTerrenoModal" tabindex="-1" role="dialog" aria-labelledby="agregarTerrenoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="agregarTerrenoModalLabel">Agregar Terreno</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="terrenos.php" method="POST">
+                        <div class="form-group">
+                            <label for="nombre">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required>
                         </div>
-
-                    </div>
-
-                </div>
-                <!-- End of Page Content -->
-
-            </div>
-            <!-- End of Content Wrapper -->
-
-        </div>
-        <!-- End of Page Wrapper -->
-
-        <!-- Modal Agregar Terreno -->
-        <div class="modal fade" id="agregarTerrenoModal" tabindex="-1" role="dialog" aria-labelledby="agregarTerrenoModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="agregarTerrenoModalLabel">Agregar Terreno</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="add_terreno.php" method="POST">
-                            <div class="form-group">
-                                <label for="nombre">Nombre</label>
-                                <input type="text" class="form-control" id="nombre" name="nombre" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="ubicacion">Ubicación</label>
-                                <input type="text" class="form-control" id="ubicacion" name="ubicacion" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="tamano">Tamaño (m²)</label>
-                                <input type="number" class="form-control" id="tamano" name="tamano" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="estado">Estado</label>
-                                <select class="form-control" id="estado" name="estado" required>
-                                    <option value="activo">Activo</option>
-                                    <option value="inactivo">Inactivo</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="descripcion">Descripción</label>
-                                <textarea class="form-control" id="descripcion" name="descripcion"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Agregar Terreno</button>
-                        </form>
-                    </div>
+                        <div class="form-group">
+                            <label for="ubicacion">Ubicación</label>
+                            <input type="text" class="form-control" id="ubicacion" name="ubicacion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tamano">Tamaño (m²)</label>
+                            <input type="number" class="form-control" id="tamano" name="tamano" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="estado">Estado</label>
+                            <select class="form-control" id="estado" name="estado" required>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="descripcion">Descripción</label>
+                            <textarea class="form-control" id="descripcion" name="descripcion"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Agregar Terreno</button>
+                    </form>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Modal Editar Terreno -->
-        <div class="modal fade" id="editarTerrenoModal" tabindex="-1" role="dialog" aria-labelledby="editarTerrenoModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editarTerrenoModalLabel">Editar Terreno</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="update_terreno.php" method="POST">
-                            <input type="hidden" id="edit_id" name="id">
-                            <div class="form-group">
-                                <label for="edit_nombre">Nombre</label>
-                                <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="edit_ubicacion">Ubicación</label>
-                                <input type="text" class="form-control" id="edit_ubicacion" name="ubicacion" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="edit_tamano">Tamaño (m²)</label>
-                                <input type="number" class="form-control" id="edit_tamano" name="tamano" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="edit_estado">Estado</label>
-                                <select class="form-control" id="edit_estado" name="estado" required>
-                                    <option value="activo">Activo</option>
-                                    <option value="inactivo">Inactivo</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="edit_descripcion">Descripción</label>
-                                <textarea class="form-control" id="edit_descripcion" name="descripcion"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Actualizar Terreno</button>
-                        </form>
-                    </div>
+    <!-- Modal Editar Terreno -->
+    <div class="modal fade" id="editarTerrenoModal" tabindex="-1" role="dialog" aria-labelledby="editarTerrenoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editarTerrenoModalLabel">Editar Terreno</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="terrenos.php" method="POST">
+                        <input type="hidden" id="edit_id" name="id">
+                        <div class="form-group">
+                            <label for="edit_nombre">Nombre</label>
+                            <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_ubicacion">Ubicación</label>
+                            <input type="text" class="form-control" id="edit_ubicacion" name="ubicacion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_tamano">Tamaño (m²)</label>
+                            <input type="number" class="form-control" id="edit_tamano" name="tamano" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_estado">Estado</label>
+                            <select class="form-control" id="edit_estado" name="estado" required>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_descripcion">Descripción</label>
+                            <textarea class="form-control" id="edit_descripcion" name="descripcion"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Actualizar Terreno</button>
+                    </form>
                 </div>
             </div>
         </div>
+    </div>
+ 
 
         <!-- Scroll to Top Button-->
         <a class="scroll-to-top rounded" href="#page-top">

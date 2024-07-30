@@ -445,7 +445,7 @@ if ($_SESSION['rol'] === 'admin') {
                     <tr>
                         <th>Nombre</th>
                         <th>Ubicación</th>
-                        <th>Tamaño (m²)</th>
+                        <th>Tamaño (ha)</th>
                         <th>Estado</th>
                         <th>Descripción</th>
                         <?php if ($_SESSION['rol'] === 'admin'): ?>
@@ -505,7 +505,7 @@ if ($_SESSION['rol'] === 'admin') {
                             <input type="text" class="form-control" id="ubicacion" name="ubicacion" required>
                         </div>
                         <div class="form-group">
-                            <label for="tamano">Tamaño (m²)</label>
+                            <label for="tamano">Tamaño (ha)</label>
                             <input type="number" class="form-control" id="tamano" name="tamano" required>
                         </div>
                         <div class="form-group">
@@ -550,7 +550,7 @@ if ($_SESSION['rol'] === 'admin') {
                             <input type="text" class="form-control" id="edit_ubicacion" name="ubicacion" required>
                         </div>
                         <div class="form-group">
-                            <label for="edit_tamano">Tamaño (m²)</label>
+                            <label for="edit_tamano">Tamaño (ha)</label>
                             <input type="number" class="form-control" id="edit_tamano" name="tamano" required>
                         </div>
                         <div class="form-group">

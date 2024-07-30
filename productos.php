@@ -117,6 +117,32 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
     exit();
 }
 
+// Manejo de la agregación de variedades
+if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_POST['product_id']) && isset($_POST['variedad_nombre']) && isset($_POST['caracteristicas'])) {
+    $product_id = $_POST['product_id'];
+    $variedad = [
+        'nombre_variedad' => $_POST['variedad_nombre'],
+        'caracteristicas' => $_POST['caracteristicas']
+    ];
+
+    try {
+        $result = $productosCollection->updateOne(
+            ['_id' => new ObjectId($product_id)],
+            ['$push' => ['variedades' => $variedad]]
+        );
+        if ($result->getModifiedCount() > 0) {
+            $success[] = 'Variedad agregada exitosamente.';
+        } else {
+            $errors[] = 'No se pudo agregar la variedad.';
+        }
+    } catch (Exception $e) {
+        $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
+    }
+
+    header('Location: productos.php');
+    exit();
+}
+
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
 $total_tareas_pendientes = 0;
@@ -149,6 +175,7 @@ if ($_SESSION['rol'] === 'admin') {
 
 // Aquí comienza el HTML
 ?>
+
 
 
 

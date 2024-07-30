@@ -113,6 +113,42 @@ foreach ($productos as $producto) {
     error_log("Producto ID: " . $producto->_id);
 }
 
+
+
+// Agregar variedad
+if (isset($_POST['nombre']) && isset($_POST['caracteristicas']) && isset($_POST['product_id'])) {
+    $nombre_variedad = $_POST['nombre'];
+    $caracteristicas = $_POST['caracteristicas'];
+    $product_id = $_POST['product_id'];
+
+    $collection = $db->productos;
+    $collection->updateOne(
+        ['_id' => new MongoDB\BSON\ObjectId($product_id)],
+        ['$push' => ['variedades' => ['nombre_variedad' => $nombre_variedad, 'caracteristicas' => $caracteristicas]]]
+    );
+    header('Location: productos.php');
+    exit();
+}
+
+// Eliminar variedad
+if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
+    $product_id = $_GET['product_id'];
+    $variedad_nombre = $_GET['variedad_nombre'];
+
+    $collection = $db->productos;
+    $collection->updateOne(
+        ['_id' => new MongoDB\BSON\ObjectId($product_id)],
+        ['$pull' => ['variedades' => ['nombre_variedad' => $variedad_nombre]]]
+    );
+    header('Location: productos.php');
+    exit();
+}
+
+
+
+
+
+
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
 $total_tareas_pendientes = 0;

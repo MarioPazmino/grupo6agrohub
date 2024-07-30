@@ -1,8 +1,8 @@
 <?php
 session_start();
 
-// Verificar si el usuario está autenticado y tiene el rol de 'admin'
-if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['rol'])) {
     header("Location: index.php");
     exit();
 }
@@ -17,16 +17,12 @@ $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-eas
 $mongoClient = new Client($mongoUri);
 $collection = $mongoClient->grupo6_agrohub->terrenos;
 
-
-
-
-
 // Variables para mensajes de éxito y error
 $success = [];
 $errors = [];
 
-// Manejo del formulario de inserción de terreno
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
+// Manejo del formulario de inserción de terreno para administradores
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_SESSION['rol'] === 'admin') {
     try {
         if ($_POST['accion'] === 'insertar') {
             $nombre = $_POST['nombre'];
@@ -50,34 +46,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
     }
 }
 
-// Leer terrenos si el usuario es admin
+// Leer terrenos
 $terrenos = [];
 if ($_SESSION['rol'] === 'admin') {
     $terrenos = $collection->find()->toArray();
+} else if ($_SESSION['rol'] === 'empleado') {
+    // Opcional: Filtrar terrenos específicos para empleados, si es necesario
+    $terrenos = $collection->find()->toArray();
 }
 
+// Contar el número total de empleados y tareas si el usuario es admin
+$total_empleados = 0;
+$total_tareas_pendientes = 0;
+$total_tareas_proceso = 0;
+$total_tareas_completadas = 0;
 
+if ($_SESSION['rol'] === 'admin') {
+    $empleadosCollection = $mongoClient->grupo6_agrohub->empleados;
 
+    // Contar el número total de empleados
+    $total_empleados = $empleadosCollection->countDocuments(['rol' => 'empleado']);
 
+    // Contar el número de tareas pendientes, en proceso y completadas
+    $total_tareas_pendientes = $empleadosCollection->countDocuments([
+        'tareas_asignadas.estado' => 'pendiente'
+    ]);
 
-// Contar el número total de empleados
-$total_empleados = $collection->countDocuments(['rol' => 'empleado']);
+    $total_tareas_proceso = $empleadosCollection->countDocuments([
+        'tareas_asignadas.estado' => 'en_proceso'
+    ]);
 
-// Contar el número de tareas pendientes, en proceso y completadas
-$total_tareas_pendientes = $collection->countDocuments([
-    'tareas_asignadas.estado' => 'pendiente'
-]);
-
-$total_tareas_proceso = $collection->countDocuments([
-    'tareas_asignadas.estado' => 'en_proceso'
-]);
-
-$total_tareas_completadas = $collection->countDocuments([
-    'tareas_asignadas.estado' => 'completada'
-]);
+    $total_tareas_completadas = $empleadosCollection->countDocuments([
+        'tareas_asignadas.estado' => 'completada'
+    ]);
+}
 
 // Pasa estos valores a tu vista
-
 
 ?>
 

@@ -18,6 +18,34 @@ $mongoClient = new Client($mongoUri);
 $collection = $mongoClient->grupo6_agrohub->usuarios;
 
 
+
+
+
+
+
+
+
+
+
+// Contar el número total de empleados
+$total_empleados = $collection->countDocuments(['rol' => 'empleado']);
+
+// Contar el número de tareas pendientes, en proceso y completadas
+$total_tareas_pendientes = $collection->countDocuments([
+    'tareas_asignadas.estado' => 'pendiente'
+]);
+
+$total_tareas_proceso = $collection->countDocuments([
+    'tareas_asignadas.estado' => 'en_proceso'
+]);
+
+$total_tareas_completadas = $collection->countDocuments([
+    'tareas_asignadas.estado' => 'completada'
+]);
+
+// Pasa estos valores a tu vista
+
+
 ?>
 
 <!DOCTYPE html>

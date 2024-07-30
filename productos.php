@@ -700,13 +700,39 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
+
 <script>
     $('#variedadesModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);
+        var id = button.data('id');
         var variedades = button.data('variedades');
 
         var modal = $(this);
-        modal.find('#variedadesContent').text(JSON.stringify(variedades, null, 2));
+        var tbody = modal.find('#variedadesTableBody');
+        tbody.empty();
+
+        variedades.forEach(function(variedad) {
+            tbody.append(
+                '<tr>' +
+                '<td>' + variedad.nombre_variedad + '</td>' +
+                '<td>' + variedad.caracteristicas + '</td>' +
+                <?php if ($_SESSION['rol'] === 'admin'): ?>
+                '<td>' +
+                '<button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarVariedadModal" ' +
+                'data-id="' + variedad._id + '" ' +
+                'data-nombre_variedad="' + variedad.nombre_variedad + '" ' +
+                'data-caracteristicas="' + variedad.caracteristicas + '">' +
+                'Editar' +
+                '</button>' +
+                '<a href="?action=delete_variedad&id=' + variedad._id + '" class="btn btn-danger btn-sm" ' +
+                'onclick="return confirm(\'¿Estás seguro de que deseas eliminar esta variedad?\');">' +
+                'Eliminar' +
+                '</a>' +
+                '</td>' +
+                <?php endif; ?>
+                '</tr>'
+            );
+        });
     });
 
     $('#editarProductoModal').on('show.bs.modal', function (event) {
@@ -731,6 +757,51 @@ if ($_SESSION['rol'] === 'admin') {
 </script>
 
 
+
+                    
+<!-- Modal Agregar Producto -->
+<div class="modal fade" id="addProductoModal" tabindex="-1" role="dialog" aria-labelledby="addProductoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductoModalLabel">Agregar Producto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductoForm" action="productos.php" method="POST">
+                    <div class="form-group">
+                        <label for="producto_nombre">Nombre</label>
+                        <input type="text" class="form-control" id="producto_nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto_descripcion">Descripción</label>
+                        <textarea class="form-control" id="producto_descripcion" name="descripcion" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto_tipo">Tipo</label>
+                        <input type="text" class="form-control" id="producto_tipo" name="tipo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto_precio_unitario">Precio Unitario</label>
+                        <input type="number" step="0.01" class="form-control" id="producto_precio_unitario" name="precio_unitario" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto_unidad">Unidad</label>
+                        <input type="text" class="form-control" id="producto_unidad" name="unidad" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto_variedades">Variedades (JSON)</label>
+                        <textarea class="form-control" id="producto_variedades" name="variedades"></textarea>
+                        <small class="form-text text-muted">Introduzca variedades en formato JSON.</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Agregar Producto</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
         <!-- Scroll to Top Button-->
         <a class="scroll-to-top rounded" href="#page-top">

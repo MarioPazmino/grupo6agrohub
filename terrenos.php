@@ -55,14 +55,10 @@ if ($_SESSION['rol'] === 'admin') {
     $terrenos = $collection->find()->toArray();
 }
 
-// Contar el número total de empleados y tareas si el usuario es admin
-$total_empleados = 0;
-$total_tareas_pendientes = 0;
-$total_tareas_proceso = 0;
-$total_tareas_completadas = 0;
+
 
 if ($_SESSION['rol'] === 'admin') {
-    $empleadosCollection = $mongoClient->grupo6_agrohub->empleados;
+  
 
     // Contar el número total de empleados
     $total_empleados = $empleadosCollection->countDocuments(['rol' => 'empleado']);

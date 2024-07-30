@@ -528,7 +528,7 @@ $total_tareas_completadas = $collection->countDocuments([
                             </div>
                         </div>
                     <?php endif; ?>
-                </div>
+          
 
 
                                     

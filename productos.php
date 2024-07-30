@@ -450,8 +450,6 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
-
 <!-- Content Row -->
 <div class="row">
 
@@ -480,7 +478,7 @@ if ($_SESSION['rol'] === 'admin') {
                 </div>
                 <?php endif; ?>
 
-                <!-- Botón de agregar producto -->
+                <!-- Botón de agregar producto (solo para admin) -->
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#agregarProductoModal">
                     Agregar Producto
@@ -545,7 +543,8 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
-<!-- Modal Agregar Producto -->
+<!-- Modal Agregar Producto (solo para admin) -->
+<?php if ($_SESSION['rol'] === 'admin'): ?>
 <div class="modal fade" id="agregarProductoModal" tabindex="-1" role="dialog" aria-labelledby="agregarProductoModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -597,8 +596,10 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
+<?php endif; ?>
 
-<!-- Modal Editar Producto -->
+<!-- Modal Editar Producto (solo para admin) -->
+<?php if ($_SESSION['rol'] === 'admin'): ?>
 <div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -643,8 +644,7 @@ if ($_SESSION['rol'] === 'admin') {
                     </div>
                     <div class="form-group">
                         <label for="edit_variedades">Variedades (JSON)</label>
-                        <textarea class="form-control" id="edit_variedades" name="variedades" required></textarea>
-                        <small class="form-text text-muted">Introduce las variedades en formato JSON.</small>
+                        <textarea class="form-control" id="edit_variedades" name="variedades"></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                 </form>
@@ -652,137 +652,41 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
+<?php endif; ?>
 
-<!-- Modal Ver Variedades -->
+<!-- Modal Variedades -->
 <div class="modal fade" id="variedadesModal" tabindex="-1" role="dialog" aria-labelledby="variedadesModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="variedadesModalLabel">Variedades del Producto</h5>
+                <h5 class="modal-title" id="variedadesModalLabel">Variedades</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <ul id="variedadesList" class="list-group">
-                    <!-- Aquí se mostrarán las variedades -->
-                </ul>
-                <hr>
-                <h6>Agregar Nueva Variedad</h6>
-                <form id="addVariedadForm">
-                    <div class="form-group">
-                        <label for="nombreVariedad">Nombre de la Variedad:</label>
-                        <input type="text" class="form-control" id="nombreVariedad" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="caracteristicasVariedad">Características:</label>
-                        <textarea class="form-control" id="caracteristicasVariedad" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Agregar</button>
-                </form>
+                <div id="variedadesContent"></div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    let variedades = [];
-    let productoId = '';
-
-    function actualizarListaVariedades() {
-        const listElement = document.getElementById('variedadesList');
-        listElement.innerHTML = '';
-        variedades.forEach((variedad, index) => {
-            const li = document.createElement('li');
-            li.className = 'list-group-item d-flex justify-content-between align-items-center';
-            li.innerHTML = `
-                ${variedad.nombre_variedad} - ${variedad.caracteristicas}
-                <button type="button" class="btn btn-danger btn-sm" onclick="eliminarVariedad(${index})">Eliminar</button>
-            `;
-            listElement.appendChild(li);
-        });
-    }
-
-    document.getElementById('agregarVariedad').addEventListener('click', () => {
-        const nombre = document.getElementById('nuevaVariedadNombre').value.trim();
-        const caracteristicas = document.getElementById('nuevaVariedadCaracteristicas').value.trim();
-        if (nombre && caracteristicas) {
-            variedades.push({ nombre_variedad: nombre, caracteristicas: caracteristicas });
-            actualizarListaVariedades();
-            document.getElementById('nuevaVariedadNombre').value = '';
-            document.getElementById('nuevaVariedadCaracteristicas').value = '';
-        }
-    });
-
-    function eliminarVariedad(index) {
-        variedades.splice(index, 1);
-        actualizarListaVariedades();
-    }
-
-    document.getElementById('guardarVariedades').addEventListener('click', () => {
-        fetch('productos.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ id: productoId, variedades: variedades })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Variedades guardadas correctamente.');
-                $('#variedadesModal').modal('hide');
-            } else {
-                alert('Hubo un error al guardar las variedades.');
-            }
-        });
-    });
-
-    $('#variedadesModal').on('show.bs.modal', function (event) {
-        const button = $(event.relatedTarget);
-        productoId = button.data('id');
-        variedades = button.data('variedades') || [];
-        actualizarListaVariedades();
-    });
-</script>
-
-
-
-<script>
-    $('#variedadesModal').on('show.bs.modal', function (event) {
+document.addEventListener('DOMContentLoaded', function() {
+    $('#variedadesModal').on('show.bs.modal', function(event) {
         var button = $(event.relatedTarget);
-        var id = button.data('id');
         var variedades = button.data('variedades');
-
+        var id = button.data('id');
         var modal = $(this);
-        var tbody = modal.find('#variedadesTableBody');
-        tbody.empty();
-
+        var content = '<ul>';
         variedades.forEach(function(variedad) {
-            tbody.append(
-                '<tr>' +
-                '<td>' + variedad.nombre_variedad + '</td>' +
-                '<td>' + variedad.caracteristicas + '</td>' +
-                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                '<td>' +
-                '<button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarVariedadModal" ' +
-                'data-id="' + variedad._id + '" ' +
-                'data-nombre_variedad="' + variedad.nombre_variedad + '" ' +
-                'data-caracteristicas="' + variedad.caracteristicas + '">' +
-                'Editar' +
-                '</button>' +
-                '<a href="?action=delete_variedad&id=' + variedad._id + '" class="btn btn-danger btn-sm" ' +
-                'onclick="return confirm(\'¿Estás seguro de que deseas eliminar esta variedad?\');">' +
-                'Eliminar' +
-                '</a>' +
-                '</td>' +
-                <?php endif; ?>
-                '</tr>'
-            );
+            content += '<li>' + variedad + '</li>';
         });
+        content += '</ul>';
+        modal.find('#variedadesContent').html(content);
     });
 
-    $('#editarProductoModal').on('show.bs.modal', function (event) {
+    $('#editarProductoModal').on('show.bs.modal', function(event) {
         var button = $(event.relatedTarget);
         var id = button.data('id');
         var nombre = button.data('nombre');
@@ -791,64 +695,23 @@ if ($_SESSION['rol'] === 'admin') {
         var precio_unitario = button.data('precio_unitario');
         var unidad = button.data('unidad');
         var variedades = button.data('variedades');
-
         var modal = $(this);
+
         modal.find('#edit_id').val(id);
         modal.find('#edit_nombre').val(nombre);
         modal.find('#edit_descripcion').val(descripcion);
         modal.find('#edit_tipo').val(tipo);
         modal.find('#edit_precio_unitario').val(precio_unitario);
         modal.find('#edit_unidad').val(unidad);
-        modal.find('#edit_variedades').val(JSON.stringify(variedades, null, 2));
+        modal.find('#edit_variedades').val(JSON.stringify(variedades));
     });
+});
 </script>
 
 
 
+
                     
-<!-- Modal Agregar Producto -->
-<div class="modal fade" id="addProductoModal" tabindex="-1" role="dialog" aria-labelledby="addProductoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addProductoModalLabel">Agregar Producto</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="addProductoForm" action="productos.php" method="POST">
-                    <div class="form-group">
-                        <label for="producto_nombre">Nombre</label>
-                        <input type="text" class="form-control" id="producto_nombre" name="nombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="producto_descripcion">Descripción</label>
-                        <textarea class="form-control" id="producto_descripcion" name="descripcion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="producto_tipo">Tipo</label>
-                        <input type="text" class="form-control" id="producto_tipo" name="tipo" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="producto_precio_unitario">Precio Unitario</label>
-                        <input type="number" step="0.01" class="form-control" id="producto_precio_unitario" name="precio_unitario" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="producto_unidad">Unidad</label>
-                        <input type="text" class="form-control" id="producto_unidad" name="unidad" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="producto_variedades">Variedades (JSON)</label>
-                        <textarea class="form-control" id="producto_variedades" name="variedades"></textarea>
-                        <small class="form-text text-muted">Introduzca variedades en formato JSON.</small>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Agregar Producto</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
         <!-- Scroll to Top Button-->
         <a class="scroll-to-top rounded" href="#page-top">

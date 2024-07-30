@@ -458,24 +458,6 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 
 <?php else: ?>
-    <!-- Mostrar solo datos de usuario -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Perfil del Usuario</h6>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4 text-center">
-                    <img class="img-fluid rounded-circle" style="width: 150px;" src="assets/images/undraw_profile.svg" alt="Profile Image">
-                </div>
-                <div class="col-md-8">
-                    <p><strong>Nombre:</strong> <?php echo htmlspecialchars($_SESSION['nombre_usuario']); ?></p>
-                    <!-- Aquí puedes agregar más datos del perfil si es necesario -->
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Mostrar terrenos para empleados sin la opción de modificar -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">

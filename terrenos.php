@@ -279,159 +279,106 @@ if ($_SESSION['rol'] === 'admin') {
     <!-- Page Heading -->
     <h1 class="h3 mb-4 text-gray-800">Perfil Administrador</h1>
 
-
 <!-- Mostrar mensajes de error -->
-        <?php if (!empty($errors)): ?>
-            <div class="alert alert-danger notification">
-                <?php foreach ($errors as $error): ?>
-                    <p><?php echo $error; ?></p>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
+<?php if (!empty($errors)): ?>
+    <div class="alert alert-danger notification">
+        <?php foreach ($errors as $error): ?>
+            <p><?php echo $error; ?></p>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
 
-        <!-- Mostrar mensajes de éxito -->
-        <?php if (!empty($success)): ?>
-            <div class="alert alert-success notification">
-                <?php foreach ($success as $msg): ?>
-                    <p><?php echo $msg; ?></p>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    <?php if ($_SESSION['rol'] === 'admin'): ?>
-        <!-- Content Row -->
-        <div class="row">
+<!-- Mostrar mensajes de éxito -->
+<?php if (!empty($success)): ?>
+    <div class="alert alert-success notification">
+        <?php foreach ($success as $msg): ?>
+            <p><?php echo $msg; ?></p>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
 
-            <!-- Total Empleados Card -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-primary shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Total de Empleados</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_empleados; ?></div>
+<?php if ($_SESSION['rol'] === 'admin'): ?>
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- Total Empleados Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total de Empleados
                             </div>
-                            <div class="col-auto">
-                                <i class="fas fa-users fa-2x text-gray-300"></i>
-                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_empleados; ?></div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tareas Pendientes Card -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-warning shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                    Tareas Pendientes</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_tareas_pendientes; ?></div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-tasks fa-2x text-gray-300"></i>
-                            </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tareas En Proceso Card -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-info shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                    Tareas En Proceso</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_tareas_proceso; ?></div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-spinner fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tareas Completadas Card -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-success shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                    Tareas Completadas</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_tareas_completadas; ?></div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-check fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    <?php else: ?>
-        <!-- Perfil del Usuario (Visible para todos los roles, excepto admin) -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Datos del Perfil</h6>
-            </div>
-            <!-- Card Body - User Info -->
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 text-center">
-                        <img class="img-fluid rounded-circle" style="width: 150px;" src="assets/images/undraw_profile.svg" alt="Profile Image">
-                    </div>
-                    <div class="col-md-8">
-                        <form method="post" action="">
-                            <?php
-                            // Mostrar errores si existen
-                            if (!empty($errors)) {
-                                echo '<div class="alert alert-danger">';
-                                echo '<ul>';
-                                foreach ($errors as $error) {
-                                    echo "<li>$error</li>";
-                                }
-                                echo '</ul>';
-                                echo '</div>';
-                            }
-                            ?>
-                            <div class="form-group">
-                                <label for="nombre_usuario">Nombre de Usuario:</label>
-                                <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo htmlspecialchars($_SESSION['nombre_usuario']); ?>" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label for="nombre">Nombre:</label>
-                                <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($usuario['nombre']); ?>">
-                            </div>
-                            <div class="form-group">
-                                <label for="apellido">Apellido:</label>
-                                <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($usuario['apellido']); ?>">
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Email:</label>
-                                <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($usuario['email']); ?>">
-                            </div>
-                            <div class="form-group">
-                                <label for="telefono">Teléfono:</label>
-                                <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($usuario['telefono']); ?>">
-                            </div>
-                            <div class="form-group">
-                                <label for="cedula">Cédula:</label>
-                                <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo htmlspecialchars($usuario['cedula']); ?>">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Actualizar Perfil</button>
-                        </form>
                     </div>
                 </div>
             </div>
         </div>
-    <?php endif; ?>
 
+        <!-- Tareas Pendientes Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Tareas Pendientes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_tareas_pendientes; ?></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tareas En Proceso Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Tareas En Proceso
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_tareas_proceso; ?></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-spinner fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tareas Completadas Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Tareas Completadas
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_tareas_completadas; ?></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+<?php endif; ?>
 
 
 

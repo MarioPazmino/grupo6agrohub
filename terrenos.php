@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($result->getModifiedCount() > 0) {
                 $success[] = 'Terreno actualizado exitosamente.';
             } else {
-                $errors[] = 'No se encontró el terreno para actualizar.';
+                $errors[] = 'No se encontró el terreno para actualizar o no hubo cambios.';
             }
         } catch (Exception $e) {
             $errors[] = 'Error al actualizar el terreno: ' . $e->getMessage();
@@ -111,6 +111,9 @@ if ($_SESSION['rol'] === 'admin') {
     }
 }
 ?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 

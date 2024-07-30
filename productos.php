@@ -10,6 +10,7 @@ if (!isset($_SESSION['rol'])) {
 require __DIR__ . '/vendor/autoload.php';
 
 use MongoDB\Client;
+use MongoDB\BSON\ObjectId;
 use MongoDB\Exception\Exception;
 
 // Conexión a MongoDB con la URL proporcionada
@@ -28,7 +29,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     
     try {
         if (strlen($id) == 24 && ctype_xdigit($id)) {
-            $result = $productosCollection->deleteOne(['_id' => new MongoDB\BSON\ObjectId($id)]);
+            $result = $productosCollection->deleteOne(['_id' => new ObjectId($id)]);
             if ($result->getDeletedCount() > 0) {
                 $success[] = 'Producto eliminado exitosamente.';
             } else {
@@ -46,20 +47,27 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     exit();
 }
 
-// Manejo de la actualización de productos
+// Manejo de la actualización y agregación de productos
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    error_log('POST data: ' . print_r($_POST, true));
+
     if (isset($_POST['id'])) {
         // Actualizar producto
         try {
+            $variedades = json_decode($_POST['variedades'], true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new Exception('El formato JSON para variedades no es válido.');
+            }
+
             $result = $productosCollection->updateOne(
-                ['_id' => new MongoDB\BSON\ObjectId($_POST['id'])],
+                ['_id' => new ObjectId($_POST['id'])],
                 ['$set' => [
                     'nombre' => $_POST['nombre'],
                     'descripcion' => $_POST['descripcion'],
                     'tipo' => $_POST['tipo'],
-                    'precio_unitario' => $_POST['precio_unitario'],
+                    'precio_unitario' => floatval($_POST['precio_unitario']),
                     'unidad' => $_POST['unidad'],
-                    'variedades' => $_POST['variedades']
+                    'variedades' => $variedades
                 ]]
             );
             if ($result->getModifiedCount() > 0) {
@@ -73,16 +81,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Agregar producto
         try {
+            $variedades = json_decode($_POST['variedades'], true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new Exception('El formato JSON para variedades no es válido.');
+            }
+
             $result = $productosCollection->insertOne([
                 'nombre' => $_POST['nombre'],
                 'descripcion' => $_POST['descripcion'],
                 'tipo' => $_POST['tipo'],
-                'precio_unitario' => $_POST['precio_unitario'],
+                'precio_unitario' => floatval($_POST['precio_unitario']),
                 'unidad' => $_POST['unidad'],
-                'variedades' => $_POST['variedades']
+                'variedades' => $variedades
             ]);
             if ($result->getInsertedCount() > 0) {
                 $success[] = 'Producto agregado exitosamente.';
+            } else {
+                $errors[] = 'Error al agregar el producto.';
             }
         } catch (Exception $e) {
             $errors[] = 'Error al agregar el producto: ' . $e->getMessage();
@@ -106,15 +121,9 @@ $total_tareas_completadas = 0;
 
 if ($_SESSION['rol'] === 'admin') {
     try {
-        // Aquí puedes agregar la lógica para contar empleados y tareas como antes, pero usando la colección adecuada si es necesario.
-        // Este es un ejemplo de cómo podrías contar documentos si estuvieras trabajando con una colección similar
-        // a la de empleados que tenías antes.
-
-        // Contar el número total de empleados
         $usuariosCollection = $mongoClient->grupo6_agrohub->usuarios;
         $total_empleados = $usuariosCollection->countDocuments(['rol' => 'empleado']);
 
-        // Contar el número de tareas pendientes, en proceso y completadas
         $total_tareas_pendientes = $usuariosCollection->countDocuments([
             'rol' => 'empleado',
             'tareas_asignadas.estado' => 'pendiente'
@@ -133,8 +142,9 @@ if ($_SESSION['rol'] === 'admin') {
         $errors[] = 'Error al obtener información de empleados: ' . $e->getMessage();
     }
 }
-?>
 
+// Aquí comienza el HTML
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -331,182 +341,103 @@ if ($_SESSION['rol'] === 'admin') {
                 </nav>
                 <!-- End of Topbar -->
 
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
-
-                    <!-- Page Heading -->
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-                    </div>
-
-                 <!-- Content Row -->
-<div class="row">
-
-    <?php if ($_SESSION['rol'] === 'admin'): ?>
-    <!-- Total Productos -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Total Productos</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_productos; ?></div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-boxes fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
+    <!-- Begin Page Content -->
+    <div class="container-fluid">
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Productos</h1>
         </div>
-    </div>
 
-    <!-- Total Variedades -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Total Variedades</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_variedades; ?></div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-seedling fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Productos en Stock -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Productos en Stock</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $productos_en_stock; ?></div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-cubes fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Productos Agotados -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Productos Agotados</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $productos_agotados; ?></div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-ban fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
-
-</div>
-
-<!-- Content Row -->
-<div class="row">
-
-    <!-- Productos -->
-    <div class="col-lg-12">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Productos</h6>
-            </div>
-            <div class="card-body">
-
-                <!-- Mensajes de éxito y error -->
-                <?php if (!empty($success)): ?>
-                <div class="alert alert-success" role="alert">
-                    <?php foreach ($success as $message): ?>
+        <!-- Mensajes de éxito y error -->
+        <?php if (!empty($success)): ?>
+            <div class="alert alert-success" role="alert">
+                <?php foreach ($success as $message): ?>
                     <?php echo $message; ?><br>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
 
-                <?php if (!empty($errors)): ?>
-                <div class="alert alert-danger" role="alert">
-                    <?php foreach ($errors as $message): ?>
+        <?php if (!empty($errors)): ?>
+            <div class="alert alert-danger" role="alert">
+                <?php foreach ($errors as $message): ?>
                     <?php echo $message; ?><br>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
 
-                <!-- Botón de agregar producto -->
-                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#agregarProductoModal">
-                    Agregar Producto
-                </button>
-                <?php endif; ?>
+        <!-- Content Row -->
+        <div class="row">
+            <!-- Productos -->
+            <div class="col-lg-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Productos</h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- Botón de agregar producto -->
+                        <?php if ($_SESSION['rol'] === 'admin'): ?>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#agregarProductoModal">
+                                Agregar Producto
+                            </button>
+                        <?php endif; ?>
 
-                <!-- Tabla de productos -->
-                <div class="table-responsive mt-4">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Descripción</th>
-                                <th>Tipo</th>
-                                <th>Precio Unitario</th>
-                                <th>Unidad</th>
-                                <th>Variedades</th>
-                                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                                <th>Acciones</th>
-                                <?php endif; ?>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($productos as $producto): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($producto->nombre); ?></td>
-                                <td><?php echo htmlspecialchars($producto->descripcion); ?></td>
-                                <td><?php echo htmlspecialchars($producto->tipo); ?></td>
-                                <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
-                                <td><?php echo htmlspecialchars($producto->unidad); ?></td>
-                                <td>
-                                    <?php foreach ($producto->variedades as $variedad): ?>
-                                    <div><?php echo htmlspecialchars($variedad->nombre_variedad) . ': ' . htmlspecialchars($variedad->caracteristicas); ?></div>
+                        <!-- Tabla de productos -->
+                        <div class="table-responsive mt-4">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Descripción</th>
+                                        <th>Tipo</th>
+                                        <th>Precio Unitario</th>
+                                        <th>Unidad</th>
+                                        <th>Variedades</th>
+                                        <?php if ($_SESSION['rol'] === 'admin'): ?>
+                                            <th>Acciones</th>
+                                        <?php endif; ?>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($productos as $producto): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($producto->nombre); ?></td>
+                                            <td><?php echo htmlspecialchars($producto->descripcion); ?></td>
+                                            <td><?php echo htmlspecialchars($producto->tipo); ?></td>
+                                            <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
+                                            <td><?php echo htmlspecialchars($producto->unidad); ?></td>
+                                            <td>
+                                                <?php foreach ($producto->variedades as $variedad): ?>
+                                                    <div><?php echo htmlspecialchars($variedad->nombre_variedad) . ': ' . htmlspecialchars($variedad->caracteristicas); ?></div>
+                                                <?php endforeach; ?>
+                                            </td>
+                                            <?php if ($_SESSION['rol'] === 'admin'): ?>
+                                                <td>
+                                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarProductoModal"
+                                                            data-id="<?php echo $producto->_id; ?>"
+                                                            data-nombre="<?php echo htmlspecialchars($producto->nombre); ?>"
+                                                            data-descripcion="<?php echo htmlspecialchars($producto->descripcion); ?>"
+                                                            data-tipo="<?php echo htmlspecialchars($producto->tipo); ?>"
+                                                            data-precio="<?php echo htmlspecialchars($producto->precio_unitario); ?>"
+                                                            data-unidad="<?php echo htmlspecialchars($producto->unidad); ?>"
+                                                            data-variedades='<?php echo json_encode($producto->variedades); ?>'>
+                                                        Editar
+                                                    </button>
+                                                    <a href="?action=delete&id=<?php echo $producto->_id; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
+                                                        Eliminar
+                                                    </a>
+                                                </td>
+                                            <?php endif; ?>
+                                        </tr>
                                     <?php endforeach; ?>
-                                </td>
-                                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                                <td>
-                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarProductoModal"
-                                            data-id="<?php echo $producto->_id; ?>"
-                                            data-nombre="<?php echo htmlspecialchars($producto->nombre); ?>"
-                                            data-descripcion="<?php echo htmlspecialchars($producto->descripcion); ?>"
-                                            data-tipo="<?php echo htmlspecialchars($producto->tipo); ?>"
-                                            data-precio="<?php echo htmlspecialchars($producto->precio_unitario); ?>"
-                                            data-unidad="<?php echo htmlspecialchars($producto->unidad); ?>"
-                                            data-variedades='<?php echo json_encode($producto->variedades); ?>'>
-                                        Editar
-                                    </button>
-                                    <a href="?action=delete&id=<?php echo $producto->_id; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
-                                        Eliminar
-                                    </a>
-                                </td>
-                                <?php endif; ?>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <!-- /.container-fluid -->
 
     <!-- Modal Agregar Producto -->
     <div class="modal fade" id="agregarProductoModal" tabindex="-1" role="dialog" aria-labelledby="agregarProductoModalLabel" aria-hidden="true">
@@ -533,8 +464,8 @@ if ($_SESSION['rol'] === 'admin') {
                             <input type="text" class="form-control" id="tipo" name="tipo" required>
                         </div>
                         <div class="form-group">
-                            <label for="precio">Precio Unitario</label>
-                            <input type="number" step="0.01" class="form-control" id="precio" name="precio" required>
+                            <label for="precio_unitario">Precio Unitario</label>
+                            <input type="number" step="0.01" class="form-control" id="precio_unitario" name="precio_unitario" required>
                         </div>
                         <div class="form-group">
                             <label for="unidad">Unidad</label>
@@ -551,6 +482,8 @@ if ($_SESSION['rol'] === 'admin') {
             </div>
         </div>
     </div>
+
+
 
     <!-- Modal Editar Producto -->
     <div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">

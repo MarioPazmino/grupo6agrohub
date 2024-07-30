@@ -511,8 +511,10 @@ if ($_SESSION['rol'] === 'admin') {
                         <div class="form-group">
                             <label for="estado">Estado</label>
                             <select class="form-control" id="estado" name="estado" required>
-                                <option value="activo">Activo</option>
-                                <option value="inactivo">Inactivo</option>
+                                <option value="Activo">Activo</option>
+                                <option value="Ocupado">Ocupado</option>
+                                <option value="En Mantenimiento">En Mantenimiento</option>
+                                <option value="Desactivado">Desactivado</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -554,8 +556,10 @@ if ($_SESSION['rol'] === 'admin') {
                         <div class="form-group">
                             <label for="edit_estado">Estado</label>
                             <select class="form-control" id="edit_estado" name="estado" required>
-                                <option value="activo">Activo</option>
-                                <option value="inactivo">Inactivo</option>
+                                <option value="Activo">Activo</option>
+                                <option value="Ocupado">Ocupado</option>
+                                <option value="En Mantenimiento">En Mantenimiento</option>
+                                <option value="Desactivado">Desactivado</option>
                             </select>
                         </div>
                         <div class="form-group">

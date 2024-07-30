@@ -16,7 +16,7 @@ use MongoDB\Exception\Exception;
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
 $terrenosCollection = $mongoClient->grupo6_agrohub->terrenos;
-$empleadosCollection = $mongoClient->grupo6_agrohub->empleados;
+$usuariosCollection = $mongoClient->grupo6_agrohub->usuarios;
 
 // Variables para mensajes de éxito y error
 $success = [];
@@ -25,17 +25,26 @@ $errors = [];
 // Manejo de la eliminación de terrenos
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $id = $_GET['id'];
+    error_log("Intentando eliminar terreno con ID: " . $id);
     
     try {
-        $result = $terrenosCollection->deleteOne(['_id' => new MongoDB\BSON\ObjectId($id)]);
-        if ($result->getDeletedCount() > 0) {
-            $success[] = 'Terreno eliminado exitosamente.';
+        if (strlen($id) == 24 && ctype_xdigit($id)) {
+            $result = $terrenosCollection->deleteOne(['_id' => new MongoDB\BSON\ObjectId($id)]);
+            if ($result->getDeletedCount() > 0) {
+                $success[] = 'Terreno eliminado exitosamente.';
+            } else {
+                $errors[] = 'No se encontró el terreno para eliminar.';
+            }
         } else {
-            $errors[] = 'No se encontró el terreno para eliminar.';
+            $errors[] = 'ID de terreno inválido.';
         }
     } catch (Exception $e) {
         $errors[] = 'Error al eliminar el terreno: ' . $e->getMessage();
     }
+
+    // Redireccionar después de procesar la eliminación
+    header("Location: terrenos.php");
+    exit();
 }
 
 // Manejo de la actualización de terrenos
@@ -83,6 +92,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Obtener terrenos para mostrar en la tabla
 $terrenos = $terrenosCollection->find()->toArray();
 
+// Debug: Imprimir IDs de terrenos
+foreach ($terrenos as $terreno) {
+    error_log("Terreno ID: " . $terreno->_id);
+}
+
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
 $total_tareas_pendientes = 0;
@@ -92,18 +106,21 @@ $total_tareas_completadas = 0;
 if ($_SESSION['rol'] === 'admin') {
     try {
         // Contar el número total de empleados
-        $total_empleados = $empleadosCollection->countDocuments(['rol' => 'empleado']);
+        $total_empleados = $usuariosCollection->countDocuments(['rol' => 'empleado']);
 
         // Contar el número de tareas pendientes, en proceso y completadas
-        $total_tareas_pendientes = $empleadosCollection->countDocuments([
+        $total_tareas_pendientes = $usuariosCollection->countDocuments([
+            'rol' => 'empleado',
             'tareas_asignadas.estado' => 'pendiente'
         ]);
 
-        $total_tareas_proceso = $empleadosCollection->countDocuments([
+        $total_tareas_proceso = $usuariosCollection->countDocuments([
+            'rol' => 'empleado',
             'tareas_asignadas.estado' => 'en_proceso'
         ]);
 
-        $total_tareas_completadas = $empleadosCollection->countDocuments([
+        $total_tareas_completadas = $usuariosCollection->countDocuments([
+            'rol' => 'empleado',
             'tareas_asignadas.estado' => 'completada'
         ]);
     } catch (Exception $e) {
@@ -111,8 +128,6 @@ if ($_SESSION['rol'] === 'admin') {
     }
 }
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -457,9 +472,9 @@ if ($_SESSION['rol'] === 'admin') {
                                     data-descripcion="<?php echo htmlspecialchars($terreno->descripcion); ?>">
                                 Editar
                             </button>
-                            <a href="?action=delete&id=<?php echo $terreno->id; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este terreno?');">
-                                Eliminar
-                            </a>
+                           <a href="?action=delete&id=<?php echo $terreno->_id; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este terreno?');">
+    Eliminar
+</a>
                         </td>
                         <?php endif; ?>
                     </tr>

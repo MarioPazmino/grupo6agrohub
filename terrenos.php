@@ -384,14 +384,12 @@ if ($_SESSION['rol'] === 'admin') {
 <?php endif; ?>
 
 
-
-
 <?php if ($_SESSION['rol'] === 'admin'): ?>
     <!-- Contenedor para el formulario y la tabla en dos columnas -->
     <div class="container">
         <div class="row">
-            <!-- Formulario para agregar terrenos -->
-            <div class="col-md-6 mb-4">
+            <!-- Formulario para agregar terrenos en dos columnas -->
+            <div class="col-md-12 mb-4">
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Agregar Terreno</h6>
@@ -399,24 +397,28 @@ if ($_SESSION['rol'] === 'admin') {
                     <div class="card-body">
                         <form method="post" action="">
                             <input type="hidden" name="accion" value="insertar">
-                            <div class="form-group">
-                                <label for="nombre">Nombre:</label>
-                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="nombre">Nombre:</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="ubicacion">Ubicación:</label>
+                                    <input type="text" class="form-control" id="ubicacion" name="ubicacion" required>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="ubicacion">Ubicación:</label>
-                                <input type="text" class="form-control" id="ubicacion" name="ubicacion" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="tamano">Tamaño (hectáreas):</label>
-                                <input type="number" class="form-control" id="tamano" name="tamano" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="estado">Estado:</label>
-                                <select class="form-control" id="estado" name="estado" required>
-                                    <option value="disponible">Disponible</option>
-                                    <option value="ocupado">Ocupado</option>
-                                </select>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="tamano">Tamaño (hectáreas):</label>
+                                    <input type="number" class="form-control" id="tamano" name="tamano" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="estado">Estado:</label>
+                                    <select class="form-control" id="estado" name="estado" required>
+                                        <option value="disponible">Disponible</option>
+                                        <option value="ocupado">Ocupado</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="descripcion">Descripción:</label>
@@ -429,7 +431,7 @@ if ($_SESSION['rol'] === 'admin') {
             </div>
 
             <!-- Mostrar terrenos -->
-            <div class="col-md-6 mb-4">
+            <div class="col-md-12 mb-4">
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Terrenos Registrados</h6>
@@ -535,6 +537,7 @@ if ($_SESSION['rol'] === 'admin') {
             modal.find('#edit_descripcion').val(descripcion);
         });
     </script>
+
 
 
 

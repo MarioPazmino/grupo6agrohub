@@ -57,8 +57,14 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
+// Contar el número total de empleados y tareas si el usuario es admin
+$total_empleados = 0;
+$total_tareas_pendientes = 0;
+$total_tareas_proceso = 0;
+$total_tareas_completadas = 0;
+
 if ($_SESSION['rol'] === 'admin') {
-  
+    $empleadosCollection = $mongoClient->grupo6_agrohub->empleados;
 
     // Contar el número total de empleados
     $total_empleados = $empleadosCollection->countDocuments(['rol' => 'empleado']);
@@ -76,6 +82,7 @@ if ($_SESSION['rol'] === 'admin') {
         'tareas_asignadas.estado' => 'completada'
     ]);
 }
+
 
 // Pasa estos valores a tu vista
 
@@ -406,7 +413,7 @@ if ($_SESSION['rol'] === 'admin') {
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="tamano">Tamaño (hectáreas):</label>
-                                    <input type="number" class="form-control" id="tamano" name="tamano" required>
+                                    <input type="number" class="form-control" id="tamano" name="tamano" min="1" required>
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label for="estado">Estado:</label>
@@ -454,8 +461,26 @@ if ($_SESSION['rol'] === 'admin') {
                                             <td><?php echo htmlspecialchars($terreno->estado); ?></td>
                                             <td><?php echo htmlspecialchars($terreno->descripcion); ?></td>
                                             <td>
-                                                <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal" data-id="<?php echo htmlspecialchars($terreno->id); ?>" data-nombre="<?php echo htmlspecialchars($terreno->nombre); ?>" data-ubicacion="<?php echo htmlspecialchars($terreno->ubicacion); ?>" data-tamano="<?php echo htmlspecialchars($terreno->tamano); ?>" data-estado="<?php echo htmlspecialchars($terreno->estado); ?>" data-descripcion="<?php echo htmlspecialchars($terreno->descripcion); ?>">Editar</button>
-                                                <a href="delete_terreno.php?id=<?php echo htmlspecialchars($terreno->id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este terreno?');">Eliminar</a>
+                                                <!-- Botón de Editar con formulario -->
+                                                <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal" 
+                                                    data-id="<?php echo htmlspecialchars($terreno->id); ?>"
+                                                    data-nombre="<?php echo htmlspecialchars($terreno->nombre); ?>"
+                                                    data-ubicacion="<?php echo htmlspecialchars($terreno->ubicacion); ?>"
+                                                    data-tamano="<?php echo htmlspecialchars($terreno->tamano); ?>"
+                                                    data-estado="<?php echo htmlspecialchars($terreno->estado); ?>"
+                                                    data-descripcion="<?php echo htmlspecialchars($terreno->descripcion); ?>"
+                                                    title="Editar">
+                                                    <i class="fas fa-edit"></i> <!-- Icono de Editar -->
+                                                </button>
+
+                                                <!-- Botón de Eliminar con formulario -->
+                                                <form method="post" action="" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este terreno?');">
+                                                    <input type="hidden" name="accion" value="eliminar">
+                                                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($terreno->id); ?>">
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                        <i class="fas fa-trash-alt"></i> <!-- Icono de Eliminar -->
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -481,7 +506,7 @@ if ($_SESSION['rol'] === 'admin') {
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form method="post" action="update_terreno.php">
+                    <form method="post" action="">
                         <input type="hidden" name="accion" value="actualizar">
                         <input type="hidden" id="edit_id" name="id">
                         <div class="form-group">
@@ -494,7 +519,7 @@ if ($_SESSION['rol'] === 'admin') {
                         </div>
                         <div class="form-group">
                             <label for="edit_tamano">Tamaño (hectáreas):</label>
-                            <input type="number" class="form-control" id="edit_tamano" name="tamano" required>
+                            <input type="number" class="form-control" id="edit_tamano" name="tamano" min="1" required>
                         </div>
                         <div class="form-group">
                             <label for="edit_estado">Estado:</label>
@@ -533,6 +558,8 @@ if ($_SESSION['rol'] === 'admin') {
             modal.find('#edit_descripcion').val(descripcion);
         });
     </script>
+
+
 
 
 

@@ -380,7 +380,7 @@ $total_tareas_completadas = $collection->countDocuments([
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="user.php">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="admin.php">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-laugh-wink"></i>
                 </div>
@@ -612,6 +612,74 @@ $total_tareas_completadas = $collection->countDocuments([
 
         </div>
     <?php else: ?>
+        <!-- Perfil del Usuario (Visible para todos los roles, excepto admin) -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Datos del Perfil</h6>
+            </div>
+            <!-- Card Body - User Info -->
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <img class="img-fluid rounded-circle" style="width: 150px;" src="assets/images/undraw_profile.svg" alt="Profile Image">
+                    </div>
+                    <div class="col-md-8">
+                        <form method="post" action="">
+                            <?php
+                            // Mostrar errores si existen
+                            if (!empty($errors)) {
+                                echo '<div class="alert alert-danger">';
+                                echo '<ul>';
+                                foreach ($errors as $error) {
+                                    echo "<li>$error</li>";
+                                }
+                                echo '</ul>';
+                                echo '</div>';
+                            }
+                            ?>
+                            <div class="form-group">
+                                <label for="nombre_usuario">Nombre de Usuario:</label>
+                                <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="<?php echo htmlspecialchars($_SESSION['nombre_usuario']); ?>" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="nombre">Nombre:</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($usuario['nombre']); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="apellido">Apellido:</label>
+                                <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo htmlspecialchars($usuario['apellido']); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email:</label>
+                                <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($usuario['email']); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="telefono">Teléfono:</label>
+                                <input type="text" class="form-control" id="telefono" name="telefono" value="<?php echo htmlspecialchars($usuario['telefono']); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="cedula">Cédula:</label>
+                                <input type="text" class="form-control" id="cedula" name="cedula" value="<?php echo htmlspecialchars($usuario['cedula']); ?>">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Actualizar Perfil</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+
+
+
+
+
+
+    
+
+
+
+
 
 
                                     

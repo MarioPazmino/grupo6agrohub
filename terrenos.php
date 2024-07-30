@@ -10,50 +10,57 @@ if (!isset($_SESSION['rol'])) {
 require __DIR__ . '/vendor/autoload.php';
 
 use MongoDB\Client;
-use MongoDB\BSON\ObjectId;
+use MongoDB\Exception\Exception;
 
-// Conexión a MongoDB
+// Conexión a MongoDB con la URL proporcionada
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
 $terrenosCollection = $mongoClient->grupo6_agrohub->terrenos;
+$usuariosCollection = $mongoClient->grupo6_agrohub->usuarios;
 
-// Variables para mensajes
+// Variables para mensajes de éxito y error
 $success = [];
 $errors = [];
 
 // Manejo de la eliminación de terrenos
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $id = $_GET['id'];
+    error_log("Intentando eliminar terreno con ID: " . $id);
+    
     try {
-        $result = $terrenosCollection->deleteOne(['_id' => new ObjectId($id)]);
-        if ($result->getDeletedCount() > 0) {
-            $success[] = 'Terreno eliminado exitosamente.';
+        if (strlen($id) == 24 && ctype_xdigit($id)) {
+            $result = $terrenosCollection->deleteOne(['_id' => new MongoDB\BSON\ObjectId($id)]);
+            if ($result->getDeletedCount() > 0) {
+                $success[] = 'Terreno eliminado exitosamente.';
+            } else {
+                $errors[] = 'No se encontró el terreno para eliminar.';
+            }
         } else {
-            $errors[] = 'No se encontró el terreno para eliminar.';
+            $errors[] = 'ID de terreno inválido.';
         }
     } catch (Exception $e) {
         $errors[] = 'Error al eliminar el terreno: ' . $e->getMessage();
     }
+
+    // Redireccionar después de procesar la eliminación
     header("Location: terrenos.php");
     exit();
 }
 
-// Manejo de la actualización y creación de terrenos
+// Manejo de la actualización de terrenos
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $terrenoData = [
-        'nombre' => $_POST['nombre'],
-        'ubicacion' => $_POST['ubicacion'],
-        'tamano' => floatval($_POST['tamano']),  // Convertir a número
-        'estado' => $_POST['estado'],
-        'descripcion' => $_POST['descripcion']
-    ];
-
-    if (isset($_POST['id']) && !empty($_POST['id'])) {
+    if (isset($_POST['id'])) {
         // Actualizar terreno
         try {
             $result = $terrenosCollection->updateOne(
-                ['_id' => new ObjectId($_POST['id'])],
-                ['$set' => $terrenoData]
+                ['_id' => new MongoDB\BSON\ObjectId($_POST['id'])],
+                ['$set' => [
+                    'nombre' => $_POST['nombre'],
+                    'ubicacion' => $_POST['ubicacion'],
+                    'tamano' => $_POST['tamano'],
+                    'estado' => $_POST['estado'],
+                    'descripcion' => $_POST['descripcion']
+                ]]
             );
             if ($result->getModifiedCount() > 0) {
                 $success[] = 'Terreno actualizado exitosamente.';
@@ -66,8 +73,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Agregar terreno
         try {
-            $result = $terrenosCollection->insertOne($terrenoData);
-            if ($result->getInsertedId()) {
+            $result = $terrenosCollection->insertOne([
+                'nombre' => $_POST['nombre'],
+                'ubicacion' => $_POST['ubicacion'],
+                'tamano' => $_POST['tamano'],
+                'estado' => $_POST['estado'],
+                'descripcion' => $_POST['descripcion']
+            ]);
+            if ($result->getInsertedCount() > 0) {
                 $success[] = 'Terreno agregado exitosamente.';
             }
         } catch (Exception $e) {
@@ -115,6 +128,8 @@ if ($_SESSION['rol'] === 'admin') {
     }
 }
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">

@@ -1,108 +1,92 @@
 <?php
 session_start();
 
-// Conectar a la base de datos MongoDB
-require __DIR__ . '/vendor/autoload.php';
-
-use MongoDB\Client;
-use MongoDB\Exception\Exception;
-
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['rol'])) {
     header("Location: index.php");
     exit();
 }
 
+require __DIR__ . '/vendor/autoload.php';
+
+use MongoDB\Client;
+use MongoDB\Exception\Exception;
+
 // Conexión a MongoDB con la URL proporcionada
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
 $collection = $mongoClient->grupo6_agrohub->terrenos;
 
-// Función para obtener los terrenos
-function obtenerTerrenos($collection) {
-    return $collection->find()->toArray();
-}
-
-// Función para agregar un terreno
-function agregarTerreno($collection, $nombre, $ubicacion, $tamano, $estado, $descripcion) {
-    try {
-        $result = $collection->insertOne([
-            'nombre' => $nombre,
-            'ubicacion' => $ubicacion,
-            'tamano' => $tamano,
-            'estado' => $estado,
-            'descripcion' => $descripcion
-        ]);
-        return $result->getInsertedCount() > 0;
-    } catch (Exception $e) {
-        return false;
-    }
-}
-
-// Función para actualizar un terreno
-function actualizarTerreno($collection, $id, $nombre, $ubicacion, $tamano, $estado, $descripcion) {
-    try {
-        $result = $collection->updateOne(
-            ['_id' => new MongoDB\BSON\ObjectId($id)],
-            ['$set' => [
-                'nombre' => $nombre,
-                'ubicacion' => $ubicacion,
-                'tamano' => $tamano,
-                'estado' => $estado,
-                'descripcion' => $descripcion
-            ]]
-        );
-        return $result->getModifiedCount() > 0;
-    } catch (Exception $e) {
-        return false;
-    }
-}
-
-// Función para eliminar un terreno
-function eliminarTerreno($collection, $id) {
-    try {
-        $result = $collection->deleteOne(['_id' => new MongoDB\BSON\ObjectId($id)]);
-        return $result->getDeletedCount() > 0;
-    } catch (Exception $e) {
-        return false;
-    }
-}
-
-// Procesar solicitudes de formularios
+// Variables para mensajes de éxito y error
 $success = [];
 $errors = [];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
-        if ($_POST['action'] === 'add') {
-            // Agregar terreno
-            if (agregarTerreno($collection, $_POST['nombre'], $_POST['ubicacion'], $_POST['tamano'], $_POST['estado'], $_POST['descripcion'])) {
-                $success[] = 'Terreno agregado exitosamente.';
-            } else {
-                $errors[] = 'Error al agregar terreno.';
-            }
-        } elseif ($_POST['action'] === 'update') {
-            // Actualizar terreno
-            if (actualizarTerreno($collection, $_POST['id'], $_POST['nombre'], $_POST['ubicacion'], $_POST['tamano'], $_POST['estado'], $_POST['descripcion'])) {
-                $success[] = 'Terreno actualizado exitosamente.';
-            } else {
-                $errors[] = 'Error al actualizar terreno.';
-            }
+// Manejo del formulario de inserción de terreno para administradores
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_SESSION['rol'] === 'admin') {
+    try {
+        if ($_POST['accion'] === 'insertar') {
+            $nombre = $_POST['nombre'];
+            $ubicacion = $_POST['ubicacion'];
+            $tamano = (int)$_POST['tamano'];
+            $estado = $_POST['estado'];
+            $descripcion = $_POST['descripcion'];
+
+            $result = $collection->insertOne([
+                "nombre" => $nombre,
+                "ubicacion" => $ubicacion,
+                "tamano" => $tamano,
+                "estado" => $estado,
+                "descripcion" => $descripcion
+            ]);
+
+            $success[] = "Terreno agregado exitosamente.";
         }
-    }
-} elseif (isset($_GET['delete'])) {
-    // Eliminar terreno
-    if (eliminarTerreno($collection, $_GET['delete'])) {
-        $success[] = 'Terreno eliminado exitosamente.';
-    } else {
-        $errors[] = 'Error al eliminar terreno.';
+    } catch (Exception $e) {
+        $errors[] = "Error al agregar terreno: " . $e->getMessage();
     }
 }
 
-// Obtener terrenos
-$terrenos = obtenerTerrenos($collection);
-?>
+// Leer terrenos
+$terrenos = [];
+if ($_SESSION['rol'] === 'admin') {
+    $terrenos = $collection->find()->toArray();
+} else if ($_SESSION['rol'] === 'empleado') {
+    // Opcional: Filtrar terrenos específicos para empleados, si es necesario
+    $terrenos = $collection->find()->toArray();
+}
 
+
+
+// Contar el número total de empleados y tareas si el usuario es admin
+$total_empleados = 0;
+$total_tareas_pendientes = 0;
+$total_tareas_proceso = 0;
+$total_tareas_completadas = 0;
+
+if ($_SESSION['rol'] === 'admin') {
+    $empleadosCollection = $mongoClient->grupo6_agrohub->empleados;
+
+    // Contar el número total de empleados
+    $total_empleados = $empleadosCollection->countDocuments(['rol' => 'empleado']);
+
+    // Contar el número de tareas pendientes, en proceso y completadas
+    $total_tareas_pendientes = $empleadosCollection->countDocuments([
+        'tareas_asignadas.estado' => 'pendiente'
+    ]);
+
+    $total_tareas_proceso = $empleadosCollection->countDocuments([
+        'tareas_asignadas.estado' => 'en_proceso'
+    ]);
+
+    $total_tareas_completadas = $empleadosCollection->countDocuments([
+        'tareas_asignadas.estado' => 'completada'
+    ]);
+}
+
+
+// Pasa estos valores a tu vista
+
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -152,13 +136,82 @@ $terrenos = obtenerTerrenos($collection);
         }
     </style>
 </head>
+
 <body id="page-top">
 
     <!-- Page Wrapper -->
     <div id="wrapper">
 
         <!-- Sidebar -->
-        <!-- (Aquí iría tu código de la barra lateral) -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="admin.php">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-laugh-wink"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">Agro HUB  <sup></sup></div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item active">
+                <a class="nav-link" href="admin.php">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span></a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Interface
+            </div>
+
+            <!-- Nav Item - Pages Collapse Menu -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
+                    aria-expanded="true" aria-controls="collapseTwo">
+                    <i class="fas fa-fw fa-tractor"></i>
+                    <span>Agrícola</span>
+                </a>
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Mi granja:</h6>
+                        <a class="collapse-item" href="terrenos.php">Terrenos</a>
+                        <a class="collapse-item" href="productos.php">Productos</a>
+                        <a class="collapse-item" href="sembrio.php">Sembríos</a>
+                        <a class="collapse-item" href="cosechas.php">Cosechas</a>
+                    </div>
+                </div>
+            </li>
+
+           
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+                             <!-- Nav Item - Charts -->
+                             <li class="nav-item">
+                <a class="nav-link" href="ventas.php">
+                    <i class="fas fa-fw fa-cart-plus"></i>
+                    <span>Ventas</span></a>
+            </li>
+
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+
+          
+        </ul>
+        <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
@@ -167,271 +220,438 @@ $terrenos = obtenerTerrenos($collection);
             <div id="content">
 
                 <!-- Topbar -->
-                <!-- (Aquí iría tu código de la barra superior) -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
 
-                    <!-- Page Heading -->
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-                    </div>
+                  
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
 
-                    <!-- Content Row -->
-                    <div class="row">
+                        
 
-                        <?php if ($_SESSION['rol'] === 'admin'): ?>
-                        <!-- Total Empleados -->
-                        <!-- (Aquí irían las tarjetas para mostrar estadísticas) -->
-                        <?php endif; ?>
+                       
 
-                    </div>
+                        <div class="topbar-divider d-none d-sm-block"></div>
 
-                    <!-- Content Row -->
-                    <div class="row">
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($_SESSION['nombre_usuario']); ?></span>
 
-                        <!-- Terrenos -->
-                        <div class="col-lg-12">
-                            <div class="card shadow mb-4">
-                                <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Terrenos</h6>
-                                </div>
-                                <div class="card-body">
+                                <img class="img-profile rounded-circle"
+                                    src="assets/images/undraw_profile.svg">
+                            </a>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="user.php">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Profile
+                                </a>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Settings
+                                </a>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Activity Log
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="logout.php">
+    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+    Salir
+</a>
 
-                                    <!-- Mensajes de éxito y error -->
-                                    <?php if (!empty($success)): ?>
-                                    <div class="alert alert-success" role="alert">
-                                        <?php foreach ($success as $message): ?>
-                                        <?php echo $message; ?><br>
-                                        <?php endforeach; ?>
-                                    </div>
-                                    <?php endif; ?>
-
-                                    <?php if (!empty($errors)): ?>
-                                    <div class="alert alert-danger" role="alert">
-                                        <?php foreach ($errors as $message): ?>
-                                        <?php echo $message; ?><br>
-                                        <?php endforeach; ?>
-                                    </div>
-                                    <?php endif; ?>
-
-                                    <!-- Botón de agregar terreno -->
-                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#agregarTerrenoModal">
-                                        Agregar Terreno
-                                    </button>
-                                    <?php endif; ?>
-
-                                    <!-- Tabla de terrenos -->
-                                    <div class="table-responsive mt-4">
-                                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Nombre</th>
-                                                    <th>Ubicación</th>
-                                                    <th>Tamaño (m²)</th>
-                                                    <th>Estado</th>
-                                                    <th>Descripción</th>
-                                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
-                                                    <th>Acciones</th>
-                                                    <?php endif; ?>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php foreach ($terrenos as $terreno): ?>
-                                                <tr>
-                                                    <td><?php echo htmlspecialchars($terreno->nombre); ?></td>
-                                                    <td><?php echo htmlspecialchars($terreno->ubicacion); ?></td>
-                                                    <td><?php echo htmlspecialchars($terreno->tamano); ?></td>
-                                                    <td class="<?php echo $terreno->estado === 'activo' ? 'text-success' : 'text-danger'; ?>">
-                                                        <?php echo htmlspecialchars($terreno->estado); ?>
-                                                    </td>
-                                                    <td><?php echo htmlspecialchars($terreno->descripcion); ?></td>
-                                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
-                                                    <td>
-                                                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarTerrenoModal" 
-                                                                data-id="<?php echo $terreno->id; ?>"
-                                                                data-nombre="<?php echo htmlspecialchars($terreno->nombre); ?>"
-                                                                data-ubicacion="<?php echo htmlspecialchars($terreno->ubicacion); ?>"
-                                                                data-tamano="<?php echo htmlspecialchars($terreno->tamano); ?>"
-                                                                data-estado="<?php echo htmlspecialchars($terreno->estado); ?>"
-                                                                data-descripcion="<?php echo htmlspecialchars($terreno->descripcion); ?>">
-                                                            Editar
-                                                        </button>
-                                                        <a href="?delete=<?php echo $terreno->id; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este terreno?');">
-                                                            Eliminar
-                                                        </a>
-                                                    </td>
-                                                    <?php endif; ?>
-                                                </tr>
-                                                <?php endforeach; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
                             </div>
+                        </li>
+
+                    </ul>
+
+                </nav>
+                <!-- End of Topbar -->
+
+                
+
+  <!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+   
+<h1 class="h3 mb-4 text-gray-800">
+    <?php echo ($_SESSION['rol'] === 'admin') ? 'Perfil Administrador' : 'Perfil de Empleado'; ?>
+</h1>
+
+<!-- Mostrar mensajes de error -->
+<?php if (!empty($errors)): ?>
+    <div class="alert alert-danger notification">
+        <?php foreach ($errors as $error): ?>
+            <p><?php echo $error; ?></p>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
+
+<!-- Mostrar mensajes de éxito -->
+<?php if (!empty($success)): ?>
+    <div class="alert alert-success notification">
+        <?php foreach ($success as $msg): ?>
+            <p><?php echo $msg; ?></p>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
+
+<?php if ($_SESSION['rol'] === 'admin'): ?>
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- Total Empleados Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total de Empleados
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_empleados; ?></div>
                         </div>
-
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
                     </div>
-
                 </div>
-                <!-- End of Page Content -->
-
             </div>
-            <!-- End of Content Wrapper -->
-
         </div>
-        <!-- End of Page Wrapper -->
 
-        <!-- Modal Agregar Terreno -->
-        <div class="modal fade" id="agregarTerrenoModal" tabindex="-1" role="dialog" aria-labelledby="agregarTerrenoModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="agregarTerrenoModalLabel">Agregar Terreno</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+        <!-- Tareas Pendientes Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Tareas Pendientes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_tareas_pendientes; ?></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <form action="" method="POST">
-                            <input type="hidden" name="action" value="add">
-                            <div class="form-group">
-                                <label for="nombre">Nombre</label>
-                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tareas En Proceso Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Tareas En Proceso
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_tareas_proceso; ?></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-spinner fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tareas Completadas Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Tareas Completadas
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_tareas_completadas; ?></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+<?php endif; ?>
+
+
+<?php if ($_SESSION['rol'] === 'admin'): ?>
+    <!-- Contenedor para el formulario y la tabla en dos columnas -->
+    <div class="container">
+        <div class="row">
+            <!-- Formulario para agregar terrenos en dos columnas -->
+            <div class="col-md-12 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Agregar Terreno</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="">
+                            <input type="hidden" name="accion" value="insertar">
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="nombre">Nombre:</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="ubicacion">Ubicación:</label>
+                                    <input type="text" class="form-control" id="ubicacion" name="ubicacion" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="tamano">Tamaño (hectáreas):</label>
+                                    <input type="number" class="form-control" id="tamano" name="tamano" min="1" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="estado">Estado:</label>
+                                    <select class="form-control" id="estado" name="estado" required>
+                                        <option value="disponible">Disponible</option>
+                                        <option value="ocupado">Ocupado</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="form-group">
-                                <label for="ubicacion">Ubicación</label>
-                                <input type="text" class="form-control" id="ubicacion" name="ubicacion" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="tamano">Tamaño (m²)</label>
-                                <input type="number" class="form-control" id="tamano" name="tamano" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="estado">Estado</label>
-                                <select class="form-control" id="estado" name="estado" required>
-                                    <option value="activo">Activo</option>
-                                    <option value="inactivo">Inactivo</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="descripcion">Descripción</label>
-                                <textarea class="form-control" id="descripcion" name="descripcion"></textarea>
+                                <label for="descripcion">Descripción:</label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="3"></textarea>
                             </div>
                             <button type="submit" class="btn btn-primary">Agregar Terreno</button>
                         </form>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Modal Editar Terreno -->
-        <div class="modal fade" id="editarTerrenoModal" tabindex="-1" role="dialog" aria-labelledby="editarTerrenoModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editarTerrenoModalLabel">Editar Terreno</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+            <!-- Mostrar terrenos -->
+            <div class="col-md-12 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Terrenos Registrados</h6>
                     </div>
-                    <div class="modal-body">
-                        <form action="" method="POST">
-                            <input type="hidden" name="action" value="update">
-                            <input type="hidden" id="edit_id" name="id">
-                            <div class="form-group">
-                                <label for="edit_nombre">Nombre</label>
-                                <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="edit_ubicacion">Ubicación</label>
-                                <input type="text" class="form-control" id="edit_ubicacion" name="ubicacion" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="edit_tamano">Tamaño (m²)</label>
-                                <input type="number" class="form-control" id="edit_tamano" name="tamano" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="edit_estado">Estado</label>
-                                <select class="form-control" id="edit_estado" name="estado" required>
-                                    <option value="activo">Activo</option>
-                                    <option value="inactivo">Inactivo</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="edit_descripcion">Descripción</label>
-                                <textarea class="form-control" id="edit_descripcion" name="descripcion"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Actualizar Terreno</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    <div class="card-body">
+                        <?php if (!empty($terrenos)): ?>
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Ubicación</th>
+                                        <th>Tamaño</th>
+                                        <th>Estado</th>
+                                        <th>Descripción</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($terrenos as $terreno): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($terreno->nombre); ?></td>
+                                            <td><?php echo htmlspecialchars($terreno->ubicacion); ?></td>
+                                            <td><?php echo htmlspecialchars($terreno->tamano); ?></td>
+                                            <td><?php echo htmlspecialchars($terreno->estado); ?></td>
+                                            <td><?php echo htmlspecialchars($terreno->descripcion); ?></td>
+                                            <td>
+                                                <!-- Botón de Editar con formulario -->
+                                                <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal" 
+                                                    data-id="<?php echo htmlspecialchars($terreno->id); ?>"
+                                                    data-nombre="<?php echo htmlspecialchars($terreno->nombre); ?>"
+                                                    data-ubicacion="<?php echo htmlspecialchars($terreno->ubicacion); ?>"
+                                                    data-tamano="<?php echo htmlspecialchars($terreno->tamano); ?>"
+                                                    data-estado="<?php echo htmlspecialchars($terreno->estado); ?>"
+                                                    data-descripcion="<?php echo htmlspecialchars($terreno->descripcion); ?>"
+                                                    title="Editar">
+                                                    <i class="fas fa-edit"></i> <!-- Icono de Editar -->
+                                                </button>
 
-        <!-- Scroll to Top Button-->
-        <a class="scroll-to-top rounded" href="#page-top">
-            <i class="fas fa-angle-up"></i>
-        </a>
-
-        <!-- Logout Modal-->
-        <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="logoutModalLabel">¿Está seguro de que quiere salir?</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">Selecciona "Cerrar sesión" si estás listo para terminar la sesión actual.</div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <a class="btn btn-primary" href="logout.php">Cerrar sesión</a>
+                                                <!-- Botón de Eliminar con formulario -->
+                                                <form method="post" action="" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este terreno?');">
+                                                    <input type="hidden" name="accion" value="eliminar">
+                                                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($terreno->id); ?>">
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                        <i class="fas fa-trash-alt"></i> <!-- Icono de Eliminar -->
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php else: ?>
+                            <p>No hay terrenos registrados.</p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Bootstrap core JavaScript-->
-        <script src="vendor/jquery/jquery.min.js"></script>
-        <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Modal para editar terreno -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Editar Terreno</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="">
+                        <input type="hidden" name="accion" value="actualizar">
+                        <input type="hidden" id="edit_id" name="id">
+                        <div class="form-group">
+                            <label for="edit_nombre">Nombre:</label>
+                            <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_ubicacion">Ubicación:</label>
+                            <input type="text" class="form-control" id="edit_ubicacion" name="ubicacion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_tamano">Tamaño (hectáreas):</label>
+                            <input type="number" class="form-control" id="edit_tamano" name="tamano" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_estado">Estado:</label>
+                            <select class="form-control" id="edit_estado" name="estado" required>
+                                <option value="disponible">Disponible</option>
+                                <option value="ocupado">Ocupado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_descripcion">Descripción:</label>
+                            <textarea class="form-control" id="edit_descripcion" name="descripcion" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Actualizar Terreno</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <!-- Core plugin JavaScript-->
-        <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script>
+        $('#editModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var id = button.data('id'); // Extract info from data-* attributes
+            var nombre = button.data('nombre');
+            var ubicacion = button.data('ubicacion');
+            var tamano = button.data('tamano');
+            var estado = button.data('estado');
+            var descripcion = button.data('descripcion');
 
-        <!-- Custom scripts for all pages-->
-        <script src="js/sb-admin-2.min.js"></script>
+            var modal = $(this);
+            modal.find('#edit_id').val(id);
+            modal.find('#edit_nombre').val(nombre);
+            modal.find('#edit_ubicacion').val(ubicacion);
+            modal.find('#edit_tamano').val(tamano);
+            modal.find('#edit_estado').val(estado);
+            modal.find('#edit_descripcion').val(descripcion);
+        });
+    </script>
 
-        <!-- Page level plugins -->
-        <script src="vendor/datatables/jquery.dataTables.min.js"></script>
-        <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
-        <!-- Page level custom scripts -->
-        <script src="js/demo/datatables-demo.js"></script>
 
-        <!-- Scripts para modales -->
-        <script>
-            $('#editarTerrenoModal').on('show.bs.modal', function (event) {
-                var button = $(event.relatedTarget) // Button that triggered the modal
-                var id = button.data('id')
-                var nombre = button.data('nombre')
-                var ubicacion = button.data('ubicacion')
-                var tamano = button.data('tamano')
-                var estado = button.data('estado')
-                var descripcion = button.data('descripcion')
 
-                var modal = $(this)
-                modal.find('.modal-body #edit_id').val(id)
-                modal.find('.modal-body #edit_nombre').val(nombre)
-                modal.find('.modal-body #edit_ubicacion').val(ubicacion)
-                modal.find('.modal-body #edit_tamano').val(tamano)
-                modal.find('.modal-body #edit_estado').val(estado)
-                modal.find('.modal-body #edit_descripcion').val(descripcion)
-            })
-        </script>
-   <!-- Bootstrap core JavaScript-->
+
+
+<?php else: ?>
+    <!-- Mostrar terrenos para empleados sin la opción de modificar -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Terrenos Disponibles</h6>
+        </div>
+        <div class="card-body">
+            <?php if (!empty($terrenos)): ?>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Ubicación</th>
+                            <th>Tamaño</th>
+                            <th>Estado</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($terrenos as $terreno): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($terreno->nombre); ?></td>
+                                <td><?php echo htmlspecialchars($terreno->ubicacion); ?></td>
+                                <td><?php echo htmlspecialchars($terreno->tamano); ?></td>
+                                <td><?php echo htmlspecialchars($terreno->estado); ?></td>
+                                <td><?php echo htmlspecialchars($terreno->descripcion); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php else: ?>
+                <p>No hay terrenos registrados.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+
+<?php endif; ?>
+
+
+                                    
+                </div>
+                <!-- /.container-fluid -->
+            </div>
+            <!-- End of Main Content -->
+    
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; AgroHUB 2024</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="login.html">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 

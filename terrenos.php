@@ -15,7 +15,8 @@ use MongoDB\Exception\Exception;
 // Conexión a MongoDB con la URL proporcionada
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
-$collection = $mongoClient->grupo6_agrohub->terrenos;
+$terrenosCollection = $mongoClient->grupo6_agrohub->terrenos;
+$empleadosCollection = $mongoClient->grupo6_agrohub->empleados;
 
 // Variables para mensajes de éxito y error
 $success = [];
@@ -24,53 +25,63 @@ $errors = [];
 // Manejo de la eliminación de terrenos
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $id = $_GET['id'];
-    $query = 'DELETE FROM terrenos WHERE id = :id';
-    $stmt = $pdo->prepare($query);
-    $stmt->execute(['id' => $id]);
-
-    $success[] = 'Terreno eliminado exitosamente.';
+    
+    try {
+        $result = $terrenosCollection->deleteOne(['_id' => new MongoDB\BSON\ObjectId($id)]);
+        if ($result->getDeletedCount() > 0) {
+            $success[] = 'Terreno eliminado exitosamente.';
+        } else {
+            $errors[] = 'No se encontró el terreno para eliminar.';
+        }
+    } catch (Exception $e) {
+        $errors[] = 'Error al eliminar el terreno: ' . $e->getMessage();
+    }
 }
 
 // Manejo de la actualización de terrenos
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['id'])) {
         // Actualizar terreno
-        $query = 'UPDATE terrenos SET nombre = :nombre, ubicacion = :ubicacion, tamano = :tamano, estado = :estado, descripcion = :descripcion WHERE id = :id';
-        $stmt = $pdo->prepare($query);
-        $stmt->execute([
-            'id' => $_POST['id'],
-            'nombre' => $_POST['nombre'],
-            'ubicacion' => $_POST['ubicacion'],
-            'tamano' => $_POST['tamano'],
-            'estado' => $_POST['estado'],
-            'descripcion' => $_POST['descripcion']
-        ]);
-
-        $success[] = 'Terreno actualizado exitosamente.';
+        try {
+            $result = $terrenosCollection->updateOne(
+                ['_id' => new MongoDB\BSON\ObjectId($_POST['id'])],
+                ['$set' => [
+                    'nombre' => $_POST['nombre'],
+                    'ubicacion' => $_POST['ubicacion'],
+                    'tamano' => $_POST['tamano'],
+                    'estado' => $_POST['estado'],
+                    'descripcion' => $_POST['descripcion']
+                ]]
+            );
+            if ($result->getModifiedCount() > 0) {
+                $success[] = 'Terreno actualizado exitosamente.';
+            } else {
+                $errors[] = 'No se encontró el terreno para actualizar.';
+            }
+        } catch (Exception $e) {
+            $errors[] = 'Error al actualizar el terreno: ' . $e->getMessage();
+        }
     } else {
         // Agregar terreno
-        $query = 'INSERT INTO terrenos (nombre, ubicacion, tamano, estado, descripcion) VALUES (:nombre, :ubicacion, :tamano, :estado, :descripcion)';
-        $stmt = $pdo->prepare($query);
-        $stmt->execute([
-            'nombre' => $_POST['nombre'],
-            'ubicacion' => $_POST['ubicacion'],
-            'tamano' => $_POST['tamano'],
-            'estado' => $_POST['estado'],
-            'descripcion' => $_POST['descripcion']
-        ]);
-
-        $success[] = 'Terreno agregado exitosamente.';
+        try {
+            $result = $terrenosCollection->insertOne([
+                'nombre' => $_POST['nombre'],
+                'ubicacion' => $_POST['ubicacion'],
+                'tamano' => $_POST['tamano'],
+                'estado' => $_POST['estado'],
+                'descripcion' => $_POST['descripcion']
+            ]);
+            if ($result->getInsertedCount() > 0) {
+                $success[] = 'Terreno agregado exitosamente.';
+            }
+        } catch (Exception $e) {
+            $errors[] = 'Error al agregar el terreno: ' . $e->getMessage();
+        }
     }
 }
 
 // Obtener terrenos para mostrar en la tabla
-$query = 'SELECT * FROM terrenos';
-$statement = $pdo->query($query);
-$terrenos = $statement->fetchAll(PDO::FETCH_OBJ);
-
-
-
-
+$terrenos = $terrenosCollection->find()->toArray();
 
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
@@ -79,26 +90,27 @@ $total_tareas_proceso = 0;
 $total_tareas_completadas = 0;
 
 if ($_SESSION['rol'] === 'admin') {
-    $empleadosCollection = $mongoClient->grupo6_agrohub->empleados;
+    try {
+        // Contar el número total de empleados
+        $total_empleados = $empleadosCollection->countDocuments(['rol' => 'empleado']);
 
-    // Contar el número total de empleados
-    $total_empleados = $empleadosCollection->countDocuments(['rol' => 'empleado']);
+        // Contar el número de tareas pendientes, en proceso y completadas
+        $total_tareas_pendientes = $empleadosCollection->countDocuments([
+            'tareas_asignadas.estado' => 'pendiente'
+        ]);
 
-    // Contar el número de tareas pendientes, en proceso y completadas
-    $total_tareas_pendientes = $empleadosCollection->countDocuments([
-        'tareas_asignadas.estado' => 'pendiente'
-    ]);
+        $total_tareas_proceso = $empleadosCollection->countDocuments([
+            'tareas_asignadas.estado' => 'en_proceso'
+        ]);
 
-    $total_tareas_proceso = $empleadosCollection->countDocuments([
-        'tareas_asignadas.estado' => 'en_proceso'
-    ]);
-
-    $total_tareas_completadas = $empleadosCollection->countDocuments([
-        'tareas_asignadas.estado' => 'completada'
-    ]);
+        $total_tareas_completadas = $empleadosCollection->countDocuments([
+            'tareas_asignadas.estado' => 'completada'
+        ]);
+    } catch (Exception $e) {
+        $errors[] = 'Error al obtener información de empleados: ' . $e->getMessage();
+    }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 

@@ -694,11 +694,82 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-                <pre id="variedadesContent"></pre>
+                <form id="variedadesForm">
+                    <div class="form-group">
+                        <label for="nuevaVariedad">Nueva Variedad</label>
+                        <input type="text" class="form-control" id="nuevaVariedad" placeholder="Ingrese variedad" required>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="agregarVariedad">Agregar Variedad</button>
+                </form>
+                <ul class="list-group mt-3" id="variedadesList">
+                    <!-- La lista de variedades se llenará dinámicamente aquí -->
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="guardarVariedades">Guardar Cambios</button>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Variables globales
+    let variedades = [];
+
+    // Función para actualizar la lista de variedades en el modal
+    function actualizarListaVariedades() {
+        const listElement = document.getElementById('variedadesList');
+        listElement.innerHTML = ''; // Limpiar la lista actual
+        variedades.forEach((variedad, index) => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.innerHTML = `
+                ${variedad}
+                <button type="button" class="btn btn-danger btn-sm" onclick="eliminarVariedad(${index})">Eliminar</button>
+            `;
+            listElement.appendChild(li);
+        });
+    }
+
+    // Agregar variedad a la lista
+    document.getElementById('agregarVariedad').addEventListener('click', () => {
+        const nuevaVariedad = document.getElementById('nuevaVariedad').value.trim();
+        if (nuevaVariedad) {
+            variedades.push(nuevaVariedad);
+            actualizarListaVariedades();
+            document.getElementById('nuevaVariedad').value = ''; // Limpiar el campo de entrada
+        }
+    });
+
+    // Eliminar variedad de la lista
+    function eliminarVariedad(index) {
+        variedades.splice(index, 1);
+        actualizarListaVariedades();
+    }
+
+    // Guardar variedades al cerrar el modal
+    document.getElementById('guardarVariedades').addEventListener('click', () => {
+        // Enviar las variedades al servidor o realizar las acciones necesarias
+        console.log('Variedades guardadas:', variedades);
+        $('#variedadesModal').modal('hide');
+    });
+
+    // Configurar el modal cuando se abre
+    $('#variedadesModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var variedadesData = button.data('variedades');
+
+        // Si hay variedades iniciales, actualizarlas
+        if (Array.isArray(variedadesData)) {
+            variedades = variedadesData;
+            actualizarListaVariedades();
+        } else {
+            variedades = [];
+            actualizarListaVariedades();
+        }
+    });
+</script>
 
 
 <script>

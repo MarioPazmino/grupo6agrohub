@@ -15,13 +15,46 @@ use MongoDB\Exception\Exception;
 // Conexión a MongoDB con la URL proporcionada
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
-$collection = $mongoClient->grupo6_agrohub->usuarios;
+$collection = $mongoClient->grupo6_agrohub->terrenos;
 
 
 
 
 
+// Variables para mensajes de éxito y error
+$success = [];
+$errors = [];
 
+// Manejo del formulario de inserción de terreno
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
+    try {
+        if ($_POST['accion'] === 'insertar') {
+            $nombre = $_POST['nombre'];
+            $ubicacion = $_POST['ubicacion'];
+            $tamano = (int)$_POST['tamano'];
+            $estado = $_POST['estado'];
+            $descripcion = $_POST['descripcion'];
+
+            $result = $collection->insertOne([
+                "nombre" => $nombre,
+                "ubicacion" => $ubicacion,
+                "tamano" => $tamano,
+                "estado" => $estado,
+                "descripcion" => $descripcion
+            ]);
+
+            $success[] = "Terreno agregado exitosamente.";
+        }
+    } catch (Exception $e) {
+        $errors[] = "Error al agregar terreno: " . $e->getMessage();
+    }
+}
+
+// Leer terrenos si el usuario es admin
+$terrenos = [];
+if ($_SESSION['rol'] === 'admin') {
+    $terrenos = $collection->find()->toArray();
+}
 
 
 
@@ -405,7 +438,97 @@ $total_tareas_completadas = $collection->countDocuments([
 
 
 
+  <?php if ($_SESSION['rol'] === 'admin'): ?>
+                        <!-- Formulario para agregar terrenos -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">Agregar Terreno</h6>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" action="">
+                                    <input type="hidden" name="accion" value="insertar">
+                                    <div class="form-group">
+                                        <label for="nombre">Nombre:</label>
+                                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ubicacion">Ubicación:</label>
+                                        <input type="text" class="form-control" id="ubicacion" name="ubicacion" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="tamano">Tamaño (hectáreas):</label>
+                                        <input type="number" class="form-control" id="tamano" name="tamano" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="estado">Estado:</label>
+                                        <select class="form-control" id="estado" name="estado" required>
+                                            <option value="disponible">Disponible</option>
+                                            <option value="ocupado">Ocupado</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="descripcion">Descripción:</label>
+                                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Agregar Terreno</button>
+                                </form>
+                            </div>
+                        </div>
 
+                        <!-- Mostrar terrenos -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">Terrenos Registrados</h6>
+                            </div>
+                            <div class="card-body">
+                                <?php if (!empty($terrenos)): ?>
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Ubicación</th>
+                                                <th>Tamaño</th>
+                                                <th>Estado</th>
+                                                <th>Descripción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($terrenos as $terreno): ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($terreno->nombre); ?></td>
+                                                    <td><?php echo htmlspecialchars($terreno->ubicacion); ?></td>
+                                                    <td><?php echo htmlspecialchars($terreno->tamano); ?></td>
+                                                    <td><?php echo htmlspecialchars($terreno->estado); ?></td>
+                                                    <td><?php echo htmlspecialchars($terreno->descripcion); ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                <?php else: ?>
+                                    <p>No hay terrenos registrados.</p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <!-- Mostrar solo datos de usuario -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">Perfil del Usuario</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 text-center">
+                                        <img class="img-fluid rounded-circle" style="width: 150px;" src="assets/images/undraw_profile.svg" alt="Profile Image">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <p><strong>Nombre:</strong> <?php echo htmlspecialchars($_SESSION['nombre_usuario']); ?></p>
+                                        <!-- Aquí puedes agregar más datos del perfil si es necesario -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
 
 
                                     

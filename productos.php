@@ -49,71 +49,44 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 }
 
 // Manejo de la actualización y agregación de productos
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action']) && $_POST['action'] === 'add_variedad') {
-        // Agregar variedad a un producto existente
-        $product_id = $_POST['product_id'];
-        $variedad = [
-            'nombre_variedad' => $_POST['variedad_nombre'],
-            'caracteristicas' => $_POST['caracteristicas']
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
+    try {
+        $variedades = json_decode($_POST['variedades'], true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('El formato JSON para variedades no es válido.');
+        }
+
+        $productoData = [
+            'nombre' => $_POST['nombre'],
+            'descripcion' => $_POST['descripcion'],
+            'tipo' => $_POST['tipo'],
+            'precio_unitario' => floatval($_POST['precio_unitario']),
+            'unidad' => $_POST['unidad'],
+            'variedades' => $variedades
         ];
 
-        try {
+        if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
+            // Actualizar producto
             $result = $productosCollection->updateOne(
-                ['_id' => new ObjectId($product_id)],
-                ['$push' => ['variedades' => $variedad]]
+                ['_id' => new ObjectId($_POST['id'])],
+                ['$set' => $productoData]
             );
             if ($result->getModifiedCount() > 0) {
-                $success[] = 'Variedad agregada exitosamente.';
+                $success[] = 'Producto actualizado exitosamente.';
             } else {
-                $errors[] = 'No se pudo agregar la variedad.';
+                $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
             }
-        } catch (Exception $e) {
-            $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
-        }
-
-        header('Location: productos.php');
-        exit();
-    } else {
-        // Agregar o actualizar producto
-        try {
-            $variedades = json_decode($_POST['variedades'] ?? '[]', true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new Exception('El formato JSON para variedades no es válido.');
-            }
-
-            $productoData = [
-                'nombre' => $_POST['nombre'] ?? '',
-                'descripcion' => $_POST['descripcion'] ?? '',
-                'tipo' => $_POST['tipo'] ?? '',
-                'precio_unitario' => floatval($_POST['precio_unitario'] ?? 0),
-                'unidad' => $_POST['unidad'] ?? '',
-                'variedades' => $variedades
-            ];
-
-            if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
-                // Actualizar producto
-                $result = $productosCollection->updateOne(
-                    ['_id' => new ObjectId($_POST['id'])],
-                    ['$set' => $productoData]
-                );
-                if ($result->getModifiedCount() > 0) {
-                    $success[] = 'Producto actualizado exitosamente.';
-                } else {
-                    $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
-                }
+        } else {
+            // Agregar producto
+            $result = $productosCollection->insertOne($productoData);
+            if ($result->getInsertedCount() > 0) {
+                $success[] = 'Producto agregado exitosamente.';
             } else {
-                // Agregar producto
-                $result = $productosCollection->insertOne($productoData);
-                if ($result->getInsertedCount() > 0) {
-                    $success[] = 'Producto agregado exitosamente.';
-                } else {
-                    $errors[] = 'Error al agregar el producto.';
-                }
+                $errors[] = 'Error al agregar el producto.';
             }
-        } catch (Exception $e) {
-            $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
         }
+    } catch (Exception $e) {
+        $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
     }
 }
 
@@ -141,6 +114,32 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
         }
     } catch (Exception $e) {
         $errors[] = 'Error al eliminar la variedad: ' . $e->getMessage();
+    }
+
+    header('Location: productos.php');
+    exit();
+}
+
+// Manejo de la agregación de variedades
+if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_POST['product_id']) && isset($_POST['variedad_nombre']) && isset($_POST['caracteristicas'])) {
+    $product_id = $_POST['product_id'];
+    $variedad = [
+        'nombre_variedad' => $_POST['variedad_nombre'],
+        'caracteristicas' => $_POST['caracteristicas']
+    ];
+
+    try {
+        $result = $productosCollection->updateOne(
+            ['_id' => new ObjectId($product_id)],
+            ['$push' => ['variedades' => $variedad]]
+        );
+        if ($result->getModifiedCount() > 0) {
+            $success[] = 'Variedad agregada exitosamente.';
+        } else {
+            $errors[] = 'No se pudo agregar la variedad.';
+        }
+    } catch (Exception $e) {
+        $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
     }
 
     header('Location: productos.php');
@@ -189,7 +188,7 @@ if ($_SESSION['rol'] === 'admin') {
     <?php if (!empty($success)) : ?>
         <div class="alert alert-success">
             <?php foreach ($success as $message) : ?>
-                <p><?php echo htmlspecialchars($message ?? ''); ?></p>
+                <p><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></p>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
@@ -197,7 +196,7 @@ if ($_SESSION['rol'] === 'admin') {
     <?php if (!empty($errors)) : ?>
         <div class="alert alert-danger">
             <?php foreach ($errors as $message) : ?>
-                <p><?php echo htmlspecialchars($message ?? ''); ?></p>
+                <p><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></p>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
@@ -217,39 +216,56 @@ if ($_SESSION['rol'] === 'admin') {
         <tbody>
             <?php foreach ($productos as $producto) : ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($producto['nombre'] ?? ''); ?></td>
-                    <td><?php echo htmlspecialchars($producto['descripcion'] ?? ''); ?></td>
-                    <td><?php echo htmlspecialchars($producto['tipo'] ?? ''); ?></td>
-                    <td><?php echo htmlspecialchars($producto['precio_unitario'] ?? 0); ?></td>
-                    <td><?php echo htmlspecialchars($producto['unidad'] ?? ''); ?></td>
+                    <td><?php echo htmlspecialchars($producto['nombre'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td><?php echo htmlspecialchars($producto['descripcion'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td><?php echo htmlspecialchars($producto['tipo'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td><?php echo htmlspecialchars($producto['precio_unitario'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td><?php echo htmlspecialchars($producto['unidad'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
                     <td>
                         <ul>
-                            <?php foreach ($producto['variedades'] ?? [] as $variedad) : ?>
-                                <li>
-                                    <?php echo htmlspecialchars($variedad['nombre_variedad'] ?? ''); ?>
-                                    <a href="productos.php?action=delete_variedad&product_id=<?php echo urlencode((string) $producto['_id']); ?>&variedad_nombre=<?php echo urlencode($variedad['nombre_variedad']); ?>">Eliminar variedad</a>
-                                </li>
-                            <?php endforeach; ?>
+                            <?php if (!empty($producto['variedades'])) : ?>
+                                <?php foreach ($producto['variedades'] as $variedad) : ?>
+                                    <li>
+                                        <?php echo htmlspecialchars($variedad['nombre_variedad'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+                                        <a href="?action=delete_variedad&product_id=<?php echo urlencode((string) $producto['_id']); ?>&variedad_nombre=<?php echo urlencode($variedad['nombre_variedad']); ?>">Eliminar Variedad</a>
+                                    </li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </ul>
                     </td>
                     <td>
-                        <a href="productos.php?action=delete&id=<?php echo urlencode((string) $producto['_id']); ?>">Eliminar</a>
-                        <!-- Aquí podrías agregar un enlace para editar el producto si lo necesitas -->
+                        <a href="editar_producto.php?id=<?php echo urlencode((string) $producto['_id']); ?>">Editar</a> |
+                        <a href="?action=delete&id=<?php echo urlencode((string) $producto['_id']); ?>" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">Eliminar</a>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 
-    <!-- Formulario para agregar/actualizar productos -->
-    <form method="post" action="productos.php">
-        <input type="hidden" name="action" value="add_variedad">
-        <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($_GET['id'] ?? ''); ?>">
-        <label for="variedad_nombre">Nombre de la Variedad:</label>
-        <input type="text" id="variedad_nombre" name="variedad_nombre" required>
-        <label for="caracteristicas">Características:</label>
-        <textarea id="caracteristicas" name="caracteristicas" required></textarea>
-        <button type="submit">Agregar Variedad</button>
+    <h2>Agregar/Actualizar Producto</h2>
+    <form method="post" action="">
+        <input type="hidden" name="id" value="<?php echo htmlspecialchars($_GET['id'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+        <label>Nombre:</label>
+        <input type="text" name="nombre" required>
+        <label>Descripción:</label>
+        <textarea name="descripcion" required></textarea>
+        <label>Tipo:</label>
+        <input type="text" name="tipo" required>
+        <label>Precio Unitario:</label>
+        <input type="number" step="0.01" name="precio_unitario" required>
+        <label>Unidad:</label>
+        <input type="text" name="unidad" required>
+        <label>Variedades (JSON):</label>
+        <textarea name="variedades" required></textarea>
+        <button type="submit">Guardar</button>
     </form>
+
+    <?php if ($_SESSION['rol'] === 'admin') : ?>
+        <h2>Estadísticas de Empleados</h2>
+        <p>Total de Empleados: <?php echo htmlspecialchars($total_empleados, ENT_QUOTES, 'UTF-8'); ?></p>
+        <p>Tareas Pendientes: <?php echo htmlspecialchars($total_tareas_pendientes, ENT_QUOTES, 'UTF-8'); ?></p>
+        <p>Tareas en Proceso: <?php echo htmlspecialchars($total_tareas_proceso, ENT_QUOTES, 'UTF-8'); ?></p>
+        <p>Tareas Completadas: <?php echo htmlspecialchars($total_tareas_completadas, ENT_QUOTES, 'UTF-8'); ?></p>
+    <?php endif; ?>
 </body>
 </html>

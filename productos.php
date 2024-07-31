@@ -1,6 +1,9 @@
 <?php
 session_start();
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['rol'])) {
     header("Location: index.php");

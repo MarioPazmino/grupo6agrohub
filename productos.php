@@ -90,13 +90,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     }
 }
 
-// Obtener productos para mostrar en la tabla
-try {
-    $productos = $productosCollection->find()->toArray();
-} catch (Exception $e) {
-    $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
-}
-
 // Manejo de la eliminación de variedades
 if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
     $product_id = $_GET['product_id'];
@@ -144,6 +137,13 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
 
     header('Location: productos.php');
     exit();
+}
+
+// Obtener productos para mostrar en la tabla
+try {
+    $productos = $productosCollection->find()->toArray();
+} catch (Exception $e) {
+    $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
 }
 
 // Contar el número total de empleados y tareas si el usuario es admin
@@ -258,6 +258,18 @@ if ($_SESSION['rol'] === 'admin') {
         <label>Variedades (JSON):</label>
         <textarea name="variedades" required></textarea>
         <button type="submit">Guardar</button>
+    </form>
+
+    <h2>Agregar Variedad</h2>
+    <form method="post" action="">
+        <input type="hidden" name="action" value="add_variedad">
+        <label>ID del Producto:</label>
+        <input type="text" name="product_id" required>
+        <label>Nombre de Variedad:</label>
+        <input type="text" name="variedad_nombre" required>
+        <label>Características:</label>
+        <textarea name="caracteristicas" required></textarea>
+        <button type="submit">Agregar Variedad</button>
     </form>
 
     <?php if ($_SESSION['rol'] === 'admin') : ?>

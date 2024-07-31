@@ -143,6 +143,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
     exit();
 }
 
+
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
 $total_tareas_pendientes = 0;

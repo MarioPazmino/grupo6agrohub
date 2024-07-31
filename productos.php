@@ -14,7 +14,6 @@ require __DIR__ . '/vendor/autoload.php';
 
 use MongoDB\Client;
 use MongoDB\BSON\ObjectId;
-use MongoDB\Exception\Exception;
 
 // Conexión a MongoDB con la URL proporcionada
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
@@ -40,7 +39,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
         } else {
             $errors[] = 'ID de producto inválido.';
         }
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
         $errors[] = 'Error al eliminar el producto: ' . $e->getMessage();
     }
 
@@ -51,9 +50,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 // Manejo de la actualización y agregación de productos
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $variedades = json_decode($_POST['variedades'], true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception('El formato JSON para variedades no es válido.');
+        if (isset($_POST['variedades'])) {
+            $variedades = json_decode($_POST['variedades'], true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \Exception('El formato JSON para variedades no es válido.');
+            }
+        } else {
+            $variedades = [];
         }
 
         $productoData = [
@@ -85,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors[] = 'Error al agregar el producto.';
             }
         }
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
         $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
     }
 }
@@ -93,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Obtener productos para mostrar en la tabla
 try {
     $productos = $productosCollection->find()->toArray();
-} catch (Exception $e) {
+} catch (\Exception $e) {
     $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
 }
 
@@ -112,7 +115,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
         } else {
             $errors[] = 'No se pudo eliminar la variedad.';
         }
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
         $errors[] = 'Error al eliminar la variedad: ' . $e->getMessage();
     }
 
@@ -142,15 +145,13 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
         } else {
             $errors[] = 'ID de producto inválido.';
         }
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
         $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
     }
 
     header('Location: productos.php');
     exit();
 }
-
-
 
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
@@ -177,7 +178,7 @@ if ($_SESSION['rol'] === 'admin') {
             'rol' => 'empleado',
             'tareas_asignadas.estado' => 'completada'
         ]);
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
         $errors[] = 'Error al obtener información de empleados: ' . $e->getMessage();
     }
 }

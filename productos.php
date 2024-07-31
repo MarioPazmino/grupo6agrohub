@@ -129,18 +129,14 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
     ];
 
     try {
-        if (strlen($product_id) == 24 && ctype_xdigit($product_id)) {
-            $result = $productosCollection->updateOne(
-                ['_id' => new ObjectId($product_id)],
-                ['$push' => ['variedades' => $variedad]]
-            );
-            if ($result->getModifiedCount() > 0) {
-                $success[] = 'Variedad agregada exitosamente.';
-            } else {
-                $errors[] = 'No se pudo agregar la variedad. Verifique que el producto exista.';
-            }
+        $result = $productosCollection->updateOne(
+            ['_id' => new ObjectId($product_id)],
+            ['$push' => ['variedades' => $variedad]]
+        );
+        if ($result->getModifiedCount() > 0) {
+            $success[] = 'Variedad agregada exitosamente.';
         } else {
-            $errors[] = 'ID de producto inválido.';
+            $errors[] = 'No se pudo agregar la variedad.';
         }
     } catch (Exception $e) {
         $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
@@ -149,7 +145,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
     header('Location: productos.php');
     exit();
 }
-
 
 
 // Contar el número total de empleados y tareas si el usuario es admin
@@ -259,4 +254,4 @@ if ($_SESSION['rol'] === 'admin') {
     <p>Total de Tareas en Proceso: <?php echo $total_tareas_proceso; ?></p>
     <p>Total de Tareas Completadas: <?php echo $total_tareas_completadas; ?></p>
 </body>
-</html>
+</html>   

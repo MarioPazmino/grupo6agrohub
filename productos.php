@@ -126,14 +126,18 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
     ];
 
     try {
-        $result = $productosCollection->updateOne(
-            ['_id' => new ObjectId($product_id)],
-            ['$push' => ['variedades' => $variedad]]
-        );
-        if ($result->getModifiedCount() > 0) {
-            $success[] = 'Variedad agregada exitosamente.';
+        if (strlen($product_id) == 24 && ctype_xdigit($product_id)) {
+            $result = $productosCollection->updateOne(
+                ['_id' => new ObjectId($product_id)],
+                ['$push' => ['variedades' => $variedad]]
+            );
+            if ($result->getModifiedCount() > 0) {
+                $success[] = 'Variedad agregada exitosamente.';
+            } else {
+                $errors[] = 'No se pudo agregar la variedad. Verifique que el producto exista.';
+            }
         } else {
-            $errors[] = 'No se pudo agregar la variedad.';
+            $errors[] = 'ID de producto inválido.';
         }
     } catch (Exception $e) {
         $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
@@ -142,6 +146,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
     header('Location: productos.php');
     exit();
 }
+
 
 
 // Contar el número total de empleados y tareas si el usuario es admin

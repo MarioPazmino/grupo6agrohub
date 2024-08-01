@@ -52,18 +52,61 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && !isset($_POST['id'])) {
     try {
-        // Datos del producto sin "variedades"
+        // Verificar si variedades está presente y no es null
+        $variedades = isset($_POST['variedades']) ? json_decode($_POST['variedades'], true) : [];
+
+        // Verificar si la decodificación fue exitosa
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('El formato JSON para variedades no es válido.');
+        }
+
         $productoData = [
             'nombre' => $_POST['nombre'],
             'descripcion' => $_POST['descripcion'],
             'tipo' => $_POST['tipo'],
             'precio_unitario' => floatval($_POST['precio_unitario']),
-            'unidad' => $_POST['unidad']
+            'unidad' => $_POST['unidad'],
+            'variedades' => $variedades
         ];
 
-        if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
+        // Agregar producto
+        $result = $productosCollection->insertOne($productoData);
+        if ($result->getInsertedCount() > 0) {
+            $success[] = 'Producto agregado exitosamente.';
+        } else {
+            $errors[] = 'Error al agregar el producto.';
+        }
+    } catch (Exception $e) {
+        $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
+    }
+}
+
+
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && isset($_POST['id'])) {
+    try {
+        // Verificar si variedades está presente y no es null
+        $variedades = isset($_POST['variedades']) ? json_decode($_POST['variedades'], true) : [];
+
+        // Verificar si la decodificación fue exitosa
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('El formato JSON para variedades no es válido.');
+        }
+
+        $productoData = [
+            'nombre' => $_POST['nombre'],
+            'descripcion' => $_POST['descripcion'],
+            'tipo' => $_POST['tipo'],
+            'precio_unitario' => floatval($_POST['precio_unitario']),
+            'unidad' => $_POST['unidad'],
+            'variedades' => $variedades
+        ];
+
+        // Verificar si el ID es válido
+        if (strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
             // Actualizar producto
             $result = $productosCollection->updateOne(
                 ['_id' => new ObjectId($_POST['id'])],
@@ -75,18 +118,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
                 $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
             }
         } else {
-            // Agregar producto
-            $result = $productosCollection->insertOne($productoData);
-            if ($result->getInsertedCount() > 0) {
-                $success[] = 'Producto agregado exitosamente.';
-            } else {
-                $errors[] = 'Error al agregar el producto.';
-            }
+            $errors[] = 'ID de producto no válido.';
         }
     } catch (Exception $e) {
         $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
     }
 }
+
 
 
 // Modifica la parte de eliminación de variedades
@@ -483,6 +521,7 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
+
 <!-- Content Row -->
 
 <div class="row">
@@ -616,7 +655,6 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 
 <!-- Modal Editar Producto (solo para admin) -->
-<<!-- Modal Editar Producto (solo para admin) -->
 <div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -660,6 +698,7 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
+
 <?php endif; ?>
 
 

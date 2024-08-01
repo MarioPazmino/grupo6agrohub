@@ -52,7 +52,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && !isset($_POST['id'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     try {
         // Verificar si variedades está presente y no es null
         $variedades = isset($_POST['variedades']) ? json_decode($_POST['variedades'], true) : [];
@@ -71,40 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && !isset(
             'variedades' => $variedades
         ];
 
-        // Agregar producto
-        $result = $productosCollection->insertOne($productoData);
-        if ($result->getInsertedCount() > 0) {
-            $success[] = 'Producto agregado exitosamente.';
-        } else {
-            $errors[] = 'Error al agregar el producto.';
-        }
-    } catch (Exception $e) {
-        $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
-    }
-}
-
-
-
-// Manejo de la actualización del producto
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id']) && !isset($_POST['action'])) {
-    try {
-        $variedades = isset($_POST['variedades']) ? json_decode($_POST['variedades'], true) : [];
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception('El formato JSON para variedades no es válido.');
-        }
-
-        $productoData = [
-            'nombre' => $_POST['nombre'],
-            'descripcion' => $_POST['descripcion'],
-            'tipo' => $_POST['tipo'],
-            'precio_unitario' => floatval($_POST['precio_unitario']),
-            'unidad' => $_POST['unidad'],
-            'variedades' => $variedades
-        ];
-
-        // Verificar si el ID es válido
-        if (strlen($_POST['id']) === 24 && ctype_xdigit($_POST['id'])) {
+        if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
+            // Actualizar producto
             $result = $productosCollection->updateOne(
                 ['_id' => new ObjectId($_POST['id'])],
                 ['$set' => $productoData]
@@ -115,13 +83,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id']) && !isset($_POS
                 $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
             }
         } else {
-            $errors[] = 'ID de producto no válido.';
+            // Agregar producto
+            $result = $productosCollection->insertOne($productoData);
+            if ($result->getInsertedCount() > 0) {
+                $success[] = 'Producto agregado exitosamente.';
+            } else {
+                $errors[] = 'Error al agregar el producto.';
+            }
         }
     } catch (Exception $e) {
         $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
     }
 }
-
 
 
 // Modifica la parte de eliminación de variedades
@@ -518,7 +491,6 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
 <!-- Content Row -->
 
 <div class="row">
@@ -689,26 +661,17 @@ if ($_SESSION['rol'] === 'admin') {
                         <label for="editar_unidad">Unidad</label>
                         <input type="text" class="form-control" id="editar_unidad" name="unidad" required>
                     </div>
+                    <div class="form-group">
+                        <label for="editar_variedades">Variedades (JSON)</label>
+                        <textarea class="form-control" id="editar_variedades" name="variedades" required></textarea>
+                    </div>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-
 <?php endif; ?>
-
-<script>
-function showEditModal(producto) {
-    document.getElementById('editar_id').value = producto._id;
-    document.getElementById('editar_nombre').value = producto.nombre;
-    document.getElementById('editar_descripcion').value = producto.descripcion;
-    document.getElementById('editar_tipo').value = producto.tipo;
-    document.getElementById('editar_precio_unitario').value = producto.precio_unitario;
-    document.getElementById('editar_unidad').value = producto.unidad;
-    $('#editarProductoModal').modal('show');
-}
-</script>
 
 
 <!-- Contenedor para mensajes -->

@@ -146,6 +146,9 @@ try {
     $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
 }
 
+
+
+
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
 $total_tareas_pendientes = 0;
@@ -475,8 +478,6 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
-
 <!-- Content Row -->
 <div class="row">
 
@@ -537,18 +538,20 @@ if ($_SESSION['rol'] === 'admin') {
                                 <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
                                 <td><?php echo htmlspecialchars($producto->unidad); ?></td>
                                 <td>
-                                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#variedadesModal"
-    data-id="<?php echo htmlspecialchars($producto->_id); ?>"
-    data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades)); ?>'>
-    Ver Variedades
-</button>
-
-                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
-                                    <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#agregarVariedadModal"
-                                            data-id="<?php echo htmlspecialchars($producto->_id); ?>">
-                                        Agregar Variedad
+                                    <button type="button" class="btn btn-info btn-sm" onclick="toggleVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>)">
+                                        Ver Variedades
                                     </button>
-                                    <?php endif; ?>
+                                    <table class="table table-bordered mt-2" id="variedadesTable" style="display: none;">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombre de Variedad</th>
+                                                <th>Características</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="variedadesTableBody">
+                                            <!-- Las variedades se cargarán aquí dinámicamente -->
+                                        </tbody>
+                                    </table>
                                 </td>
                                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                                 <td>
@@ -559,7 +562,7 @@ if ($_SESSION['rol'] === 'admin') {
                                             data-tipo="<?php echo htmlspecialchars($producto->tipo); ?>"
                                             data-precio_unitario="<?php echo htmlspecialchars($producto->precio_unitario); ?>"
                                             data-unidad="<?php echo htmlspecialchars($producto->unidad); ?>"
-                                            data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades)); ?>'>
+                                            data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>'
                                         Editar
                                     </button>
                                     <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
@@ -673,11 +676,6 @@ if ($_SESSION['rol'] === 'admin') {
                             <!-- Agrega más opciones según sea necesario -->
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="edit_variedades">Variedades (en formato JSON)</label>
-                        <textarea class="form-control" id="edit_variedades" name="variedades"></textarea>
-                        <small class="form-text text-muted">Las variedades deben estar en formato JSON.</small>
-                    </div>
                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                 </form>
             </div>
@@ -686,95 +684,43 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 <?php endif; ?>
 
-<div class="modal fade" id="variedadesModal" tabindex="-1" role="dialog" aria-labelledby="variedadesModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="variedadesModalLabel">Variedades del Producto</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <ul id="variedadesList" class="list-group">
-                    <!-- Las variedades se cargarán aquí dinámicamente -->
-                </ul>
-                <div id="debugInfo" style="margin-top: 20px; padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6;">
-                    <h6>Información de depuración:</h6>
-                    <!-- La información de depuración se mostrará aquí -->
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<script>
+    function toggleVariedades(variedades) {
+        const table = document.querySelector('#variedadesTable');
+        const tableBody = document.querySelector('#variedadesTableBody');
+        table.style.display = (table.style.display === 'none' || table.style.display === '') ? 'table' : 'none';
+        
+        if (table.style.display === 'table') {
+            tableBody.innerHTML = ''; // Limpiar contenido previo
 
-
-<!-- Modal Agregar Variedad (solo para admin) -->
-<?php if ($_SESSION['rol'] === 'admin'): ?>
-<div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="agregarVariedadModalLabel">Agregar Variedad</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="productos.php">
-                    <input type="hidden" name="action" value="add_variedad">
-                    <input type="hidden" id="variedad_product_id" name="product_id">
-                    <div class="form-group">
-                        <label for="variedad_nombre">Nombre de Variedad</label>
-                        <input type="text" class="form-control" id="variedad_nombre" name="variedad_nombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="caracteristicas">Características</label>
-                        <textarea class="form-control" id="caracteristicas" name="caracteristicas" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Agregar Variedad</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
-
-
-$(document).ready(function() {
-    $('#variedadesModal').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget); // Botón que activó el modal
-        var id = button.data('id'); // Extraer datos-id del botón
-        var variedades = button.data('variedades'); // Extraer datos-variedades del botón
-
-        var modal = $(this);
-        var variedadesList = modal.find('#variedadesList');
-        variedadesList.empty(); // Limpiar la lista de variedades antes de agregar nuevos elementos
-
-        if (variedades && Array.isArray(variedades)) {
-            variedades.forEach(function(variedad) {
-                var nombreVariedad = htmlspecialchars(variedad.nombre_variedad);
-                var caracteristicas = htmlspecialchars(variedad.caracteristicas);
-                variedadesList.append('<li class="list-group-item">' + nombreVariedad + ': ' + caracteristicas + '</li>');
+            variedades.forEach(variedad => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${variedad.nombre}</td><td>${variedad.caracteristicas}</td>`;
+                tableBody.appendChild(row);
             });
-        } else {
-            variedadesList.append('<li class="list-group-item">No hay variedades disponibles.</li>');
         }
-    });
-
-    function htmlspecialchars(text) {
-        var map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
     }
-});
 
+    // Configurar el modal de edición
+    $('#editarProductoModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const id = button.data('id');
+        const nombre = button.data('nombre');
+        const descripcion = button.data('descripcion');
+        const tipo = button.data('tipo');
+        const precioUnitario = button.data('precio_unitario');
+        const unidad = button.data('unidad');
+        const variedades = button.data('variedades');
 
+        const modal = $(this);
+        modal.find('#edit_id').val(id);
+        modal.find('#edit_nombre').val(nombre);
+        modal.find('#edit_descripcion').val(descripcion);
+        modal.find('#edit_tipo').val(tipo);
+        modal.find('#edit_precio_unitario').val(precioUnitario);
+        modal.find('#edit_unidad').val(unidad);
+    });
+</script>
 
 
 

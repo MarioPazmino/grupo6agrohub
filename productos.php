@@ -226,7 +226,8 @@ if ($_SESSION['rol'] === 'admin') {
                             <?php if (!empty($producto['variedades'])) : ?>
                                 <?php foreach ($producto['variedades'] as $variedad) : ?>
                                     <li>
-                                        <?php echo htmlspecialchars($variedad['nombre_variedad'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+                                        <strong>Nombre:</strong> <?php echo htmlspecialchars($variedad['nombre_variedad'] ?? '', ENT_QUOTES, 'UTF-8'); ?><br>
+                                        <strong>Descripción:</strong> <?php echo htmlspecialchars($variedad['caracteristicas'] ?? '', ENT_QUOTES, 'UTF-8'); ?><br>
                                         <a href="?action=delete_variedad&product_id=<?php echo urlencode((string) $producto['_id']); ?>&variedad_nombre=<?php echo urlencode($variedad['nombre_variedad']); ?>">Eliminar Variedad</a>
                                     </li>
                                 <?php endforeach; ?>

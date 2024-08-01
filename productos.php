@@ -488,7 +488,7 @@ if ($_SESSION['rol'] === 'admin') {
 <!-- Content Row -->
 <div class="row">
 
-   <!-- Productos -->
+ <!-- Productos -->
 <div class="col-lg-12">
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -516,7 +516,7 @@ if ($_SESSION['rol'] === 'admin') {
             <!-- Botón de agregar producto (solo para admin) -->
             <?php if ($_SESSION['rol'] === 'admin'): ?>
             <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarProductoModal">
-                <i class="fas fa-plus-circle"></i> Agregar Producto
+                Agregar Producto
             </button>
             <?php endif; ?>
 
@@ -542,9 +542,9 @@ if ($_SESSION['rol'] === 'admin') {
                             <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
                             <td><?php echo htmlspecialchars($producto->unidad); ?></td>
                             <td>
-                                <button type="button" class="btn btn-info btn-sm" onclick="toggleVariedades(this, <?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
-                                    <i class="fas fa-plus"></i> Agregar Variedades | Ocultar
-                                </button>
+                                <button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
+    Ver Variedades
+</button>
                                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                                 <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarProductoModal"
                                         data-id="<?php echo htmlspecialchars($producto->_id); ?>"
@@ -557,7 +557,7 @@ if ($_SESSION['rol'] === 'admin') {
                                     <i class="fas fa-edit"></i> Editar
                                 </button>
                                 <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
-                                    <i class="fas fa-trash"></i> Eliminar
+                                    <i class="fas fa-trash-alt"></i> Eliminar
                                 </a>
                                 <?php endif; ?>
                             </td>
@@ -569,6 +569,7 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
+
 
 
                                         

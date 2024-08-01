@@ -28,13 +28,14 @@ $productosCollection = $mongoClient->grupo6_agrohub->productos;
 // Variable para mensajes de éxito y error
 $success = [];
 $errors = [];
-// Obtener tipos de productos para mostrar en el formulario
-$tiposProductosCollection = $mongoClient->grupo6_agrohub->productos;
+
+
 try {
-    $tiposProductosCursor = $tiposProductosCollection->find();
-    $tiposProductos = iterator_to_array($tiposProductosCursor);
+    $productosCursor = $productosCollection->find([], ['projection' => ['_id' => 1, 'nombre' => 1]]);
+    $productos = iterator_to_array($productosCursor);
+    echo json_encode(['productos' => $productos]);
 } catch (Exception $e) {
-    $errors[] = 'Error al obtener los tipos de productos: ' . $e->getMessage();
+    echo json_encode(['error' => 'Error al obtener los productos: ' . $e->getMessage()]);
 }
 
 // Manejo de la eliminación de productos
@@ -721,16 +722,15 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-<!-- Ejemplo de código HTML para mostrar el formulario con tipos de productos -->
 <form action="productos.php" method="POST">
     <input type="hidden" name="action" value="add_variedad">
 
-    <!-- Campo para seleccionar el tipo de producto -->
-    <label for="tipo_producto">Tipo de Producto:</label>
-    <select name="tipo_producto" id="tipo_producto">
-        <?php foreach ($tiposProductos as $tipo): ?>
-            <option value="<?php echo htmlspecialchars($tipo['nombre']); ?>">
-                <?php echo htmlspecialchars($tipo['nombre']); ?>
+    <!-- Campo para seleccionar el producto -->
+    <label for="producto">Producto:</label>
+    <select name="product_id" id="producto">
+        <?php foreach ($productos as $producto): ?>
+            <option value="<?php echo htmlspecialchars($producto['_id']); ?>">
+                <?php echo htmlspecialchars($producto['nombre']); ?>
             </option>
         <?php endforeach; ?>
     </select>
@@ -741,8 +741,6 @@ if ($_SESSION['rol'] === 'admin') {
 
     <label for="caracteristicas">Características:</label>
     <textarea name="caracteristicas" id="caracteristicas" required></textarea>
-
-    <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product_id); ?>">
 
     <button type="submit">Agregar Variedad</button>
 </form>
@@ -761,31 +759,27 @@ if ($_SESSION['rol'] === 'admin') {
                     
 <script>
 $(document).ready(function() {
-    // Configura el modal de agregar variedad con el ID del producto
+    // Configura el modal de agregar variedad
     $('#agregarVariedadModal').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget); // Botón que abrió el modal
-        var productId = button.data('product-id'); // Extrae el ID del producto
         var modal = $(this);
-        modal.find('#product_id').val(productId);
 
-        // Cargar tipos de productos
+        // Cargar productos
         $.ajax({
-            url: 'get_product_types.php',
+            url: 'get_products.php', // Necesitarás crear este archivo PHP
             type: 'GET',
             dataType: 'json',
             success: function(response) {
-                var select = modal.find('#tipo_producto');
+                var select = modal.find('#producto');
                 select.empty();
-                response.types.forEach(function(type) {
-                    select.append('<option value="' + type + '">' + type + '</option>');
+                response.productos.forEach(function(producto) {
+                    select.append('<option value="' + producto._id + '">' + producto.nombre + '</option>');
                 });
             },
             error: function() {
-                alert('Error al cargar tipos de productos.');
+                alert('Error al cargar productos.');
             }
         });
     });
-
     // Maneja el envío del formulario de agregar variedad
     $('#agregarVariedadForm').on('submit', function(e) {
         e.preventDefault(); // Evita el envío normal del formulario

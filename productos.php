@@ -90,7 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     }
 }
 
-// Manejo de la eliminación de variedades
+
+// Modifica la parte de eliminación de variedades
 if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
     $product_id = $_GET['product_id'];
     $variedad_nombre = $_GET['variedad_nombre'];
@@ -101,14 +102,15 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
             ['$pull' => ['variedades' => ['nombre_variedad' => $variedad_nombre]]]
         );
         if ($result->getModifiedCount() > 0) {
-            echo json_encode(['success' => true, 'message' => 'Variedad eliminada exitosamente.']);
+            $success[] = 'Variedad eliminada exitosamente.';
         } else {
-            echo json_encode(['success' => false, 'message' => 'No se pudo eliminar la variedad.']);
+            $errors[] = 'No se pudo eliminar la variedad.';
         }
     } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => 'Error al eliminar la variedad: ' . $e->getMessage()]);
+        $errors[] = 'Error al eliminar la variedad: ' . $e->getMessage();
     }
 
+    echo json_encode(['success' => $success, 'errors' => $errors]);
     exit();
 }
 
@@ -562,6 +564,8 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
+                                        
+<div id="messages-container"></div>
 <!-- Tabla de Variedades -->
 <div class="row mt-4" id="variedadesSection" style="display: none;">
     <div class="col-lg-12">
@@ -715,21 +719,40 @@ function showVariedades(variedades, productoId) {
     }
 }
 
- function eliminarVariedad(productoId, nombreVariedad) {
+function eliminarVariedad(productoId, nombreVariedad) {
     if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
-        // Hacer la solicitud AJAX aquí
         fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
             method: 'GET'
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                alert('Variedad eliminada con éxito');
-                // Recargar la página o actualizar la tabla de variedades
-                location.reload();
-            } else {
-                alert('Error al eliminar variedad: ' + data.message);
+            let messageHTML = '';
+            if (data.success && data.success.length > 0) {
+                messageHTML += '<div class="alert alert-success" role="alert">';
+                data.success.forEach(message => {
+                    messageHTML += `${message}<br>`;
+                });
+                messageHTML += '</div>';
             }
+            if (data.errors && data.errors.length > 0) {
+                messageHTML += '<div class="alert alert-danger" role="alert">';
+                data.errors.forEach(message => {
+                    messageHTML += `${message}<br>`;
+                });
+                messageHTML += '</div>';
+            }
+            
+            // Insertar los mensajes en el DOM
+            const messagesContainer = document.getElementById('messages-container');
+            messagesContainer.innerHTML = messageHTML;
+            
+            // Hacer scroll hacia los mensajes
+            messagesContainer.scrollIntoView({behavior: "smooth"});
+            
+            // Recargar la tabla de variedades o la página después de un breve retraso
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
         })
         .catch(error => {
             console.error('Error:', error);

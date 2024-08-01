@@ -787,7 +787,7 @@ $(document).ready(function() {
         });
     });
 });
-
+showVariedades(response.variedades, $('#product_id').val());
 function showVariedades(variedades, productoId) {
     const section = document.querySelector('#variedadesSection');
     const tableBody = document.querySelector('#variedadesTableBody');

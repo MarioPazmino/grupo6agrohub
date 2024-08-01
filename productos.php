@@ -52,10 +52,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     exit();
 }
 
-// Manejo de la actualización y agregación de productos
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     try {
-        $variedades = json_decode($_POST['variedades'], true);
+        // Verificar si variedades está presente y no es null
+        $variedades = isset($_POST['variedades']) ? json_decode($_POST['variedades'], true) : [];
+
+        // Verificar si la decodificación fue exitosa
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new Exception('El formato JSON para variedades no es válido.');
         }
@@ -490,8 +492,6 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 <!-- Content Row -->
-<!-- Asegúrate de incluir Font Awesome en el <head> de tu documento -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <div class="row">
 
@@ -578,6 +578,102 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
+<?php if ($_SESSION['rol'] === 'admin'): ?>
+<!-- Modal Agregar Producto (solo para admin) -->
+<div class="modal fade" id="agregarProductoModal" tabindex="-1" role="dialog" aria-labelledby="agregarProductoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarProductoModalLabel">Agregar Producto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="productos.php" method="POST">
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="tipo">Tipo</label>
+                        <select class="form-control" id="tipo" name="tipo" required>
+                            <option value="">Seleccione Tipo</option>
+                            <option value="Tipo1">Tipo1</option>
+                            <option value="Tipo2">Tipo2</option>
+                            <!-- Agrega más opciones según sea necesario -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="precio_unitario">Precio Unitario</label>
+                        <input type="number" step="0.01" class="form-control" id="precio_unitario" name="precio_unitario" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="unidad">Unidad</label>
+                        <input type="text" class="form-control" id="unidad" name="unidad" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar Producto</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Producto (solo para admin) -->
+<div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarProductoModalLabel">Editar Producto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="productos.php" method="POST">
+                    <input type="hidden" id="editar_id" name="id">
+                    <div class="form-group">
+                        <label for="editar_nombre">Nombre</label>
+                        <input type="text" class="form-control" id="editar_nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editar_descripcion">Descripción</label>
+                        <textarea class="form-control" id="editar_descripcion" name="descripcion" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="editar_tipo">Tipo</label>
+                        <select class="form-control" id="editar_tipo" name="tipo" required>
+                            <option value="">Seleccione Tipo</option>
+                            <option value="Tipo1">Tipo1</option>
+                            <option value="Tipo2">Tipo2</option>
+                            <!-- Agrega más opciones según sea necesario -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editar_precio_unitario">Precio Unitario</label>
+                        <input type="number" step="0.01" class="form-control" id="editar_precio_unitario" name="precio_unitario" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editar_unidad">Unidad</label>
+                        <input type="text" class="form-control" id="editar_unidad" name="unidad" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editar_variedades">Variedades (JSON)</label>
+                        <textarea class="form-control" id="editar_variedades" name="variedades" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+
 <!-- Contenedor para mensajes -->
 <div id="messages-container"></div>
 
@@ -645,99 +741,7 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
-<!-- Modal Agregar Producto (solo para admin) -->
-<?php if ($_SESSION['rol'] === 'admin'): ?>
-<div class="modal fade" id="agregarProductoModal" tabindex="-1" role="dialog" aria-labelledby="agregarProductoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="agregarProductoModalLabel">Agregar Producto</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="productos.php" method="POST">
-                    <input type="hidden" name="action" value="add_producto">
-                    <div class="form-group">
-                        <label for="nombre">Nombre</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="descripcion">Descripción</label>
-                        <textarea class="form-control" id="descripcion" name="descripcion"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="tipo">Tipo</label>
-                        <select class="form-control" id="tipo" name="tipo" required>
-                            <option value="">Seleccione Tipo</option>
-                            <option value="Tipo1">Tipo1</option>
-                            <option value="Tipo2">Tipo2</option>
-                            <!-- Agrega más opciones según sea necesario -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="precio_unitario">Precio Unitario</label>
-                        <input type="number" step="0.01" class="form-control" id="precio_unitario" name="precio_unitario" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="unidad">Unidad</label>
-                        <input type="text" class="form-control" id="unidad" name="unidad" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar Producto</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
 
-<!-- Modal Editar Producto -->
-<div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editarProductoModalLabel">Editar Producto</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="editarProductoForm" action="productos.php" method="POST">
-                    <input type="hidden" name="action" value="edit_producto">
-                    <input type="hidden" name="id" id="edit_producto_id">
-
-                    <div class="form-group">
-                        <label for="edit_nombre">Nombre</label>
-                        <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_descripcion">Descripción</label>
-                        <textarea class="form-control" id="edit_descripcion" name="descripcion"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_tipo">Tipo</label>
-                        <select class="form-control" id="edit_tipo" name="tipo" required>
-                            <option value="">Seleccione Tipo</option>
-                            <option value="Tipo1">Tipo1</option>
-                            <option value="Tipo2">Tipo2</option>
-                            <!-- Agrega más opciones según sea necesario -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_precio_unitario">Precio Unitario</label>
-                        <input type="number" step="0.01" class="form-control" id="edit_precio_unitario" name="precio_unitario" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_unidad">Unidad</label>
-                        <input type="text" class="form-control" id="edit_unidad" name="unidad" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 

@@ -1,3 +1,7 @@
+
+
+
+
 <?php
 session_start();
 
@@ -481,6 +485,10 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
+
+
+
+
 <!-- Content Row -->
 <div class="row">
 
@@ -512,7 +520,7 @@ if ($_SESSION['rol'] === 'admin') {
                 <!-- Botón de agregar producto (solo para admin) -->
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarProductoModal">
-                    <i class="fas fa-plus"></i> Agregar Producto
+                    Agregar Producto
                 </button>
                 <?php endif; ?>
 
@@ -538,9 +546,9 @@ if ($_SESSION['rol'] === 'admin') {
                                 <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
                                 <td><?php echo htmlspecialchars($producto->unidad); ?></td>
                                 <td>
-                                    <button type="button" class="btn btn-info btn-sm" onclick="toggleVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
-                                        <i class="fas fa-eye"></i> Ver Variedades
-                                    </button>
+                                    <button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
+    Ver Variedades
+</button>
                                     <?php if ($_SESSION['rol'] === 'admin'): ?>
                                     <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarProductoModal"
                                             data-id="<?php echo htmlspecialchars($producto->_id); ?>"
@@ -549,11 +557,11 @@ if ($_SESSION['rol'] === 'admin') {
                                             data-tipo="<?php echo htmlspecialchars($producto->tipo); ?>"
                                             data-precio_unitario="<?php echo htmlspecialchars($producto->precio_unitario); ?>"
                                             data-unidad="<?php echo htmlspecialchars($producto->unidad); ?>"
-                                            data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>'>
-                                        <i class="fas fa-edit"></i> Editar
+                                            data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>'
+                                        Editar
                                     </button>
                                     <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
-                                        <i class="fas fa-trash"></i> Eliminar
+                                        Eliminar
                                     </a>
                                     <?php endif; ?>
                                 </td>
@@ -567,6 +575,7 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
+                                        
 <!-- Contenedor para mensajes -->
 <div id="messages-container"></div>
 
@@ -594,7 +603,7 @@ if ($_SESSION['rol'] === 'admin') {
                 </div>
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <button type="button" class="btn btn-primary mt-3" data-toggle="modal" data-target="#agregarVariedadModal">
-                    <i class="fas fa-plus"></i> Agregar Variedad
+                    Agregar Variedad
                 </button>
                 <?php endif; ?>
             </div>
@@ -613,26 +622,27 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="productos.php" class="form-inline" id="agregarVariedadForm">
-                    <input type="hidden" name="action" value="add_variedad">
-                    <input type="hidden" name="product_id" id="product_id">
+<form method="POST" action="productos.php" class="form-inline">
+            <input type="hidden" name="action" value="add_variedad">
+            <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($producto['_id']); ?>">
 
-                    <div class="form-group mb-2 mr-2">
-                        <label for="variedad_nombre" class="sr-only">Nombre de la variedad</label>
-                        <input type="text" id="variedad_nombre" name="variedad_nombre" class="form-control" placeholder="Nombre de la variedad" required>
-                    </div>
+            <div class="form-group mb-2 mr-2">
+                <label for="variedad_nombre" class="sr-only">Nombre de la variedad</label>
+                <input type="text" id="variedad_nombre" name="variedad_nombre" class="form-control" placeholder="Nombre de la variedad" required>
+            </div>
 
-                    <div class="form-group mb-2 mr-2">
-                        <label for="caracteristicas" class="sr-only">Características</label>
-                        <input type="text" id="caracteristicas" name="caracteristicas" class="form-control" placeholder="Características" required>
-                    </div>
+            <div class="form-group mb-2 mr-2">
+                <label for="caracteristicas" class="sr-only">Características</label>
+                <input type="text" id="caracteristicas" name="caracteristicas" class="form-control" placeholder="Características" required>
+            </div>
 
-                    <button type="submit" class="btn btn-primary mb-2"><i class="fas fa-plus"></i> Agregar Variedad</button>
-                </form>
+            <button type="submit" class="btn btn-primary mb-2">Agregar Variedad</button>
+        </form>
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- Modal Agregar Producto (solo para admin) -->
 <?php if ($_SESSION['rol'] === 'admin'): ?>
@@ -662,16 +672,21 @@ if ($_SESSION['rol'] === 'admin') {
                             <option value="">Seleccione Tipo</option>
                             <option value="Tipo1">Tipo1</option>
                             <option value="Tipo2">Tipo2</option>
-                            <!-- Agregar más tipos según sea necesario -->
+                            <!-- Agrega más opciones según sea necesario -->
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="precio_unitario">Precio Unitario</label>
-                        <input type="number" class="form-control" id="precio_unitario" name="precio_unitario" step="0.01" required>
+                        <input type="number" step="0.01" class="form-control" id="precio_unitario" name="precio_unitario" min="1" required>
                     </div>
                     <div class="form-group">
                         <label for="unidad">Unidad</label>
-                        <input type="text" class="form-control" id="unidad" name="unidad" required>
+                        <select class="form-control" id="unidad" name="unidad" required>
+                            <option value="">Seleccione Unidad</option>
+                            <option value="Unidad1">Unidad1</option>
+                            <option value="Unidad2">Unidad2</option>
+                            <!-- Agrega más opciones según sea necesario -->
+                        </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Agregar Producto</button>
                 </form>
@@ -680,101 +695,6 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 <?php endif; ?>
-
-<!-- Modal Editar Producto (solo para admin) -->
-<?php if ($_SESSION['rol'] === 'admin'): ?>
-<div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editarProductoModalLabel">Editar Producto</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="productos.php" method="POST">
-                    <input type="hidden" name="action" value="edit_producto">
-                    <input type="hidden" name="id_producto" id="id_producto">
-
-                    <div class="form-group">
-                        <label for="edit_nombre">Nombre</label>
-                        <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_descripcion">Descripción</label>
-                        <textarea class="form-control" id="edit_descripcion" name="descripcion"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_tipo">Tipo</label>
-                        <select class="form-control" id="edit_tipo" name="tipo" required>
-                            <option value="">Seleccione Tipo</option>
-                            <option value="Tipo1">Tipo1</option>
-                            <option value="Tipo2">Tipo2</option>
-                            <!-- Agregar más tipos según sea necesario -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_precio_unitario">Precio Unitario</label>
-                        <input type="number" class="form-control" id="edit_precio_unitario" name="precio_unitario" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_unidad">Unidad</label>
-                        <input type="text" class="form-control" id="edit_unidad" name="unidad" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Actualizar Producto</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
-
-<script>
-    function toggleVariedades(variedades, productoId) {
-        var variedadesSection = document.getElementById('variedadesSection');
-        var variedadesTableBody = document.getElementById('variedadesTableBody');
-        var product_id = document.getElementById('product_id');
-        
-        if (variedadesSection.style.display === 'none') {
-            variedadesSection.style.display = 'block';
-            product_id.value = productoId;
-            
-            // Limpiar tabla de variedades
-            variedadesTableBody.innerHTML = '';
-            
-            // Agregar variedades a la tabla
-            variedades.forEach(function(variedad) {
-                var row = document.createElement('tr');
-                row.innerHTML = `<td>${variedad.nombre}</td><td>${variedad.caracteristicas}</td>`;
-                variedadesTableBody.appendChild(row);
-            });
-        } else {
-            variedadesSection.style.display = 'none';
-        }
-    }
-
-    $('#editarProductoModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var id = button.data('id');
-        var nombre = button.data('nombre');
-        var descripcion = button.data('descripcion');
-        var tipo = button.data('tipo');
-        var precioUnitario = button.data('precio_unitario');
-        var unidad = button.data('unidad');
-        var variedades = button.data('variedades');
-
-        var modal = $(this);
-        modal.find('#id_producto').val(id);
-        modal.find('#edit_nombre').val(nombre);
-        modal.find('#edit_descripcion').val(descripcion);
-        modal.find('#edit_tipo').val(tipo);
-        modal.find('#edit_precio_unitario').val(precioUnitario);
-        modal.find('#edit_unidad').val(unidad);
-    });
-</script>
-
-
 
 <!-- Modal Editar Producto (solo para admin) -->
 <?php if ($_SESSION['rol'] === 'admin'): ?>

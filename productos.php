@@ -569,7 +569,7 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
-
+</div>
 
 
                                         

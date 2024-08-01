@@ -52,7 +52,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     exit();
 }
 
-// Manejo de la actualización y agregación de productos
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     try {
         // Verificar si variedades está presente y no es null
@@ -63,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
             throw new Exception('El formato JSON para variedades no es válido.');
         }
 
-        // Preparar los datos del producto para la base de datos
         $productoData = [
             'nombre' => $_POST['nombre'],
             'descripcion' => $_POST['descripcion'],
@@ -73,23 +71,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
             'variedades' => $variedades
         ];
 
-        // Verificar si se está actualizando un producto existente
-        if (isset($_POST['id']) && strlen($_POST['id']) === 24 && ctype_xdigit($_POST['id'])) {
-            // Actualizar producto existente
+        if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
+            // Actualizar producto
             $result = $productosCollection->updateOne(
                 ['_id' => new ObjectId($_POST['id'])],
                 ['$set' => $productoData]
             );
-
             if ($result->getModifiedCount() > 0) {
                 $success[] = 'Producto actualizado exitosamente.';
             } else {
                 $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
             }
         } else {
-            // Agregar nuevo producto
+            // Agregar producto
             $result = $productosCollection->insertOne($productoData);
-
             if ($result->getInsertedCount() > 0) {
                 $success[] = 'Producto agregado exitosamente.';
             } else {
@@ -100,7 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
         $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
     }
 }
-
 
 
 // Modifica la parte de eliminación de variedades

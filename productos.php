@@ -55,7 +55,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 // Manejo de la actualización y agregación de productos
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     try {
-        $variedades = json_decode($_POST['variedades'], true);
+        // Verificar si variedades está presente y no es null
+        $variedades = isset($_POST['variedades']) ? json_decode($_POST['variedades'], true) : [];
+
+        // Verificar si la decodificación fue exitosa
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new Exception('El formato JSON para variedades no es válido.');
         }
@@ -93,6 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
         $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
     }
 }
+
 
 
 // Modifica la parte de eliminación de variedades

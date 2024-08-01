@@ -746,8 +746,15 @@ if ($_SESSION['rol'] === 'admin') {
 
 <script>
 $(document).ready(function() {
-    // Maneja el envío del formulario de agregar variedad (si es necesario)
-    // Puedes eliminar o comentar esta parte si ya no necesitas agregar variedades.
+    // Configura el modal de agregar variedad con el ID del producto
+    $('#agregarVariedadModal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget); // Botón que abrió el modal
+        var productId = button.data('product-id'); // Extrae el ID del producto
+        var modal = $(this);
+        modal.find('#product_id').val(productId);
+    });
+
+    // Maneja el envío del formulario de agregar variedad
     $('#agregarVariedadForm').on('submit', function(e) {
         e.preventDefault(); // Evita el envío normal del formulario
         var formData = $(this).serialize(); // Serializa los datos del formulario
@@ -836,9 +843,9 @@ $(document).ready(function() {
                 // Hacer scroll hacia los mensajes
                 messagesContainer.scrollIntoView({behavior: "smooth"});
                 
-                // Recargar la tabla de variedades después de un breve retraso
+                // Recargar la tabla de variedades o la página después de un breve retraso
                 setTimeout(() => {
-                    showVariedades(data.variedades, productoId); // Recargar tabla con las variedades actualizadas
+                    location.reload();
                 }, 2000);
             })
             .catch(error => {

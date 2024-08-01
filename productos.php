@@ -101,15 +101,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
             ['$pull' => ['variedades' => ['nombre_variedad' => $variedad_nombre]]]
         );
         if ($result->getModifiedCount() > 0) {
-            $success[] = 'Variedad eliminada exitosamente.';
+            echo json_encode(['success' => true, 'message' => 'Variedad eliminada exitosamente.']);
         } else {
-            $errors[] = 'No se pudo eliminar la variedad.';
+            echo json_encode(['success' => false, 'message' => 'No se pudo eliminar la variedad.']);
         }
     } catch (Exception $e) {
-        $errors[] = 'Error al eliminar la variedad: ' . $e->getMessage();
+        echo json_encode(['success' => false, 'message' => 'Error al eliminar la variedad: ' . $e->getMessage()]);
     }
 
-    header('Location: productos.php');
     exit();
 }
 
@@ -534,9 +533,9 @@ if ($_SESSION['rol'] === 'admin') {
                                 <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
                                 <td><?php echo htmlspecialchars($producto->unidad); ?></td>
                                 <td>
-                                    <button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>)">
-                                        Ver Variedades
-                                    </button>
+                                    <button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
+    Ver Variedades
+</button>
                                     <?php if ($_SESSION['rol'] === 'admin'): ?>
                                     <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarProductoModal"
                                             data-id="<?php echo htmlspecialchars($producto->_id); ?>"
@@ -695,44 +694,49 @@ if ($_SESSION['rol'] === 'admin') {
 <?php endif; ?>
 
 <script>
-    function showVariedades(variedades) {
-        const section = document.querySelector('#variedadesSection');
-        const tableBody = document.querySelector('#variedadesTableBody');
-        section.style.display = (section.style.display === 'none' || section.style.display === '') ? 'block' : 'none';
-        
-        if (section.style.display === 'block') {
-            tableBody.innerHTML = ''; // Limpiar contenido previo
+function showVariedades(variedades, productoId) {
+    const section = document.querySelector('#variedadesSection');
+    const tableBody = document.querySelector('#variedadesTableBody');
+    section.style.display = (section.style.display === 'none' || section.style.display === '') ? 'block' : 'none';
+    
+    if (section.style.display === 'block') {
+        tableBody.innerHTML = ''; // Limpiar contenido previo
 
-            variedades.forEach(variedad => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${variedad.nombre_variedad}</td>
-                    <td>${variedad.caracteristicas}</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm" onclick="eliminarVariedad('${variedad._id}')">Eliminar</button>
-                    </td>`;
-                tableBody.appendChild(row);
-            });
-        }
+        variedades.forEach(variedad => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${variedad.nombre_variedad}</td>
+                <td>${variedad.caracteristicas}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="eliminarVariedad('${productoId}', '${variedad.nombre_variedad}')">Eliminar</button>
+                </td>`;
+            tableBody.appendChild(row);
+        });
     }
+}
 
-    function eliminarVariedad(idVariedad) {
-        // Aquí deberás implementar la lógica para eliminar la variedad
-        // Puedes hacer una solicitud AJAX para eliminar la variedad del servidor
-        if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
-            // Hacer la solicitud AJAX aquí
-            console.log('Eliminar variedad con id:', idVariedad);
-            // Ejemplo de solicitud AJAX
-            // $.post('eliminar_variedad.php', { id: idVariedad }, function(response) {
-            //     if (response.success) {
-            //         alert('Variedad eliminada con éxito');
-            //         // Recargar o actualizar la tabla de variedades
-            //     } else {
-            //         alert('Error al eliminar variedad');
-            //     }
-            // });
-        }
+ function eliminarVariedad(productoId, nombreVariedad) {
+    if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
+        // Hacer la solicitud AJAX aquí
+        fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Variedad eliminada con éxito');
+                // Recargar la página o actualizar la tabla de variedades
+                location.reload();
+            } else {
+                alert('Error al eliminar variedad: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar variedad');
+        });
     }
+}
 
     // Configurar el modal de edición
     $('#editarProductoModal').on('show.bs.modal', function (event) {

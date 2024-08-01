@@ -538,10 +538,11 @@ if ($_SESSION['rol'] === 'admin') {
                                 <td><?php echo htmlspecialchars($producto->unidad); ?></td>
                                 <td>
                                     <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#variedadesModal"
-                                        data-id="<?php echo htmlspecialchars($producto->_id); ?>"
-                                        data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades)); ?>'>
-                                        Ver Variedades
-                                    </button>
+    data-id="<?php echo htmlspecialchars($producto->_id); ?>"
+    data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades)); ?>'>
+    Ver Variedades
+</button>
+
                                     <?php if ($_SESSION['rol'] === 'admin'): ?>
                                     <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#agregarVariedadModal"
                                             data-id="<?php echo htmlspecialchars($producto->_id); ?>">
@@ -739,53 +740,39 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 <?php endif; ?>
 
+
 <script>
-$(document).ready(function() {
-    $('#variedadesModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var variedadesJson = button.data('variedades');
-        var modal = $(this);
-        var variedadesList = modal.find('#variedadesList');
-        var debugInfo = modal.find('#debugInfo');
-        
-        variedadesList.empty();
-        debugInfo.empty();
+    $(document).ready(function() {
+        $('#variedadesModal').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget); // Botón que activó el modal
+            var id = button.data('id'); // Extraer datos-id del botón
+            var variedades = button.data('variedades'); // Extraer datos-variedades del botón
 
-        // Añadir información de depuración
-        debugInfo.append('<p>JSON recibido: ' + JSON.stringify(variedadesJson) + '</p>');
+            var modal = $(this);
+            var variedadesList = modal.find('#variedadesList');
+            variedadesList.empty(); // Limpiar la lista de variedades antes de agregar nuevos elementos
 
-        try {
-            var variedades = typeof variedadesJson === 'string' ? JSON.parse(variedadesJson) : variedadesJson;
-            
-            debugInfo.append('<p>JSON parseado: ' + JSON.stringify(variedades) + '</p>');
-            debugInfo.append('<p>Tipo de variedades: ' + typeof variedades + '</p>');
-            debugInfo.append('<p>Es array: ' + Array.isArray(variedades) + '</p>');
-            
-            if (variedades && Array.isArray(variedades) && variedades.length > 0) {
-                variedades.forEach(function (variedad, index) {
-                    variedadesList.append(
-                        '<li class="list-group-item">' +
-                        '<strong>Nombre:</strong> ' + (variedad.nombre_variedad || 'N/A') + '<br>' +
-                        '<strong>Descripción:</strong> ' + (variedad.caracteristicas || 'N/A') + '<br>' +
-                        '<a href="?action=delete_variedad&product_id=' + encodeURIComponent(button.data('id')) +
-                        '&variedad_nombre=' + encodeURIComponent(variedad.nombre_variedad) + '" ' +
-                        'class="btn btn-danger btn-sm" onclick="return confirm(\'¿Estás seguro de que deseas eliminar esta variedad?\');">Eliminar</a>' +
-                        '</li>'
-                    );
+            if (variedades && Array.isArray(variedades)) {
+                variedades.forEach(function(variedad) {
+                    variedadesList.append('<li class="list-group-item">' + htmlspecialchars(variedad.nombre_variedad) + ': ' + htmlspecialchars(variedad.caracteristicas) + '</li>');
                 });
             } else {
-                variedadesList.append('<li class="list-group-item">No hay variedades disponibles</li>');
-                debugInfo.append('<p>No hay variedades o no es un array válido</p>');
+                variedadesList.append('<li class="list-group-item">No hay variedades disponibles.</li>');
             }
-        } catch (e) {
-            console.error('Error al parsear las variedades:', e);
-            variedadesList.append('<li class="list-group-item">Error al cargar las variedades</li>');
-            debugInfo.append('<p>Error al parsear JSON: ' + e.message + '</p>');
+        });
+
+        function htmlspecialchars(text) {
+            var map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
         }
     });
-});
 </script>
-
 
 
 

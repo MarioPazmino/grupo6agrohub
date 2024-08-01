@@ -616,6 +616,7 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 
 <!-- Modal Editar Producto (solo para admin) -->
+<<!-- Modal Editar Producto (solo para admin) -->
 <div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">

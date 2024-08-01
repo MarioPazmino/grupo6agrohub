@@ -54,21 +54,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     try {
-        // Verificar si variedades está presente y no es null
-        $variedades = isset($_POST['variedades']) ? json_decode($_POST['variedades'], true) : [];
-
-        // Verificar si la decodificación fue exitosa
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception('El formato JSON para variedades no es válido.');
-        }
-
+        // Datos del producto sin "variedades"
         $productoData = [
             'nombre' => $_POST['nombre'],
             'descripcion' => $_POST['descripcion'],
             'tipo' => $_POST['tipo'],
             'precio_unitario' => floatval($_POST['precio_unitario']),
-            'unidad' => $_POST['unidad'],
-            'variedades' => $variedades
+            'unidad' => $_POST['unidad']
         ];
 
         if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
@@ -661,10 +653,6 @@ if ($_SESSION['rol'] === 'admin') {
                         <label for="editar_unidad">Unidad</label>
                         <input type="text" class="form-control" id="editar_unidad" name="unidad" required>
                     </div>
-                    <div class="form-group">
-                        <label for="editar_variedades">Variedades (JSON)</label>
-                        <textarea class="form-control" id="editar_variedades" name="variedades" required></textarea>
-                    </div>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
                 </form>
             </div>
@@ -672,6 +660,7 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 <?php endif; ?>
+
 
 
 <!-- Contenedor para mensajes -->

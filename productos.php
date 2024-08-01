@@ -28,6 +28,14 @@ $productosCollection = $mongoClient->grupo6_agrohub->productos;
 // Variable para mensajes de éxito y error
 $success = [];
 $errors = [];
+// Obtener tipos de productos para mostrar en el formulario
+$tiposProductosCollection = $mongoClient->grupo6_agrohub->tipos_productos;
+try {
+    $tiposProductosCursor = $tiposProductosCollection->find();
+    $tiposProductos = iterator_to_array($tiposProductosCursor);
+} catch (Exception $e) {
+    $errors[] = 'Error al obtener los tipos de productos: ' . $e->getMessage();
+}
 
 // Manejo de la eliminación de productos
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
@@ -713,29 +721,32 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="productos.php" id="agregarVariedadForm">
-                    <input type="hidden" name="action" value="add_variedad">
-                    <input type="hidden" id="product_id" name="product_id" value="">
+<!-- Ejemplo de código HTML para mostrar el formulario con tipos de productos -->
+<form action="productos.php" method="POST">
+    <input type="hidden" name="action" value="add_variedad">
 
-                    <div class="form-group mb-2">
-                        <label for="tipo_producto">Tipo de Producto</label>
-                        <select id="tipo_producto" name="tipo_producto" class="form-control" required>
-                            <!-- Las opciones se cargarán mediante JavaScript -->
-                        </select>
-                    </div>
+    <!-- Campo para seleccionar el tipo de producto -->
+    <label for="tipo_producto">Tipo de Producto:</label>
+    <select name="tipo_producto" id="tipo_producto">
+        <?php foreach ($tiposProductos as $tipo): ?>
+            <option value="<?php echo htmlspecialchars($tipo['nombre']); ?>">
+                <?php echo htmlspecialchars($tipo['nombre']); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
 
-                    <div class="form-group mb-2">
-                        <label for="variedad_nombre">Nombre de la variedad</label>
-                        <input type="text" id="variedad_nombre" name="variedad_nombre" class="form-control" placeholder="Nombre de la variedad" required>
-                    </div>
+    <!-- Otros campos del formulario -->
+    <label for="variedad_nombre">Nombre de Variedad:</label>
+    <input type="text" name="variedad_nombre" id="variedad_nombre" required>
 
-                    <div class="form-group mb-2">
-                        <label for="caracteristicas">Características</label>
-                        <input type="text" id="caracteristicas" name="caracteristicas" class="form-control" placeholder="Características" required>
-                    </div>
+    <label for="caracteristicas">Características:</label>
+    <textarea name="caracteristicas" id="caracteristicas" required></textarea>
 
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar Variedad</button>
-                </form>
+    <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product_id); ?>">
+
+    <button type="submit">Agregar Variedad</button>
+</form>
+
             </div>
         </div>
     </div>

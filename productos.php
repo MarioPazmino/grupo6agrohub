@@ -85,13 +85,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && !isset(
 
 
 
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && isset($_POST['id'])) {
+// Manejo de la actualización del producto
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id']) && !isset($_POST['action'])) {
     try {
-        // Verificar si variedades está presente y no es null
         $variedades = isset($_POST['variedades']) ? json_decode($_POST['variedades'], true) : [];
 
-        // Verificar si la decodificación fue exitosa
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new Exception('El formato JSON para variedades no es válido.');
         }
@@ -106,8 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && isset($
         ];
 
         // Verificar si el ID es válido
-        if (strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
-            // Actualizar producto
+        if (strlen($_POST['id']) === 24 && ctype_xdigit($_POST['id'])) {
             $result = $productosCollection->updateOne(
                 ['_id' => new ObjectId($_POST['id'])],
                 ['$set' => $productoData]
@@ -701,6 +698,17 @@ if ($_SESSION['rol'] === 'admin') {
 
 <?php endif; ?>
 
+<script>
+function showEditModal(producto) {
+    document.getElementById('editar_id').value = producto._id;
+    document.getElementById('editar_nombre').value = producto.nombre;
+    document.getElementById('editar_descripcion').value = producto.descripcion;
+    document.getElementById('editar_tipo').value = producto.tipo;
+    document.getElementById('editar_precio_unitario').value = producto.precio_unitario;
+    document.getElementById('editar_unidad').value = producto.unidad;
+    $('#editarProductoModal').modal('show');
+}
+</script>
 
 
 <!-- Contenedor para mensajes -->

@@ -96,19 +96,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     }
 }
 
-// Acción para obtener productos
-if ($_GET['action'] === 'get_products') {
-    $productos = $db->productos->find();
-    $productosArray = [];
-    foreach ($productos as $producto) {
-        $productosArray[] = [
-            '_id' => (string)$producto['_id'],
-            'nombre' => $producto['nombre']
+
+
+
+
+// Manejo de la solicitud de productos para el dropdown
+if (isset($_GET['action']) && $_GET['action'] === 'get_products') {
+    try {
+        $productos = $productosCollection->find()->toArray();
+        $response = [
+            'products' => array_map(function($producto) {
+                return [
+                    '_id' => (string)$producto['_id'],
+                    'nombre' => $producto['nombre']
+                ];
+            }, $productos)
         ];
+        echo json_encode($response);
+    } catch (Exception $e) {
+        $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
+        echo json_encode(['errors' => $errors]);
     }
-    echo json_encode(['products' => $productosArray]);
-    exit;
+    exit();
 }
+
 // Modifica la parte de eliminación de variedades
 if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
     $product_id = $_GET['product_id'];
@@ -778,15 +789,19 @@ $(document).ready(function() {
         
         // Cargar los productos disponibles en el dropdown
         $.ajax({
-            url: 'productos.php?action=get_products', // Necesitas implementar esta acción en tu backend
+            url: 'productos.php?action=get_products', // Implementa esta acción en tu backend
             type: 'GET',
             dataType: 'json',
             success: function(response) {
                 var select = modal.find('#select_product');
                 select.empty(); // Limpiar opciones existentes
-                response.products.forEach(function(product) {
-                    select.append(new Option(product.nombre, product._id));
-                });
+                if (response.products) {
+                    response.products.forEach(function(product) {
+                        select.append(new Option(product.nombre, product._id));
+                    });
+                } else if (response.errors) {
+                    alert('Error al cargar productos: ' + response.errors.join(', '));
+                }
             },
             error: function() {
                 alert('Error al cargar productos.');
@@ -802,16 +817,15 @@ $(document).ready(function() {
         $.ajax({
             url: 'productos.php',
             type: 'POST',
-            data: formData + '&action=add_variedad', // Agrega la acción al formulario
+            data: formData, // Enviar los datos del formulario
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
                     alert(response.success[0]);
                     $('#agregarVariedadModal').modal('hide');
-                    // Recargar la tabla de variedades
-                    showVariedades(response.variedades, $('#select_product').val());
+                    // Opcionalmente recargar la tabla de variedades
                 } else if (response.errors) {
-                    alert(response.errors[0]);
+                    alert('Error: ' + response.errors.join(', '));
                 }
             },
             error: function() {
@@ -820,6 +834,7 @@ $(document).ready(function() {
         });
     });
 });
+
 
 
 function showVariedades(variedades, productoId) {

@@ -488,7 +488,6 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
 <!-- Content Row -->
 <div class="row">
 
@@ -546,9 +545,15 @@ if ($_SESSION['rol'] === 'admin') {
                                 <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
                                 <td><?php echo htmlspecialchars($producto->unidad); ?></td>
                                 <td>
-                                    <button type="button" class="btn btn-info btn-sm" onclick="toggleVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
+                                    <button type="button" class="btn btn-info btn-sm" onclick="toggleVariedades('<?php echo htmlspecialchars($producto->_id); ?>')">
                                         <i class="fas fa-caret-down" id="icon-<?php echo htmlspecialchars($producto->_id); ?>"></i> Ver Variedades
                                     </button>
+                                    <div id="variedades-<?php echo htmlspecialchars($producto->_id); ?>" class="mt-2" style="display: none;">
+                                        <!-- Aquí se deben mostrar las variedades -->
+                                        <?php foreach ($producto->variedades as $variedad): ?>
+                                        <p><?php echo htmlspecialchars($variedad); ?></p>
+                                        <?php endforeach; ?>
+                                    </div>
                                     <?php if ($_SESSION['rol'] === 'admin'): ?>
                                     <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarProductoModal"
                                             data-id="<?php echo htmlspecialchars($producto->_id); ?>"
@@ -576,16 +581,16 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 
 <script>
-    function toggleVariedades(variedades, id) {
-        // Aquí debes implementar la lógica para mostrar/ocultar las variedades
-        // Por simplicidad, solo se muestra un mensaje en este ejemplo
-        alert('Mostrar/Ocultar variedades para el producto con ID: ' + id);
-        
+    function toggleVariedades(id) {
+        var variedadesDiv = document.getElementById('variedades-' + id);
         var icon = document.getElementById('icon-' + id);
-        if (icon.classList.contains('fa-caret-down')) {
+
+        if (variedadesDiv.style.display === 'none') {
+            variedadesDiv.style.display = 'block';
             icon.classList.remove('fa-caret-down');
             icon.classList.add('fa-caret-up');
         } else {
+            variedadesDiv.style.display = 'none';
             icon.classList.remove('fa-caret-up');
             icon.classList.add('fa-caret-down');
         }

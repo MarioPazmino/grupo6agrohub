@@ -481,9 +481,6 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
-
-
 <!-- Content Row -->
 <div class="row">
 
@@ -569,6 +566,7 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
+
 <!-- Contenedor para mensajes -->
 <div id="messages-container"></div>
 
@@ -596,7 +594,7 @@ if ($_SESSION['rol'] === 'admin') {
                 </div>
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <button type="button" class="btn btn-primary mt-3" data-toggle="modal" data-target="#agregarVariedadModal">
-                    Agregar Variedad
+                    <i class="fas fa-plus"></i> Agregar Variedad
                 </button>
                 <?php endif; ?>
             </div>
@@ -615,22 +613,22 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-<form method="POST" action="productos.php" class="form-inline">
-            <input type="hidden" name="action" value="add_variedad">
-            <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($producto['_id']); ?>">
+                <form method="POST" action="productos.php" class="form-inline" id="agregarVariedadForm">
+                    <input type="hidden" name="action" value="add_variedad">
+                    <input type="hidden" name="product_id" id="product_id">
 
-            <div class="form-group mb-2 mr-2">
-                <label for="variedad_nombre" class="sr-only">Nombre de la variedad</label>
-                <input type="text" id="variedad_nombre" name="variedad_nombre" class="form-control" placeholder="Nombre de la variedad" required>
-            </div>
+                    <div class="form-group mb-2 mr-2">
+                        <label for="variedad_nombre" class="sr-only">Nombre de la variedad</label>
+                        <input type="text" id="variedad_nombre" name="variedad_nombre" class="form-control" placeholder="Nombre de la variedad" required>
+                    </div>
 
-            <div class="form-group mb-2 mr-2">
-                <label for="caracteristicas" class="sr-only">Características</label>
-                <input type="text" id="caracteristicas" name="caracteristicas" class="form-control" placeholder="Características" required>
-            </div>
+                    <div class="form-group mb-2 mr-2">
+                        <label for="caracteristicas" class="sr-only">Características</label>
+                        <input type="text" id="caracteristicas" name="caracteristicas" class="form-control" placeholder="Características" required>
+                    </div>
 
-            <button type="submit" class="btn btn-primary mb-2">Agregar Variedad</button>
-        </form>
+                    <button type="submit" class="btn btn-primary mb-2"><i class="fas fa-plus"></i> Agregar Variedad</button>
+                </form>
             </div>
         </div>
     </div>
@@ -775,6 +773,7 @@ if ($_SESSION['rol'] === 'admin') {
         modal.find('#edit_unidad').val(unidad);
     });
 </script>
+
 
 
 <!-- Modal Editar Producto (solo para admin) -->

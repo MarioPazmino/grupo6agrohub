@@ -507,7 +507,7 @@ if ($_SESSION['rol'] === 'admin') {
 
                 <!-- Botón de agregar producto (solo para admin) -->
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#agregarProductoModal">
+                <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarProductoModal">
                     Agregar Producto
                 </button>
                 <?php endif; ?>
@@ -542,6 +542,12 @@ if ($_SESSION['rol'] === 'admin') {
                                         data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades)); ?>'>
                                         Ver Variedades
                                     </button>
+                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
+                                    <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#agregarVariedadModal"
+                                            data-id="<?php echo htmlspecialchars($producto->_id); ?>">
+                                        Agregar Variedad
+                                    </button>
+                                    <?php endif; ?>
                                 </td>
                                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                                 <td>
@@ -583,6 +589,7 @@ if ($_SESSION['rol'] === 'admin') {
             </div>
             <div class="modal-body">
                 <form action="productos.php" method="POST">
+                    <input type="hidden" name="action" value="add_producto">
                     <div class="form-group">
                         <label for="nombre">Nombre</label>
                         <input type="text" class="form-control" id="nombre" name="nombre" required>
@@ -612,10 +619,6 @@ if ($_SESSION['rol'] === 'admin') {
                             <option value="Unidad2">Unidad2</option>
                             <!-- Agrega más opciones según sea necesario -->
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="variedades">Variedades</label>
-                        <small class="form-text text-muted">Las variedades se manejan por separado.</small>
                     </div>
                     <button type="submit" class="btn btn-primary">Agregar Producto</button>
                 </form>
@@ -670,7 +673,7 @@ if ($_SESSION['rol'] === 'admin') {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="edit_variedades">Variedades (JSON)</label>
+                        <label for="edit_variedades">Variedades (en formato JSON)</label>
                         <textarea class="form-control" id="edit_variedades" name="variedades"></textarea>
                         <small class="form-text text-muted">Las variedades deben estar en formato JSON.</small>
                     </div>
@@ -701,8 +704,39 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
+<!-- Modal Agregar Variedad (solo para admin) -->
+<?php if ($_SESSION['rol'] === 'admin'): ?>
+<div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarVariedadModalLabel">Agregar Variedad</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="productos.php">
+                    <input type="hidden" name="action" value="add_variedad">
+                    <input type="hidden" id="variedad_product_id" name="product_id">
+                    <div class="form-group">
+                        <label for="variedad_nombre">Nombre de Variedad</label>
+                        <input type="text" class="form-control" id="variedad_nombre" name="variedad_nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="caracteristicas">Características</label>
+                        <textarea class="form-control" id="caracteristicas" name="caracteristicas" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Agregar Variedad</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <script>
-    // Script para manejar los modales de edición y variedades
+    // Script para manejar los modales de edición, variedad y agregar variedad
     $('#editarProductoModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);
         var id = button.data('id');
@@ -737,6 +771,13 @@ if ($_SESSION['rol'] === 'admin') {
         } else {
             variedadesList.append('<li class="list-group-item">No hay variedades disponibles</li>');
         }
+    });
+
+    $('#agregarVariedadModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var productId = button.data('id');
+        var modal = $(this);
+        modal.find('#variedad_product_id').val(productId);
     });
 </script>
 

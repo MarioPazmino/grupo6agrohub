@@ -785,33 +785,33 @@ $(document).ready(function() {
     });
 });
 
- function showVariedades(variedades, productoId) {
-        var variedadesSection = document.getElementById('variedadesSection');
-        var variedadesTableBody = document.getElementById('variedadesTableBody');
+function showVariedades(variedades, productoId) {
+    const section = document.querySelector('#variedadesSection');
+    const tableBody = document.querySelector('#variedadesTableBody');
+    const isCurrentlyVisible = section.style.display === 'block';
 
-        // Limpia el contenido de la tabla
-        variedadesTableBody.innerHTML = '';
+    // Alternar visibilidad de la sección
+    section.style.display = isCurrentlyVisible ? 'none' : 'block';
+    
+    // Solo actualiza la tabla si se va a mostrar la sección
+    if (!isCurrentlyVisible) {
+        section.dataset.productId = productoId;
 
-        // Agrega las variedades a la tabla
-        variedades.forEach(function(variedad) {
-            var row = document.createElement('tr');
+        tableBody.innerHTML = ''; // Limpiar contenido previo
+
+        variedades.forEach(variedad => {
+            const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${variedad.nombre}</td>
+                <td>${variedad.nombre_variedad}</td>
                 <td>${variedad.caracteristicas}</td>
                 <td>
-                    <!-- Acciones para cada variedad, si es necesario -->
+                    <button class="btn btn-danger btn-sm" onclick="eliminarVariedad('${productoId}', '${variedad.nombre_variedad}')">Eliminar</button>
                 </td>
             `;
-            variedadesTableBody.appendChild(row);
+            tableBody.appendChild(row);
         });
-
-        // Alterna la visibilidad de la sección
-        if (variedadesSection.style.display === 'none' || variedadesSection.style.display === '') {
-            variedadesSection.style.display = 'block';
-        } else {
-            variedadesSection.style.display = 'none';
-        }
     }
+}
 
 function eliminarVariedad(productoId, nombreVariedad) {
     if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {

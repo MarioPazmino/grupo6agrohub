@@ -63,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
             throw new Exception('El formato JSON para variedades no es válido.');
         }
 
+        // Preparar los datos del producto para la base de datos
         $productoData = [
             'nombre' => $_POST['nombre'],
             'descripcion' => $_POST['descripcion'],
@@ -72,20 +73,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
             'variedades' => $variedades
         ];
 
-        if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
-            // Actualizar producto
+        // Verificar si se está actualizando un producto existente
+        if (isset($_POST['id']) && strlen($_POST['id']) === 24 && ctype_xdigit($_POST['id'])) {
+            // Actualizar producto existente
             $result = $productosCollection->updateOne(
                 ['_id' => new ObjectId($_POST['id'])],
                 ['$set' => $productoData]
             );
+
             if ($result->getModifiedCount() > 0) {
                 $success[] = 'Producto actualizado exitosamente.';
             } else {
                 $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
             }
         } else {
-            // Agregar producto
+            // Agregar nuevo producto
             $result = $productosCollection->insertOne($productoData);
+
             if ($result->getInsertedCount() > 0) {
                 $success[] = 'Producto agregado exitosamente.';
             } else {
@@ -625,6 +629,7 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
+<?php if ($isAdmin): ?>
 <!-- Modal Editar Producto (solo para admin) -->
 <div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -665,7 +670,7 @@ if ($_SESSION['rol'] === 'admin') {
                     </div>
                     <div class="form-group">
                         <label for="editar_variedades">Variedades (JSON)</label>
-                        <textarea class="form-control" id="editar_variedades" name="variedades" required></textarea>
+                        <textarea class="form-control" id="editar_variedades" name="variedades" placeholder='[{"variedad": "Variedad1", "precio": 1.50}, {"variedad": "Variedad2", "precio": 2.00}]' required></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
                 </form>
@@ -674,6 +679,7 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 <?php endif; ?>
+
 
 
 <!-- Contenedor para mensajes -->

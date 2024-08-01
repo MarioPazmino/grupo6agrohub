@@ -488,6 +488,7 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
+
 <!-- Content Row -->
 <div class="row">
 
@@ -519,7 +520,7 @@ if ($_SESSION['rol'] === 'admin') {
                 <!-- Botón de agregar producto (solo para admin) -->
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarProductoModal">
-                    <i class="fas fa-plus"></i> Agregar Producto
+                    Agregar Producto
                 </button>
                 <?php endif; ?>
 
@@ -545,15 +546,9 @@ if ($_SESSION['rol'] === 'admin') {
                                 <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
                                 <td><?php echo htmlspecialchars($producto->unidad); ?></td>
                                 <td>
-                                    <button type="button" class="btn btn-info btn-sm" onclick="toggleVariedades('<?php echo htmlspecialchars($producto->_id); ?>')">
-                                        <i class="fas fa-caret-down" id="icon-<?php echo htmlspecialchars($producto->_id); ?>"></i> Ver Variedades
-                                    </button>
-                                    <div id="variedades-<?php echo htmlspecialchars($producto->_id); ?>" class="mt-2" style="display: none;">
-                                        <!-- Aquí se deben mostrar las variedades -->
-                                        <?php foreach ($producto->variedades as $variedad): ?>
-                                        <p><?php echo htmlspecialchars($variedad); ?></p>
-                                        <?php endforeach; ?>
-                                    </div>
+                                    <button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
+    Ver Variedades
+</button>
                                     <?php if ($_SESSION['rol'] === 'admin'): ?>
                                     <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarProductoModal"
                                             data-id="<?php echo htmlspecialchars($producto->_id); ?>"
@@ -562,11 +557,11 @@ if ($_SESSION['rol'] === 'admin') {
                                             data-tipo="<?php echo htmlspecialchars($producto->tipo); ?>"
                                             data-precio_unitario="<?php echo htmlspecialchars($producto->precio_unitario); ?>"
                                             data-unidad="<?php echo htmlspecialchars($producto->unidad); ?>"
-                                            data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>'>
-                                        <i class="fas fa-edit"></i> Editar
+                                            data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>'
+                                        Editar
                                     </button>
                                     <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
-                                        <i class="fas fa-trash-alt"></i> Eliminar
+                                        Eliminar
                                     </a>
                                     <?php endif; ?>
                                 </td>
@@ -579,23 +574,6 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
-
-<script>
-    function toggleVariedades(id) {
-        var variedadesDiv = document.getElementById('variedades-' + id);
-        var icon = document.getElementById('icon-' + id);
-
-        if (variedadesDiv.style.display === 'none') {
-            variedadesDiv.style.display = 'block';
-            icon.classList.remove('fa-caret-down');
-            icon.classList.add('fa-caret-up');
-        } else {
-            variedadesDiv.style.display = 'none';
-            icon.classList.remove('fa-caret-up');
-            icon.classList.add('fa-caret-down');
-        }
-    }
-</script>
 
                                         
 <!-- Contenedor para mensajes -->
@@ -807,26 +785,33 @@ $(document).ready(function() {
     });
 });
 
-function showVariedades(variedades, productoId) {
-    const section = document.querySelector('#variedadesSection');
-    const tableBody = document.querySelector('#variedadesTableBody');
-    section.style.display = 'block';
-    section.dataset.productId = productoId;
-    
-    tableBody.innerHTML = ''; // Limpiar contenido previo
+ function showVariedades(variedades, productoId) {
+        var variedadesSection = document.getElementById('variedadesSection');
+        var variedadesTableBody = document.getElementById('variedadesTableBody');
 
-    variedades.forEach(variedad => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${variedad.nombre_variedad}</td>
-            <td>${variedad.caracteristicas}</td>
-            <td>
-                <button class="btn btn-danger btn-sm" onclick="eliminarVariedad('${productoId}', '${variedad.nombre_variedad}')">Eliminar</button>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-}
+        // Limpia el contenido de la tabla
+        variedadesTableBody.innerHTML = '';
+
+        // Agrega las variedades a la tabla
+        variedades.forEach(function(variedad) {
+            var row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${variedad.nombre}</td>
+                <td>${variedad.caracteristicas}</td>
+                <td>
+                    <!-- Acciones para cada variedad, si es necesario -->
+                </td>
+            `;
+            variedadesTableBody.appendChild(row);
+        });
+
+        // Alterna la visibilidad de la sección
+        if (variedadesSection.style.display === 'none' || variedadesSection.style.display === '') {
+            variedadesSection.style.display = 'block';
+        } else {
+            variedadesSection.style.display = 'none';
+        }
+    }
 
 function eliminarVariedad(productoId, nombreVariedad) {
     if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {

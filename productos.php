@@ -562,6 +562,7 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 
                                         
+
 <!-- Contenedor para mensajes -->
 <div id="messages-container"></div>
 
@@ -845,6 +846,7 @@ function eliminarVariedad(productoId, nombreVariedad) {
         modal.find('#edit_unidad').val(unidad);
     });
 </script>
+
 
 
 

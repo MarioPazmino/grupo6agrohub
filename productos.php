@@ -520,7 +520,7 @@ if ($_SESSION['rol'] === 'admin') {
                 <!-- Botón de agregar producto (solo para admin) -->
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarProductoModal">
-                    Agregar Producto
+                    <i class="fas fa-plus"></i> Agregar Producto
                 </button>
                 <?php endif; ?>
 
@@ -547,8 +547,8 @@ if ($_SESSION['rol'] === 'admin') {
                                 <td><?php echo htmlspecialchars($producto->unidad); ?></td>
                                 <td>
                                     <button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
-    Ver Variedades
-</button>
+                                        <i class="fas fa-eye"></i> Ver Variedades
+                                    </button>
                                     <?php if ($_SESSION['rol'] === 'admin'): ?>
                                     <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarProductoModal"
                                             data-id="<?php echo htmlspecialchars($producto->_id); ?>"
@@ -557,11 +557,11 @@ if ($_SESSION['rol'] === 'admin') {
                                             data-tipo="<?php echo htmlspecialchars($producto->tipo); ?>"
                                             data-precio_unitario="<?php echo htmlspecialchars($producto->precio_unitario); ?>"
                                             data-unidad="<?php echo htmlspecialchars($producto->unidad); ?>"
-                                            data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>'
-                                        Editar
+                                            data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>'>
+                                        <i class="fas fa-edit"></i> Editar
                                     </button>
                                     <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
-                                        Eliminar
+                                        <i class="fas fa-trash"></i> Eliminar
                                     </a>
                                     <?php endif; ?>
                                 </td>
@@ -575,7 +575,6 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
-                                        
 <!-- Contenedor para mensajes -->
 <div id="messages-container"></div>
 
@@ -603,7 +602,7 @@ if ($_SESSION['rol'] === 'admin') {
                 </div>
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <button type="button" class="btn btn-primary mt-3" data-toggle="modal" data-target="#agregarVariedadModal">
-                    Agregar Variedad
+                    <i class="fas fa-plus"></i> Agregar Variedad
                 </button>
                 <?php endif; ?>
             </div>
@@ -622,27 +621,28 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-<form method="POST" action="productos.php" class="form-inline">
-            <input type="hidden" name="action" value="add_variedad">
-            <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($producto['_id']); ?>">
+                <form method="POST" action="productos.php" class="form-inline">
+                    <input type="hidden" name="action" value="add_variedad">
+                    <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($producto['_id']); ?>">
 
-            <div class="form-group mb-2 mr-2">
-                <label for="variedad_nombre" class="sr-only">Nombre de la variedad</label>
-                <input type="text" id="variedad_nombre" name="variedad_nombre" class="form-control" placeholder="Nombre de la variedad" required>
-            </div>
+                    <div class="form-group mb-2 mr-2">
+                        <label for="variedad_nombre" class="sr-only">Nombre de la variedad</label>
+                        <input type="text" id="variedad_nombre" name="variedad_nombre" class="form-control" placeholder="Nombre de la variedad" required>
+                    </div>
 
-            <div class="form-group mb-2 mr-2">
-                <label for="caracteristicas" class="sr-only">Características</label>
-                <input type="text" id="caracteristicas" name="caracteristicas" class="form-control" placeholder="Características" required>
-            </div>
+                    <div class="form-group mb-2 mr-2">
+                        <label for="caracteristicas" class="sr-only">Características</label>
+                        <input type="text" id="caracteristicas" name="caracteristicas" class="form-control" placeholder="Características" required>
+                    </div>
 
-            <button type="submit" class="btn btn-primary mb-2">Agregar Variedad</button>
-        </form>
+                    <button type="submit" class="btn btn-primary mb-2">
+                        <i class="fas fa-check"></i> Agregar Variedad
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 </div>
-
 
 <!-- Modal Agregar Producto (solo para admin) -->
 <?php if ($_SESSION['rol'] === 'admin'): ?>
@@ -677,18 +677,15 @@ if ($_SESSION['rol'] === 'admin') {
                     </div>
                     <div class="form-group">
                         <label for="precio_unitario">Precio Unitario</label>
-                        <input type="number" step="0.01" class="form-control" id="precio_unitario" name="precio_unitario" min="1" required>
+                        <input type="number" step="0.01" class="form-control" id="precio_unitario" name="precio_unitario" required>
                     </div>
                     <div class="form-group">
                         <label for="unidad">Unidad</label>
-                        <select class="form-control" id="unidad" name="unidad" required>
-                            <option value="">Seleccione Unidad</option>
-                            <option value="Unidad1">Unidad1</option>
-                            <option value="Unidad2">Unidad2</option>
-                            <!-- Agrega más opciones según sea necesario -->
-                        </select>
+                        <input type="text" class="form-control" id="unidad" name="unidad" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Agregar Producto</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Agregar Producto
+                    </button>
                 </form>
             </div>
         </div>
@@ -696,8 +693,7 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 <?php endif; ?>
 
-<!-- Modal Editar Producto (solo para admin) -->
-<?php if ($_SESSION['rol'] === 'admin'): ?>
+<!-- Modal Editar Producto -->
 <div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -709,7 +705,9 @@ if ($_SESSION['rol'] === 'admin') {
             </div>
             <div class="modal-body">
                 <form action="productos.php" method="POST">
-                    <input type="hidden" id="edit_id" name="id">
+                    <input type="hidden" name="action" value="edit_producto">
+                    <input type="hidden" id="edit_producto_id" name="producto_id">
+
                     <div class="form-group">
                         <label for="edit_nombre">Nombre</label>
                         <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
@@ -729,23 +727,21 @@ if ($_SESSION['rol'] === 'admin') {
                     </div>
                     <div class="form-group">
                         <label for="edit_precio_unitario">Precio Unitario</label>
-                        <input type="number" step="0.01" class="form-control" id="edit_precio_unitario" name="precio_unitario" min="1" required>
+                        <input type="number" step="0.01" class="form-control" id="edit_precio_unitario" name="precio_unitario" required>
                     </div>
                     <div class="form-group">
                         <label for="edit_unidad">Unidad</label>
-                        <select class="form-control" id="edit_unidad" name="unidad" required>
-                            <option value="">Seleccione Unidad</option>
-                            <option value="Unidad1">Unidad1</option>
-                            <option value="Unidad2">Unidad2</option>
-                            <!-- Agrega más opciones según sea necesario -->
-                        </select>
+                        <input type="text" class="form-control" id="edit_unidad" name="unidad" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Guardar Cambios
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 <?php endif; ?>
 
 <script>

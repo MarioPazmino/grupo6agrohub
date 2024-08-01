@@ -561,10 +561,10 @@ if ($_SESSION['rol'] === 'admin') {
                                             data-precio_unitario="<?php echo htmlspecialchars($producto->precio_unitario); ?>"
                                             data-unidad="<?php echo htmlspecialchars($producto->unidad); ?>"
                                             data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>'>
-                                        <i class="fas fa-edit"></i> Editar
+                                        <i class="fas fa-edit"></i> 
                                     </button>
                                     <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
-                                        <i class="fas fa-trash"></i> Eliminar
+                                        <i class="fas fa-trash"></i> 
                                     </a>
                                     <?php endif; ?>
                                 </td>

@@ -628,13 +628,14 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-    <form id="agregarVariedadForm" method="post" action="productos.php">
+<form id="addVariedadForm" method="post" action="productos.php">
     <input type="hidden" name="product_id" value="id_del_producto">
     <input type="text" name="variedad_nombre" placeholder="Nombre de la variedad" required>
     <input type="text" name="caracteristicas" placeholder="Características" required>
     <input type="hidden" name="action" value="add_variedad">
     <button type="submit">Agregar Variedad</button>
 </form>
+
 
 
             </div>

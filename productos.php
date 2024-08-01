@@ -623,7 +623,6 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
-<?php if ($isAdmin): ?>
 <!-- Modal Editar Producto (solo para admin) -->
 <div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -664,7 +663,7 @@ if ($_SESSION['rol'] === 'admin') {
                     </div>
                     <div class="form-group">
                         <label for="editar_variedades">Variedades (JSON)</label>
-                        <textarea class="form-control" id="editar_variedades" name="variedades" placeholder='[{"variedad": "Variedad1", "precio": 1.50}, {"variedad": "Variedad2", "precio": 2.00}]' required></textarea>
+                        <textarea class="form-control" id="editar_variedades" name="variedades" required></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
                 </form>
@@ -673,7 +672,6 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 <?php endif; ?>
-
 
 
 <!-- Contenedor para mensajes -->

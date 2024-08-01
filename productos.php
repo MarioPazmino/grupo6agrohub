@@ -114,47 +114,37 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
     exit();
 }
 
-// Manejo de la actualización y agregación de variedades
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_variedad') {
-    $productId = $_POST['product_id'];
-    $variedadNombre = $_POST['variedad_nombre'];
-    $caracteristicas = $_POST['caracteristicas'];
-
-    // Validar el ID del producto
-    if (!preg_match('/^[a-f0-9]{24}$/i', $productId)) {
-        $errors[] = 'ID del producto inválido.';
-        echo json_encode(['errors' => $errors]);
-        exit();
-    }
+// Manejo de la agregación de variedades
+if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_POST['product_id']) && isset($_POST['variedad_nombre']) && isset($_POST['caracteristicas'])) {
+    $product_id = $_POST['product_id'];
+    $variedad = [
+        'nombre_variedad' => $_POST['variedad_nombre'],
+        'caracteristicas' => $_POST['caracteristicas']
+    ];
 
     try {
-        $variedad = [
-            'nombre_variedad' => $variedadNombre,
-            'caracteristicas' => $caracteristicas,
-        ];
-
-        // Actualizar el producto existente para agregar una nueva variedad
-        $result = $productosCollection->updateOne(
-            ['_id' => new MongoDB\BSON\ObjectId($productId)],
-            ['$push' => ['variedades' => $variedad]]
-        );
-
-        if ($result->getModifiedCount() > 0) {
-            $success[] = 'Variedad agregada exitosamente.';
-            // Cargar las variedades actualizadas
-            $producto = $productosCollection->findOne(['_id' => new MongoDB\BSON\ObjectId($productId)]);
-            $variedades = $producto->variedades;
-            echo json_encode(['success' => $success, 'variedades' => $variedades]);
+        // Validar el ID del producto
+        if (strlen($product_id) === 24 && ctype_xdigit($product_id)) {
+            $result = $productosCollection->updateOne(
+                ['_id' => new ObjectId($product_id)],
+                ['$push' => ['variedades' => $variedad]]
+            );
+            if ($result->getModifiedCount() > 0) {
+                $success[] = 'Variedad agregada exitosamente.';
+            } else {
+                $errors[] = 'No se pudo agregar la variedad. Verifique que el producto exista.';
+            }
         } else {
-            $errors[] = 'No se pudo agregar la variedad.';
-            echo json_encode(['errors' => $errors]);
+            $errors[] = 'ID de producto inválido.';
         }
     } catch (Exception $e) {
         $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
-        echo json_encode(['errors' => $errors]);
     }
+
+    header('Location: productos.php');
     exit();
 }
+
 
 
 // Obtener productos para mostrar en la tabla
@@ -628,13 +618,14 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-<form id="addVariedadForm" method="post" action="productos.php">
-    <input type="hidden" name="product_id" value="id_del_producto">
+<form method="POST" action="productos.php">
+    <input type="hidden" name="action" value="add_variedad">
+    <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($producto['_id']); ?>">
     <input type="text" name="variedad_nombre" placeholder="Nombre de la variedad" required>
     <input type="text" name="caracteristicas" placeholder="Características" required>
-    <input type="hidden" name="action" value="add_variedad">
     <button type="submit">Agregar Variedad</button>
 </form>
+
 
 
 

@@ -186,6 +186,9 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -562,7 +565,6 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 
                                         
-
 <!-- Contenedor para mensajes -->
 <div id="messages-container"></div>
 
@@ -775,19 +777,19 @@ function showVariedades(variedades, productoId) {
 
     variedades.forEach(variedad => {
         const row = document.createElement('tr');
-        row.innerHTML = 
+        row.innerHTML = `
             <td>${variedad.nombre_variedad}</td>
             <td>${variedad.caracteristicas}</td>
             <td>
                 <button class="btn btn-danger btn-sm" onclick="eliminarVariedad('${productoId}', '${variedad.nombre_variedad}')">Eliminar</button>
-            </td>;
+            </td>`;
         tableBody.appendChild(row);
     });
 }
 
 function eliminarVariedad(productoId, nombreVariedad) {
     if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
-        fetch(productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}, {
+        fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
             method: 'GET'
         })
         .then(response => response.json())
@@ -796,14 +798,14 @@ function eliminarVariedad(productoId, nombreVariedad) {
             if (data.success && data.success.length > 0) {
                 messageHTML += '<div class="alert alert-success" role="alert">';
                 data.success.forEach(message => {
-                    messageHTML += ${message}<br>;
+                    messageHTML += `${message}<br>`;
                 });
                 messageHTML += '</div>';
             }
             if (data.errors && data.errors.length > 0) {
                 messageHTML += '<div class="alert alert-danger" role="alert">';
                 data.errors.forEach(message => {
-                    messageHTML += ${message}<br>;
+                    messageHTML += `${message}<br>`;
                 });
                 messageHTML += '</div>';
             }
@@ -846,6 +848,8 @@ function eliminarVariedad(productoId, nombreVariedad) {
         modal.find('#edit_unidad').val(unidad);
     });
 </script>
+
+
 
 
 

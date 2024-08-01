@@ -577,6 +577,7 @@ if ($_SESSION['rol'] === 'admin') {
                             <tr>
                                 <th>Nombre de Variedad</th>
                                 <th>Características</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="variedadesTableBody">
@@ -704,9 +705,32 @@ if ($_SESSION['rol'] === 'admin') {
 
             variedades.forEach(variedad => {
                 const row = document.createElement('tr');
-                row.innerHTML = `<td>${variedad.nombre}</td><td>${variedad.caracteristicas}</td>`;
+                row.innerHTML = `
+                    <td>${variedad.nombre_variedad}</td>
+                    <td>${variedad.caracteristicas}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarVariedad('${variedad._id}')">Eliminar</button>
+                    </td>`;
                 tableBody.appendChild(row);
             });
+        }
+    }
+
+    function eliminarVariedad(idVariedad) {
+        // Aquí deberás implementar la lógica para eliminar la variedad
+        // Puedes hacer una solicitud AJAX para eliminar la variedad del servidor
+        if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
+            // Hacer la solicitud AJAX aquí
+            console.log('Eliminar variedad con id:', idVariedad);
+            // Ejemplo de solicitud AJAX
+            // $.post('eliminar_variedad.php', { id: idVariedad }, function(response) {
+            //     if (response.success) {
+            //         alert('Variedad eliminada con éxito');
+            //         // Recargar o actualizar la tabla de variedades
+            //     } else {
+            //         alert('Error al eliminar variedad');
+            //     }
+            // });
         }
     }
 
@@ -729,8 +753,6 @@ if ($_SESSION['rol'] === 'admin') {
         modal.find('#edit_unidad').val(unidad);
     });
 </script>
-
-
 
 
 

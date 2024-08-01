@@ -685,7 +685,6 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 <?php endif; ?>
 
-<!-- Modal Ver Variedades -->
 <div class="modal fade" id="variedadesModal" tabindex="-1" role="dialog" aria-labelledby="variedadesModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -699,6 +698,10 @@ if ($_SESSION['rol'] === 'admin') {
                 <ul id="variedadesList" class="list-group">
                     <!-- Las variedades se cargarán aquí dinámicamente -->
                 </ul>
+                <div id="debugInfo" style="margin-top: 20px; padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6;">
+                    <h6>Información de depuración:</h6>
+                    <!-- La información de depuración se mostrará aquí -->
+                </div>
             </div>
         </div>
     </div>
@@ -737,22 +740,29 @@ if ($_SESSION['rol'] === 'admin') {
 <?php endif; ?>
 
 <script>
- $(document).ready(function() {
+$(document).ready(function() {
     $('#variedadesModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);
         var variedadesJson = button.data('variedades');
         var modal = $(this);
         var variedadesList = modal.find('#variedadesList');
+        var debugInfo = modal.find('#debugInfo');
         
         variedadesList.empty();
+        debugInfo.empty();
 
-        console.log('Variedades JSON:', variedadesJson); // Para depuración
+        // Añadir información de depuración
+        debugInfo.append('<p>JSON recibido: ' + JSON.stringify(variedadesJson) + '</p>');
 
         try {
-            var variedades = JSON.parse(variedadesJson);
+            var variedades = typeof variedadesJson === 'string' ? JSON.parse(variedadesJson) : variedadesJson;
+            
+            debugInfo.append('<p>JSON parseado: ' + JSON.stringify(variedades) + '</p>');
+            debugInfo.append('<p>Tipo de variedades: ' + typeof variedades + '</p>');
+            debugInfo.append('<p>Es array: ' + Array.isArray(variedades) + '</p>');
             
             if (variedades && Array.isArray(variedades) && variedades.length > 0) {
-                variedades.forEach(function (variedad) {
+                variedades.forEach(function (variedad, index) {
                     variedadesList.append(
                         '<li class="list-group-item">' +
                         '<strong>Nombre:</strong> ' + (variedad.nombre_variedad || 'N/A') + '<br>' +
@@ -765,10 +775,12 @@ if ($_SESSION['rol'] === 'admin') {
                 });
             } else {
                 variedadesList.append('<li class="list-group-item">No hay variedades disponibles</li>');
+                debugInfo.append('<p>No hay variedades o no es un array válido</p>');
             }
         } catch (e) {
             console.error('Error al parsear las variedades:', e);
             variedadesList.append('<li class="list-group-item">Error al cargar las variedades</li>');
+            debugInfo.append('<p>Error al parsear JSON: ' + e.message + '</p>');
         }
     });
 });

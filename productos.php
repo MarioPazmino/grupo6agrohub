@@ -96,7 +96,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     }
 }
 
-
+// Acción para obtener productos
+if ($_GET['action'] === 'get_products') {
+    $productos = $db->productos->find();
+    $productosArray = [];
+    foreach ($productos as $producto) {
+        $productosArray[] = [
+            '_id' => (string)$producto['_id'],
+            'nombre' => $producto['nombre']
+        ];
+    }
+    echo json_encode(['products' => $productosArray]);
+    exit;
+}
 // Modifica la parte de eliminación de variedades
 if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
     $product_id = $_GET['product_id'];

@@ -114,29 +114,37 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
     exit();
 }
 
-// Manejo de la agregación de variedades
-if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_POST['product_id']) && isset($_POST['variedad_nombre']) && isset($_POST['caracteristicas'])) {
-    $product_id = $_POST['product_id'];
-    $variedad = [
-        'nombre_variedad' => $_POST['variedad_nombre'],
-        'caracteristicas' => $_POST['caracteristicas']
-    ];
+// Manejo de la actualización y agregación de variedades
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_variedad') {
+    $productId = $_POST['product_id'];
+    $variedadNombre = $_POST['variedad_nombre'];
+    $caracteristicas = $_POST['caracteristicas'];
 
     try {
+        $variedad = [
+            'nombre_variedad' => $variedadNombre,
+            'caracteristicas' => $caracteristicas,
+        ];
+
         $result = $productosCollection->updateOne(
-            ['_id' => new ObjectId($product_id)],
+            ['_id' => new ObjectId($productId)],
             ['$push' => ['variedades' => $variedad]]
         );
+
         if ($result->getModifiedCount() > 0) {
             $success[] = 'Variedad agregada exitosamente.';
+            // Cargar las variedades actualizadas
+            $producto = $productosCollection->findOne(['_id' => new ObjectId($productId)]);
+            $variedades = $producto->variedades;
+            echo json_encode(['success' => $success, 'variedades' => $variedades]);
         } else {
             $errors[] = 'No se pudo agregar la variedad.';
+            echo json_encode(['errors' => $errors]);
         }
     } catch (Exception $e) {
         $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
+        echo json_encode(['errors' => $errors]);
     }
-
-    header('Location: productos.php');
     exit();
 }
 

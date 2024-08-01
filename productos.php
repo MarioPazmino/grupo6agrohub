@@ -520,7 +520,7 @@ if ($_SESSION['rol'] === 'admin') {
                 <!-- Botón de agregar producto (solo para admin) -->
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarProductoModal">
-                    Agregar Producto
+                    <i class="fas fa-plus"></i> Agregar Producto
                 </button>
                 <?php endif; ?>
 
@@ -546,9 +546,9 @@ if ($_SESSION['rol'] === 'admin') {
                                 <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
                                 <td><?php echo htmlspecialchars($producto->unidad); ?></td>
                                 <td>
-                                    <button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
-    Ver Variedades
-</button>
+                                    <button type="button" class="btn btn-info btn-sm" onclick="toggleVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
+                                        <i class="fas fa-caret-down" id="icon-<?php echo htmlspecialchars($producto->_id); ?>"></i> Ver Variedades
+                                    </button>
                                     <?php if ($_SESSION['rol'] === 'admin'): ?>
                                     <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarProductoModal"
                                             data-id="<?php echo htmlspecialchars($producto->_id); ?>"
@@ -557,11 +557,11 @@ if ($_SESSION['rol'] === 'admin') {
                                             data-tipo="<?php echo htmlspecialchars($producto->tipo); ?>"
                                             data-precio_unitario="<?php echo htmlspecialchars($producto->precio_unitario); ?>"
                                             data-unidad="<?php echo htmlspecialchars($producto->unidad); ?>"
-                                            data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>'
-                                        Editar
+                                            data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>'>
+                                        <i class="fas fa-edit"></i> Editar
                                     </button>
                                     <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
-                                        Eliminar
+                                        <i class="fas fa-trash-alt"></i> Eliminar
                                     </a>
                                     <?php endif; ?>
                                 </td>
@@ -574,6 +574,23 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
+
+<script>
+    function toggleVariedades(variedades, id) {
+        // Aquí debes implementar la lógica para mostrar/ocultar las variedades
+        // Por simplicidad, solo se muestra un mensaje en este ejemplo
+        alert('Mostrar/Ocultar variedades para el producto con ID: ' + id);
+        
+        var icon = document.getElementById('icon-' + id);
+        if (icon.classList.contains('fa-caret-down')) {
+            icon.classList.remove('fa-caret-down');
+            icon.classList.add('fa-caret-up');
+        } else {
+            icon.classList.remove('fa-caret-up');
+            icon.classList.add('fa-caret-down');
+        }
+    }
+</script>
 
                                         
 <!-- Contenedor para mensajes -->

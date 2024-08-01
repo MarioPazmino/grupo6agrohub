@@ -618,17 +618,22 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-<form method="POST" action="productos.php">
-    <input type="hidden" name="action" value="add_variedad">
-    <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($producto['_id']); ?>">
-    <input type="text" name="variedad_nombre" placeholder="Nombre de la variedad" required>
-    <input type="text" name="caracteristicas" placeholder="Características" required>
-    <button type="submit">Agregar Variedad</button>
-</form>
+<form method="POST" action="productos.php" class="form-inline">
+            <input type="hidden" name="action" value="add_variedad">
+            <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($producto['_id']); ?>">
 
+            <div class="form-group mb-2 mr-2">
+                <label for="variedad_nombre" class="sr-only">Nombre de la variedad</label>
+                <input type="text" id="variedad_nombre" name="variedad_nombre" class="form-control" placeholder="Nombre de la variedad" required>
+            </div>
 
+            <div class="form-group mb-2 mr-2">
+                <label for="caracteristicas" class="sr-only">Características</label>
+                <input type="text" id="caracteristicas" name="caracteristicas" class="form-control" placeholder="Características" required>
+            </div>
 
-
+            <button type="submit" class="btn btn-primary mb-2">Agregar Variedad</button>
+        </form>
             </div>
         </div>
     </div>

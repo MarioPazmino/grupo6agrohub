@@ -628,6 +628,7 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
+
 <!-- Modal Agregar Producto (solo para admin) -->
 <?php if ($_SESSION['rol'] === 'admin'): ?>
 <div class="modal fade" id="agregarProductoModal" tabindex="-1" role="dialog" aria-labelledby="agregarProductoModalLabel" aria-hidden="true">
@@ -734,29 +735,31 @@ if ($_SESSION['rol'] === 'admin') {
 
 <script>
 $(document).ready(function() {
-    // Manejar la apertura del modal de agregar variedad
-    $('#variedadesSection').on('click', '[data-toggle="modal"][data-target="#agregarVariedadModal"]', function() {
-        var productId = $('#variedadesSection').data('product-id');
-        $('#agregarVariedadModal #product_id').val(productId);
+    // Configura el modal de agregar variedad con el ID del producto
+    $('#agregarVariedadModal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget); // Botón que abrió el modal
+        var productId = button.data('product-id'); // Extrae el ID del producto
+        var modal = $(this);
+        modal.find('#product_id').val(productId);
     });
 
-    // Manejar el envío del formulario de agregar variedad
+    // Maneja el envío del formulario de agregar variedad
     $('#agregarVariedadForm').on('submit', function(e) {
-        e.preventDefault();
-        var formData = $(this).serialize();
-        
+        e.preventDefault(); // Evita el envío normal del formulario
+        var formData = $(this).serialize(); // Serializa los datos del formulario
+
         $.ajax({
             url: 'productos.php',
             type: 'POST',
-            data: formData + '&action=add_variedad',
+            data: formData + '&action=add_variedad', // Agrega la acción al formulario
             dataType: 'json',
             success: function(response) {
-                if (response.success && response.success.length > 0) {
+                if (response.success) {
                     alert(response.success[0]);
                     $('#agregarVariedadModal').modal('hide');
                     // Recargar la tabla de variedades
                     showVariedades(response.variedades, $('#product_id').val());
-                } else if (response.errors && response.errors.length > 0) {
+                } else if (response.errors) {
                     alert(response.errors[0]);
                 }
             },
@@ -782,7 +785,8 @@ function showVariedades(variedades, productoId) {
             <td>${variedad.caracteristicas}</td>
             <td>
                 <button class="btn btn-danger btn-sm" onclick="eliminarVariedad('${productoId}', '${variedad.nombre_variedad}')">Eliminar</button>
-            </td>`;
+            </td>
+        `;
         tableBody.appendChild(row);
     });
 }
@@ -795,14 +799,14 @@ function eliminarVariedad(productoId, nombreVariedad) {
         .then(response => response.json())
         .then(data => {
             let messageHTML = '';
-            if (data.success && data.success.length > 0) {
+            if (data.success) {
                 messageHTML += '<div class="alert alert-success" role="alert">';
                 data.success.forEach(message => {
                     messageHTML += `${message}<br>`;
                 });
                 messageHTML += '</div>';
             }
-            if (data.errors && data.errors.length > 0) {
+            if (data.errors) {
                 messageHTML += '<div class="alert alert-danger" role="alert">';
                 data.errors.forEach(message => {
                     messageHTML += `${message}<br>`;
@@ -828,6 +832,7 @@ function eliminarVariedad(productoId, nombreVariedad) {
         });
     }
 }
+
 
     // Configurar el modal de edición
     $('#editarProductoModal').on('show.bs.modal', function (event) {

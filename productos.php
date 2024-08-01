@@ -490,6 +490,9 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 <!-- Content Row -->
+<!-- Asegúrate de incluir Font Awesome en el <head> de tu documento -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <div class="row">
 
     <!-- Productos -->
@@ -635,9 +638,7 @@ if ($_SESSION['rol'] === 'admin') {
                         <input type="text" id="caracteristicas" name="caracteristicas" class="form-control" placeholder="Características" required>
                     </div>
 
-                    <button type="submit" class="btn btn-primary mb-2">
-                        <i class="fas fa-check"></i> Agregar Variedad
-                    </button>
+                    <button type="submit" class="btn btn-primary mb-2"><i class="fas fa-plus"></i> Agregar Variedad</button>
                 </form>
             </div>
         </div>
@@ -683,9 +684,7 @@ if ($_SESSION['rol'] === 'admin') {
                         <label for="unidad">Unidad</label>
                         <input type="text" class="form-control" id="unidad" name="unidad" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check"></i> Agregar Producto
-                    </button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar Producto</button>
                 </form>
             </div>
         </div>
@@ -704,9 +703,9 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-                <form action="productos.php" method="POST">
+                <form id="editarProductoForm" action="productos.php" method="POST">
                     <input type="hidden" name="action" value="edit_producto">
-                    <input type="hidden" id="edit_producto_id" name="producto_id">
+                    <input type="hidden" name="id" id="edit_producto_id">
 
                     <div class="form-group">
                         <label for="edit_nombre">Nombre</label>
@@ -733,17 +732,18 @@ if ($_SESSION['rol'] === 'admin') {
                         <label for="edit_unidad">Unidad</label>
                         <input type="text" class="form-control" id="edit_unidad" name="unidad" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check"></i> Guardar Cambios
-                    </button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<?php endif; ?>
 
+
+
+
+                    
 <script>
 $(document).ready(function() {
     // Configura el modal de agregar variedad con el ID del producto

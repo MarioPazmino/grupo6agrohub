@@ -25,18 +25,21 @@ $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-eas
 $mongoClient = new Client($mongoUri);
 $productosCollection = $mongoClient->grupo6_agrohub->productos;
 
-// Variable para mensajes de éxito y error
+// Variables para mensajes de éxito y error
 $success = [];
 $errors = [];
 
 
+
+// Obtener tipos de productos para mostrar en el formulario
+$tiposProductosCollection = $mongoClient->grupo6_agrohub->productos;
 try {
-    $productosCursor = $productosCollection->find([], ['projection' => ['_id' => 1, 'nombre' => 1]]);
-    $productos = iterator_to_array($productosCursor);
-    echo json_encode(['productos' => $productos]);
+    $tiposProductosCursor = $tiposProductosCollection->find();
+    $tiposProductos = iterator_to_array($tiposProductosCursor);
 } catch (Exception $e) {
-    echo json_encode(['error' => 'Error al obtener los productos: ' . $e->getMessage()]);
+    $errors[] = 'Error al obtener los tipos de productos: ' . $e->getMessage();
 }
+
 
 // Manejo de la eliminación de productos
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
@@ -61,10 +64,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     exit();
 }
 
-// Manejo de la adición y actualización de productos
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     try {
+        // Verificar si variedades está presente y no es null
         $variedades = isset($_POST['variedades']) ? json_decode($_POST['variedades'], true) : [];
+
+        // Verificar si la decodificación fue exitosa
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new Exception('El formato JSON para variedades no es válido.');
         }
@@ -79,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
         ];
 
         if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
+            // Actualizar producto
             $result = $productosCollection->updateOne(
                 ['_id' => new ObjectId($_POST['id'])],
                 ['$set' => $productoData]
@@ -89,6 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
                 $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
             }
         } else {
+            // Agregar producto
             $result = $productosCollection->insertOne($productoData);
             if ($result->getInsertedCount() > 0) {
                 $success[] = 'Producto agregado exitosamente.';
@@ -101,7 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     }
 }
 
-// Manejo de la eliminación de variedades
+
+// Modifica la parte de eliminación de variedades
 if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
     $product_id = $_GET['product_id'];
     $variedad_nombre = $_GET['variedad_nombre'];
@@ -124,7 +132,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
     exit();
 }
 
-// Manejo de la adición de variedades
+// Manejo de la agregación de variedades
 if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_POST['product_id']) && isset($_POST['variedad_nombre']) && isset($_POST['caracteristicas'])) {
     $product_id = $_POST['product_id'];
     $variedad = [
@@ -133,6 +141,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
     ];
 
     try {
+        // Validar el ID del producto
         if (strlen($product_id) === 24 && ctype_xdigit($product_id)) {
             $result = $productosCollection->updateOne(
                 ['_id' => new ObjectId($product_id)],
@@ -154,13 +163,15 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
     exit();
 }
 
+
+
 // Obtener productos para mostrar en la tabla
 try {
-    $productosCursor = $productosCollection->find();
-    $productos = iterator_to_array($productosCursor);
+    $productos = $productosCollection->find()->toArray();
 } catch (Exception $e) {
     $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
 }
+
 
 
 
@@ -711,7 +722,6 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 
 <!-- Modal Agregar Variedad -->
-<!-- Modal Agregar Variedad -->
 <div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -722,15 +732,16 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
+<!-- Ejemplo de código HTML para mostrar el formulario con tipos de productos -->
 <form action="productos.php" method="POST">
     <input type="hidden" name="action" value="add_variedad">
 
-    <!-- Campo para seleccionar el producto -->
-    <label for="producto">Producto:</label>
-    <select name="product_id" id="producto">
-        <?php foreach ($productos as $producto): ?>
-            <option value="<?php echo htmlspecialchars($producto['_id']); ?>">
-                <?php echo htmlspecialchars($producto['nombre']); ?>
+    <!-- Campo para seleccionar el tipo de producto -->
+    <label for="tipo_producto">Tipo de Producto:</label>
+    <select name="tipo_producto" id="tipo_producto">
+        <?php foreach ($tiposProductos as $tipo): ?>
+            <option value="<?php echo htmlspecialchars($tipo['nombre']); ?>">
+                <?php echo htmlspecialchars($tipo['nombre']); ?>
             </option>
         <?php endforeach; ?>
     </select>
@@ -741,6 +752,8 @@ if ($_SESSION['rol'] === 'admin') {
 
     <label for="caracteristicas">Características:</label>
     <textarea name="caracteristicas" id="caracteristicas" required></textarea>
+
+    <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product_id); ?>">
 
     <button type="submit">Agregar Variedad</button>
 </form>
@@ -759,27 +772,14 @@ if ($_SESSION['rol'] === 'admin') {
                     
 <script>
 $(document).ready(function() {
-    // Configura el modal de agregar variedad
+    // Configura el modal de agregar variedad con el ID del producto
     $('#agregarVariedadModal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget); // Botón que abrió el modal
+        var productId = button.data('product-id'); // Extrae el ID del producto
         var modal = $(this);
-
-        // Cargar productos
-        $.ajax({
-            url: 'get_products.php', // Necesitarás crear este archivo PHP
-            type: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                var select = modal.find('#producto');
-                select.empty();
-                response.productos.forEach(function(producto) {
-                    select.append('<option value="' + producto._id + '">' + producto.nombre + '</option>');
-                });
-            },
-            error: function() {
-                alert('Error al cargar productos.');
-            }
-        });
+        modal.find('#product_id').val(productId);
     });
+
     // Maneja el envío del formulario de agregar variedad
     $('#agregarVariedadForm').on('submit', function(e) {
         e.preventDefault(); // Evita el envío normal del formulario
@@ -882,6 +882,24 @@ function eliminarVariedad(productoId, nombreVariedad) {
 }
 
 
+    // Configurar el modal de edición
+    $('#editarProductoModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const id = button.data('id');
+        const nombre = button.data('nombre');
+        const descripcion = button.data('descripcion');
+        const tipo = button.data('tipo');
+        const precioUnitario = button.data('precio_unitario');
+        const unidad = button.data('unidad');
+
+        const modal = $(this);
+        modal.find('#edit_id').val(id);
+        modal.find('#edit_nombre').val(nombre);
+        modal.find('#edit_descripcion').val(descripcion);
+        modal.find('#edit_tipo').val(tipo);
+        modal.find('#edit_precio_unitario').val(precioUnitario);
+        modal.find('#edit_unidad').val(unidad);
+    });
 </script>
 
 

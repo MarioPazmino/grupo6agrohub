@@ -29,7 +29,7 @@ $productosCollection = $mongoClient->grupo6_agrohub->productos;
 $success = [];
 $errors = [];
 // Obtener tipos de productos para mostrar en el formulario
-$tiposProductosCollection = $mongoClient->grupo6_agrohub->tipos_productos;
+$tiposProductosCollection = $mongoClient->grupo6_agrohub->productos;
 try {
     $tiposProductosCursor = $tiposProductosCollection->find();
     $tiposProductos = iterator_to_array($tiposProductosCursor);

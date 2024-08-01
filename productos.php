@@ -477,7 +477,6 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
 <!-- Content Row -->
 <div class="row">
 
@@ -515,7 +514,7 @@ if ($_SESSION['rol'] === 'admin') {
 
                 <!-- Tabla de productos -->
                 <div class="table-responsive mt-4">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <table class="table table-bordered" id="productosTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
                                 <th>Nombre</th>
@@ -523,10 +522,7 @@ if ($_SESSION['rol'] === 'admin') {
                                 <th>Tipo</th>
                                 <th>Precio Unitario</th>
                                 <th>Unidad</th>
-                                <th>Variedades</th>
-                                <?php if ($_SESSION['rol'] === 'admin'): ?>
                                 <th>Acciones</th>
-                                <?php endif; ?>
                             </tr>
                         </thead>
                         <tbody>
@@ -538,23 +534,10 @@ if ($_SESSION['rol'] === 'admin') {
                                 <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
                                 <td><?php echo htmlspecialchars($producto->unidad); ?></td>
                                 <td>
-                                    <button type="button" class="btn btn-info btn-sm" onclick="toggleVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>)">
+                                    <button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>)">
                                         Ver Variedades
                                     </button>
-                                    <table class="table table-bordered mt-2" id="variedadesTable" style="display: none;">
-                                        <thead>
-                                            <tr>
-                                                <th>Nombre de Variedad</th>
-                                                <th>Características</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="variedadesTableBody">
-                                            <!-- Las variedades se cargarán aquí dinámicamente -->
-                                        </tbody>
-                                    </table>
-                                </td>
-                                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                                <td>
+                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
                                     <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarProductoModal"
                                             data-id="<?php echo htmlspecialchars($producto->_id); ?>"
                                             data-nombre="<?php echo htmlspecialchars($producto->nombre); ?>"
@@ -568,10 +551,36 @@ if ($_SESSION['rol'] === 'admin') {
                                     <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
                                         Eliminar
                                     </a>
+                                    <?php endif; ?>
                                 </td>
-                                <?php endif; ?>
                             </tr>
                             <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de Variedades -->
+<div class="row mt-4" id="variedadesSection" style="display: none;">
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Variedades</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="variedadesTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Nombre de Variedad</th>
+                                <th>Características</th>
+                            </tr>
+                        </thead>
+                        <tbody id="variedadesTableBody">
+                            <!-- Las variedades se cargarán aquí dinámicamente -->
                         </tbody>
                     </table>
                 </div>
@@ -685,12 +694,12 @@ if ($_SESSION['rol'] === 'admin') {
 <?php endif; ?>
 
 <script>
-    function toggleVariedades(variedades) {
-        const table = document.querySelector('#variedadesTable');
+    function showVariedades(variedades) {
+        const section = document.querySelector('#variedadesSection');
         const tableBody = document.querySelector('#variedadesTableBody');
-        table.style.display = (table.style.display === 'none' || table.style.display === '') ? 'table' : 'none';
+        section.style.display = (section.style.display === 'none' || section.style.display === '') ? 'block' : 'none';
         
-        if (table.style.display === 'table') {
+        if (section.style.display === 'block') {
             tableBody.innerHTML = ''; // Limpiar contenido previo
 
             variedades.forEach(variedad => {
@@ -710,7 +719,6 @@ if ($_SESSION['rol'] === 'admin') {
         const tipo = button.data('tipo');
         const precioUnitario = button.data('precio_unitario');
         const unidad = button.data('unidad');
-        const variedades = button.data('variedades');
 
         const modal = $(this);
         modal.find('#edit_id').val(id);
@@ -721,7 +729,6 @@ if ($_SESSION['rol'] === 'admin') {
         modal.find('#edit_unidad').val(unidad);
     });
 </script>
-
 
 
 

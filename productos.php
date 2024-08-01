@@ -769,40 +769,30 @@ $(document).ready(function() {
     });
 });
 
-function showVariedades() {
+
+function showVariedades(variedades, productoId) {
     const section = document.querySelector('#variedadesSection');
     const tableBody = document.querySelector('#variedadesTableBody');
-    const productId = section.dataset.productId;
+    section.style.display = 'block';
+    section.dataset.productId = productoId;
+    
+    tableBody.innerHTML = ''; // Limpiar contenido previo
 
-    $.ajax({
-        url: 'productos.php?action=get_variedades',
-        type: 'GET',
-        data: { product_id: productId },
-        dataType: 'json',
-        success: function(response) {
-            tableBody.innerHTML = ''; // Limpiar contenido previo
-
-            response.variedades.forEach(variedad => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${variedad.nombre_variedad}</td>
-                    <td>${variedad.caracteristicas}</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm" onclick="eliminarVariedad('${productId}', '${variedad.nombre_variedad}')">Eliminar</button>
-                    </td>`;
-                tableBody.appendChild(row);
-            });
-            section.style.display = 'block';
-        },
-        error: function() {
-            alert('Error al obtener las variedades.');
-        }
+    variedades.forEach(variedad => {
+        const row = document.createElement('tr');
+        row.innerHTML = 
+            <td>${variedad.nombre_variedad}</td>
+            <td>${variedad.caracteristicas}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="eliminarVariedad('${productoId}', '${variedad.nombre_variedad}')">Eliminar</button>
+            </td>;
+        tableBody.appendChild(row);
     });
 }
 
 function eliminarVariedad(productoId, nombreVariedad) {
     if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
-        fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
+        fetch(productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}, {
             method: 'GET'
         })
         .then(response => response.json())
@@ -811,14 +801,14 @@ function eliminarVariedad(productoId, nombreVariedad) {
             if (data.success && data.success.length > 0) {
                 messageHTML += '<div class="alert alert-success" role="alert">';
                 data.success.forEach(message => {
-                    messageHTML += `${message}<br>`;
+                    messageHTML += ${message}<br>;
                 });
                 messageHTML += '</div>';
             }
             if (data.errors && data.errors.length > 0) {
                 messageHTML += '<div class="alert alert-danger" role="alert">';
                 data.errors.forEach(message => {
-                    messageHTML += `${message}<br>`;
+                    messageHTML += ${message}<br>;
                 });
                 messageHTML += '</div>';
             }
@@ -828,17 +818,19 @@ function eliminarVariedad(productoId, nombreVariedad) {
             messagesContainer.innerHTML = messageHTML;
             
             // Hacer scroll hacia los mensajes
-            messagesContainer.scrollIntoView({ behavior: 'smooth' });
-
-            // Recargar la tabla de variedades
-            showVariedades();
+            messagesContainer.scrollIntoView({behavior: "smooth"});
+            
+            // Recargar la tabla de variedades o la página después de un breve retraso
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
         })
-        .catch(() => {
-            alert('Error al eliminar la variedad.');
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar variedad');
         });
     }
 }
-
 
     // Configurar el modal de edición
     $('#editarProductoModal').on('show.bs.modal', function (event) {
@@ -859,6 +851,8 @@ function eliminarVariedad(productoId, nombreVariedad) {
         modal.find('#edit_unidad').val(unidad);
     });
 </script>
+
+
 
 
 

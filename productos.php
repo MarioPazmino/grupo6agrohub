@@ -704,6 +704,7 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
+
 <!-- Modal Agregar Variedad (solo para admin) -->
 <?php if ($_SESSION['rol'] === 'admin'): ?>
 <div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
@@ -736,50 +737,33 @@ if ($_SESSION['rol'] === 'admin') {
 <?php endif; ?>
 
 <script>
-    // Script para manejar los modales de edición, variedad y agregar variedad
-    $('#editarProductoModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var id = button.data('id');
-        var nombre = button.data('nombre');
-        var descripcion = button.data('descripcion');
-        var tipo = button.data('tipo');
-        var precio_unitario = button.data('precio_unitario');
-        var unidad = button.data('unidad');
-        var variedades = button.data('variedades');
-
-        var modal = $(this);
-        modal.find('#edit_id').val(id);
-        modal.find('#edit_nombre').val(nombre);
-        modal.find('#edit_descripcion').val(descripcion);
-        modal.find('#edit_tipo').val(tipo);
-        modal.find('#edit_precio_unitario').val(precio_unitario);
-        modal.find('#edit_unidad').val(unidad);
-        modal.find('#edit_variedades').val(variedades ? JSON.stringify(variedades, null, 2) : '');
-    });
-
+    // Script para manejar el modal de ver variedades
     $('#variedadesModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var variedades = button.data('variedades');
+        var button = $(event.relatedTarget); // Botón que abrió el modal
+        var variedades = button.data('variedades'); // Extraer el JSON de variedades del botón
         var modal = $(this);
         var variedadesList = modal.find('#variedadesList');
+        
+        variedadesList.empty(); // Limpiar lista antes de agregar elementos
 
-        variedadesList.empty();
         if (variedades && Array.isArray(variedades)) {
             variedades.forEach(function (variedad) {
-                variedadesList.append('<li class="list-group-item">' + variedad + '</li>');
+                variedadesList.append(
+                    '<li class="list-group-item">' +
+                    '<strong>Nombre:</strong> ' + variedad.nombre_variedad + '<br>' +
+                    '<strong>Descripción:</strong> ' + variedad.caracteristicas + '<br>' +
+                    '<a href="?action=delete_variedad&product_id=' + encodeURIComponent(button.data('product_id')) +
+                    '&variedad_nombre=' + encodeURIComponent(variedad.nombre_variedad) + '" ' +
+                    'class="btn btn-danger btn-sm" onclick="return confirm(\'¿Estás seguro de que deseas eliminar esta variedad?\');">Eliminar</a>' +
+                    '</li>'
+                );
             });
         } else {
             variedadesList.append('<li class="list-group-item">No hay variedades disponibles</li>');
         }
     });
-
-    $('#agregarVariedadModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var productId = button.data('id');
-        var modal = $(this);
-        modal.find('#variedad_product_id').val(productId);
-    });
 </script>
+
 
 
 

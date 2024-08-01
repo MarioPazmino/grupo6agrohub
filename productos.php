@@ -120,21 +120,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $variedadNombre = $_POST['variedad_nombre'];
     $caracteristicas = $_POST['caracteristicas'];
 
+    // Validar el ID del producto
+    if (!preg_match('/^[a-f0-9]{24}$/i', $productId)) {
+        $errors[] = 'ID del producto inválido.';
+        echo json_encode(['errors' => $errors]);
+        exit();
+    }
+
     try {
         $variedad = [
             'nombre_variedad' => $variedadNombre,
             'caracteristicas' => $caracteristicas,
         ];
 
+        // Actualizar el producto existente para agregar una nueva variedad
         $result = $productosCollection->updateOne(
-            ['_id' => new ObjectId($productId)],
+            ['_id' => new MongoDB\BSON\ObjectId($productId)],
             ['$push' => ['variedades' => $variedad]]
         );
 
         if ($result->getModifiedCount() > 0) {
             $success[] = 'Variedad agregada exitosamente.';
             // Cargar las variedades actualizadas
-            $producto = $productosCollection->findOne(['_id' => new ObjectId($productId)]);
+            $producto = $productosCollection->findOne(['_id' => new MongoDB\BSON\ObjectId($productId)]);
             $variedades = $producto->variedades;
             echo json_encode(['success' => $success, 'variedades' => $variedades]);
         } else {
@@ -620,19 +628,14 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-               <form id="agregarVariedadForm" method="POST">
-    <input type="hidden" id="product_id" name="product_id">
-    <div class="form-group">
-        <label for="variedad_nombre">Nombre de la Variedad</label>
-        <input type="text" class="form-control" id="variedad_nombre" name="variedad_nombre" required>
-    </div>
-    <div class="form-group">
-        <label for="caracteristicas">Características</label>
-        <textarea class="form-control" id="caracteristicas" name="caracteristicas" required></textarea>
-    </div>
+    <form id="agregarVariedadForm" method="post" action="productos.php">
+    <input type="hidden" name="product_id" value="id_del_producto">
+    <input type="text" name="variedad_nombre" placeholder="Nombre de la variedad" required>
+    <input type="text" name="caracteristicas" placeholder="Características" required>
     <input type="hidden" name="action" value="add_variedad">
-    <button type="submit" class="btn btn-primary">Agregar Variedad</button>
+    <button type="submit">Agregar Variedad</button>
 </form>
+
 
             </div>
         </div>

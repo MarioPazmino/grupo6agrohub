@@ -738,7 +738,7 @@ if ($_SESSION['rol'] === 'admin') {
 $(document).ready(function() {
     // Manejar la apertura del modal de agregar variedad
     $('#variedadesSection').on('click', '[data-toggle="modal"][data-target="#agregarVariedadModal"]', function() {
-        var productId = $(this).data('product-id');
+        var productId = $('#variedadesSection').data('product-id');
         $('#agregarVariedadModal #product_id').val(productId);
     });
 
@@ -746,7 +746,7 @@ $(document).ready(function() {
     $('#agregarVariedadForm').on('submit', function(e) {
         e.preventDefault();
         var formData = $(this).serialize();
-
+        
         $.ajax({
             url: 'productos.php',
             type: 'POST',
@@ -757,7 +757,7 @@ $(document).ready(function() {
                     alert(response.success[0]);
                     $('#agregarVariedadModal').modal('hide');
                     // Recargar la tabla de variedades
-                    showVariedades();
+                    showVariedades(response.variedades, $('#product_id').val());
                 } else if (response.errors && response.errors.length > 0) {
                     alert(response.errors[0]);
                 }
@@ -768,7 +768,6 @@ $(document).ready(function() {
         });
     });
 });
-
 
 function showVariedades(variedades, productoId) {
     const section = document.querySelector('#variedadesSection');
@@ -851,11 +850,6 @@ function eliminarVariedad(productoId, nombreVariedad) {
         modal.find('#edit_unidad').val(unidad);
     });
 </script>
-
-
-
-
-
 
 
 

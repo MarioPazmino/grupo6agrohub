@@ -488,89 +488,88 @@ if ($_SESSION['rol'] === 'admin') {
 <!-- Content Row -->
 <div class="row">
 
- <!-- Productos -->
-<div class="col-lg-12">
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Productos</h6>
-        </div>
-        <div class="card-body">
-
-            <!-- Mensajes de éxito y error -->
-            <?php if (!empty($success)): ?>
-            <div class="alert alert-success" role="alert">
-                <?php foreach ($success as $message): ?>
-                <?php echo htmlspecialchars($message); ?><br>
-                <?php endforeach; ?>
+  <!-- Productos -->
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Productos</h6>
             </div>
-            <?php endif; ?>
+            <div class="card-body">
 
-            <?php if (!empty($errors)): ?>
-            <div class="alert alert-danger" role="alert">
-                <?php foreach ($errors as $message): ?>
-                <?php echo htmlspecialchars($message); ?><br>
-                <?php endforeach; ?>
-            </div>
-            <?php endif; ?>
+                <!-- Mensajes de éxito y error -->
+                <?php if (!empty($success)): ?>
+                <div class="alert alert-success" role="alert">
+                    <?php foreach ($success as $message): ?>
+                    <?php echo htmlspecialchars($message); ?><br>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
 
-            <!-- Botón de agregar producto (solo para admin) -->
-            <?php if ($_SESSION['rol'] === 'admin'): ?>
-            <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarProductoModal">
-                Agregar Producto
-            </button>
-            <?php endif; ?>
+                <?php if (!empty($errors)): ?>
+                <div class="alert alert-danger" role="alert">
+                    <?php foreach ($errors as $message): ?>
+                    <?php echo htmlspecialchars($message); ?><br>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
 
-            <!-- Tabla de productos -->
-            <div class="table-responsive mt-4">
-                <table class="table table-bordered" id="productosTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Descripción</th>
-                            <th>Tipo</th>
-                            <th>Precio Unitario</th>
-                            <th>Unidad</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($productos as $producto): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($producto->nombre); ?></td>
-                            <td><?php echo htmlspecialchars($producto->descripcion); ?></td>
-                            <td><?php echo htmlspecialchars($producto->tipo); ?></td>
-                            <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
-                            <td><?php echo htmlspecialchars($producto->unidad); ?></td>
-                            <td>
-                                <button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
+                <!-- Botón de agregar producto (solo para admin) -->
+                <?php if ($_SESSION['rol'] === 'admin'): ?>
+                <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarProductoModal">
+                    Agregar Producto
+                </button>
+                <?php endif; ?>
+
+                <!-- Tabla de productos -->
+                <div class="table-responsive mt-4">
+                    <table class="table table-bordered" id="productosTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Tipo</th>
+                                <th>Precio Unitario</th>
+                                <th>Unidad</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($productos as $producto): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($producto->nombre); ?></td>
+                                <td><?php echo htmlspecialchars($producto->descripcion); ?></td>
+                                <td><?php echo htmlspecialchars($producto->tipo); ?></td>
+                                <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
+                                <td><?php echo htmlspecialchars($producto->unidad); ?></td>
+                                <td>
+                                    <button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
     Ver Variedades
 </button>
-                                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                                <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarProductoModal"
-                                        data-id="<?php echo htmlspecialchars($producto->_id); ?>"
-                                        data-nombre="<?php echo htmlspecialchars($producto->nombre); ?>"
-                                        data-descripcion="<?php echo htmlspecialchars($producto->descripcion); ?>"
-                                        data-tipo="<?php echo htmlspecialchars($producto->tipo); ?>"
-                                        data-precio_unitario="<?php echo htmlspecialchars($producto->precio_unitario); ?>"
-                                        data-unidad="<?php echo htmlspecialchars($producto->unidad); ?>"
-                                        data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>'>
-                                    <i class="fas fa-edit"></i> Editar
-                                </button>
-                                <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
-                                    <i class="fas fa-trash-alt"></i> Eliminar
-                                </a>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
+                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarProductoModal"
+                                            data-id="<?php echo htmlspecialchars($producto->_id); ?>"
+                                            data-nombre="<?php echo htmlspecialchars($producto->nombre); ?>"
+                                            data-descripcion="<?php echo htmlspecialchars($producto->descripcion); ?>"
+                                            data-tipo="<?php echo htmlspecialchars($producto->tipo); ?>"
+                                            data-precio_unitario="<?php echo htmlspecialchars($producto->precio_unitario); ?>"
+                                            data-unidad="<?php echo htmlspecialchars($producto->unidad); ?>"
+                                            data-variedades='<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>'
+                                        Editar
+                                    </button>
+                                    <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
+                                        Eliminar
+                                    </a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
-</div>
-
 
                                         
 <!-- Contenedor para mensajes -->

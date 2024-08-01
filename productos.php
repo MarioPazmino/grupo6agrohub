@@ -128,30 +128,33 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
         'caracteristicas' => $_POST['caracteristicas']
     ];
 
+    $response = ['success' => [], 'errors' => []];
+
     try {
         // Validar el ID del producto
         if (strlen($product_id) === 24 && ctype_xdigit($product_id)) {
             $result = $productosCollection->updateOne(
-                ['_id' => new ObjectId($product_id)],
+                ['_id' => new MongoDB\BSON\ObjectId($product_id)],
                 ['$push' => ['variedades' => $variedad]]
             );
+
             if ($result->getModifiedCount() > 0) {
-                $success[] = 'Variedad agregada exitosamente.';
+                $response['success'][] = 'Variedad agregada exitosamente.';
             } else {
-                $errors[] = 'No se pudo agregar la variedad. Verifique que el producto exista.';
+                $response['errors'][] = 'No se pudo agregar la variedad. Verifique que el producto exista.';
             }
         } else {
-            $errors[] = 'ID de producto inválido.';
+            $response['errors'][] = 'ID de producto inválido.';
         }
     } catch (Exception $e) {
-        $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
+        $response['errors'][] = 'Error al agregar la variedad: ' . $e->getMessage();
     }
 
-    header('Location: productos.php');
+    // Enviar la respuesta en formato JSON
+    header('Content-Type: application/json');
+    echo json_encode($response);
     exit();
 }
-
-
 
 // Obtener productos para mostrar en la tabla
 try {
@@ -720,9 +723,15 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="productos.php" class="form-inline">
+                <form id="agregarVariedadForm" method="POST" action="productos.php" class="form-inline">
                     <input type="hidden" name="action" value="add_variedad">
-                    <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($producto['_id']); ?>">
+
+                    <div class="form-group mb-2 mr-2">
+                        <label for="select_product" class="sr-only">Seleccionar Producto</label>
+                        <select id="select_product" name="product_id" class="form-control" required>
+                            <!-- Las opciones se cargarán aquí dinámicamente -->
+                        </select>
+                    </div>
 
                     <div class="form-group mb-2 mr-2">
                         <label for="variedad_nombre" class="sr-only">Nombre de la variedad</label>
@@ -747,15 +756,30 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
+
                     
 <script>
 $(document).ready(function() {
-    // Configura el modal de agregar variedad con el ID del producto
+    // Configura el modal de agregar variedad
     $('#agregarVariedadModal').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget); // Botón que abrió el modal
-        var productId = button.data('product-id'); // Extrae el ID del producto
         var modal = $(this);
-        modal.find('#product_id').val(productId);
+        
+        // Cargar los productos disponibles en el dropdown
+        $.ajax({
+            url: 'productos.php?action=get_products', // Necesitas implementar esta acción en tu backend
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                var select = modal.find('#select_product');
+                select.empty(); // Limpiar opciones existentes
+                response.products.forEach(function(product) {
+                    select.append(new Option(product.nombre, product._id));
+                });
+            },
+            error: function() {
+                alert('Error al cargar productos.');
+            }
+        });
     });
 
     // Maneja el envío del formulario de agregar variedad
@@ -773,7 +797,7 @@ $(document).ready(function() {
                     alert(response.success[0]);
                     $('#agregarVariedadModal').modal('hide');
                     // Recargar la tabla de variedades
-                    showVariedades(response.variedades, $('#product_id').val());
+                    showVariedades(response.variedades, $('#select_product').val());
                 } else if (response.errors) {
                     alert(response.errors[0]);
                 }
@@ -784,6 +808,7 @@ $(document).ready(function() {
         });
     });
 });
+
 
 function showVariedades(variedades, productoId) {
     const section = document.querySelector('#variedadesSection');
@@ -859,25 +884,6 @@ function eliminarVariedad(productoId, nombreVariedad) {
     }
 }
 
-
-    // Configurar el modal de edición
-    $('#editarProductoModal').on('show.bs.modal', function (event) {
-        const button = $(event.relatedTarget);
-        const id = button.data('id');
-        const nombre = button.data('nombre');
-        const descripcion = button.data('descripcion');
-        const tipo = button.data('tipo');
-        const precioUnitario = button.data('precio_unitario');
-        const unidad = button.data('unidad');
-
-        const modal = $(this);
-        modal.find('#edit_id').val(id);
-        modal.find('#edit_nombre').val(nombre);
-        modal.find('#edit_descripcion').val(descripcion);
-        modal.find('#edit_tipo').val(tipo);
-        modal.find('#edit_precio_unitario').val(precioUnitario);
-        modal.find('#edit_unidad').val(unidad);
-    });
 </script>
 
 

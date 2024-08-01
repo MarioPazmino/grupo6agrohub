@@ -148,6 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit();
 }
 
+
 // Obtener productos para mostrar en la tabla
 try {
     $productos = $productosCollection->find()->toArray();
@@ -619,18 +620,20 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-                <form id="agregarVariedadForm">
-                    <input type="hidden" id="product_id" name="product_id">
-                    <div class="form-group">
-                        <label for="variedad_nombre">Nombre de la Variedad</label>
-                        <input type="text" class="form-control" id="variedad_nombre" name="variedad_nombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="caracteristicas">Características</label>
-                        <textarea class="form-control" id="caracteristicas" name="caracteristicas" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Agregar Variedad</button>
-                </form>
+               <form id="agregarVariedadForm" method="POST">
+    <input type="hidden" id="product_id" name="product_id">
+    <div class="form-group">
+        <label for="variedad_nombre">Nombre de la Variedad</label>
+        <input type="text" class="form-control" id="variedad_nombre" name="variedad_nombre" required>
+    </div>
+    <div class="form-group">
+        <label for="caracteristicas">Características</label>
+        <textarea class="form-control" id="caracteristicas" name="caracteristicas" required></textarea>
+    </div>
+    <input type="hidden" name="action" value="add_variedad">
+    <button type="submit" class="btn btn-primary">Agregar Variedad</button>
+</form>
+
             </div>
         </div>
     </div>

@@ -136,11 +136,9 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
         $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
     }
 
-    // Enviar respuesta JSON
-    echo json_encode(['success' => $success, 'errors' => $errors]);
+    header('Location: productos.php');
     exit();
 }
-
 
 // Obtener productos para mostrar en la tabla
 try {
@@ -182,9 +180,6 @@ if ($_SESSION['rol'] === 'admin') {
     }
 }
 ?>
-
-
-
 
 
 

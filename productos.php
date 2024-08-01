@@ -565,7 +565,9 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 
                                         
+<!-- Contenedor para mensajes -->
 <div id="messages-container"></div>
+
 <!-- Tabla de Variedades -->
 <div class="row mt-4" id="variedadesSection" style="display: none;">
     <div class="col-lg-12">
@@ -588,6 +590,39 @@ if ($_SESSION['rol'] === 'admin') {
                         </tbody>
                     </table>
                 </div>
+                <?php if ($_SESSION['rol'] === 'admin'): ?>
+                <button type="button" class="btn btn-primary mt-3" data-toggle="modal" data-target="#agregarVariedadModal">
+                    Agregar Variedad
+                </button>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Agregar Variedad -->
+<div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarVariedadModalLabel">Agregar Variedad</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="agregarVariedadForm">
+                    <input type="hidden" id="product_id" name="product_id">
+                    <div class="form-group">
+                        <label for="variedad_nombre">Nombre de la Variedad</label>
+                        <input type="text" class="form-control" id="variedad_nombre" name="variedad_nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="caracteristicas">Características</label>
+                        <textarea class="form-control" id="caracteristicas" name="caracteristicas" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Agregar Variedad</button>
+                </form>
             </div>
         </div>
     </div>
@@ -698,25 +733,58 @@ if ($_SESSION['rol'] === 'admin') {
 <?php endif; ?>
 
 <script>
+$(document).ready(function() {
+    // Manejar la apertura del modal de agregar variedad
+    $('#variedadesSection').on('click', '[data-toggle="modal"][data-target="#agregarVariedadModal"]', function() {
+        var productId = $('#variedadesSection').data('product-id');
+        $('#agregarVariedadModal #product_id').val(productId);
+    });
+
+    // Manejar el envío del formulario de agregar variedad
+    $('#agregarVariedadForm').on('submit', function(e) {
+        e.preventDefault();
+        var formData = $(this).serialize();
+        
+        $.ajax({
+            url: 'productos.php',
+            type: 'POST',
+            data: formData + '&action=add_variedad',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success && response.success.length > 0) {
+                    alert(response.success[0]);
+                    $('#agregarVariedadModal').modal('hide');
+                    // Recargar la tabla de variedades
+                    showVariedades(response.variedades, $('#product_id').val());
+                } else if (response.errors && response.errors.length > 0) {
+                    alert(response.errors[0]);
+                }
+            },
+            error: function() {
+                alert('Error al agregar la variedad.');
+            }
+        });
+    });
+});
+
 function showVariedades(variedades, productoId) {
     const section = document.querySelector('#variedadesSection');
     const tableBody = document.querySelector('#variedadesTableBody');
-    section.style.display = (section.style.display === 'none' || section.style.display === '') ? 'block' : 'none';
+    section.style.display = 'block';
+    section.dataset.productId = productoId;
     
-    if (section.style.display === 'block') {
-        tableBody.innerHTML = ''; // Limpiar contenido previo
+    tableBody.innerHTML = ''; // Limpiar contenido previo
 
-        variedades.forEach(variedad => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${variedad.nombre_variedad}</td>
-                <td>${variedad.caracteristicas}</td>
-                <td>
-                    <button class="btn btn-danger btn-sm" onclick="eliminarVariedad('${productoId}', '${variedad.nombre_variedad}')">Eliminar</button>
-                </td>`;
-            tableBody.appendChild(row);
-        });
-    }
+    variedades.forEach(variedad => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${variedad.nombre_variedad}</td>
+            <td>${variedad.caracteristicas}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="eliminarVariedad('${productoId}', '${variedad.nombre_variedad}')">Eliminar</button>
+            </td>`;
+        tableBody.appendChild(row);
+    });
 }
 
 function eliminarVariedad(productoId, nombreVariedad) {

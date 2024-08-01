@@ -737,31 +737,41 @@ if ($_SESSION['rol'] === 'admin') {
 <?php endif; ?>
 
 <script>
-    // Script para manejar el modal de ver variedades
+ $(document).ready(function() {
     $('#variedadesModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget); // Botón que abrió el modal
-        var variedades = button.data('variedades'); // Extraer el JSON de variedades del botón
+        var button = $(event.relatedTarget);
+        var variedadesJson = button.data('variedades');
         var modal = $(this);
         var variedadesList = modal.find('#variedadesList');
         
-        variedadesList.empty(); // Limpiar lista antes de agregar elementos
+        variedadesList.empty();
 
-        if (variedades && Array.isArray(variedades)) {
-            variedades.forEach(function (variedad) {
-                variedadesList.append(
-                    '<li class="list-group-item">' +
-                    '<strong>Nombre:</strong> ' + variedad.nombre_variedad + '<br>' +
-                    '<strong>Descripción:</strong> ' + variedad.caracteristicas + '<br>' +
-                    '<a href="?action=delete_variedad&product_id=' + encodeURIComponent(button.data('product_id')) +
-                    '&variedad_nombre=' + encodeURIComponent(variedad.nombre_variedad) + '" ' +
-                    'class="btn btn-danger btn-sm" onclick="return confirm(\'¿Estás seguro de que deseas eliminar esta variedad?\');">Eliminar</a>' +
-                    '</li>'
-                );
-            });
-        } else {
-            variedadesList.append('<li class="list-group-item">No hay variedades disponibles</li>');
+        console.log('Variedades JSON:', variedadesJson); // Para depuración
+
+        try {
+            var variedades = JSON.parse(variedadesJson);
+            
+            if (variedades && Array.isArray(variedades) && variedades.length > 0) {
+                variedades.forEach(function (variedad) {
+                    variedadesList.append(
+                        '<li class="list-group-item">' +
+                        '<strong>Nombre:</strong> ' + (variedad.nombre_variedad || 'N/A') + '<br>' +
+                        '<strong>Descripción:</strong> ' + (variedad.caracteristicas || 'N/A') + '<br>' +
+                        '<a href="?action=delete_variedad&product_id=' + encodeURIComponent(button.data('id')) +
+                        '&variedad_nombre=' + encodeURIComponent(variedad.nombre_variedad) + '" ' +
+                        'class="btn btn-danger btn-sm" onclick="return confirm(\'¿Estás seguro de que deseas eliminar esta variedad?\');">Eliminar</a>' +
+                        '</li>'
+                    );
+                });
+            } else {
+                variedadesList.append('<li class="list-group-item">No hay variedades disponibles</li>');
+            }
+        } catch (e) {
+            console.error('Error al parsear las variedades:', e);
+            variedadesList.append('<li class="list-group-item">Error al cargar las variedades</li>');
         }
     });
+});
 </script>
 
 

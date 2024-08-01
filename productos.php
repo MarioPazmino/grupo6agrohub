@@ -722,7 +722,9 @@ if ($_SESSION['rol'] === 'admin') {
             <div class="modal-body">
                 <form method="POST" action="productos.php" class="form-inline">
                     <input type="hidden" name="action" value="add_variedad">
-                    <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($producto['_id']); ?>">
+
+                    <input type="hidden" name="product_id" id="product_id" value="<?php echo htmlspecialchars($producto['_id']); ?>">
+
 
                     <div class="form-group mb-2 mr-2">
                         <label for="variedad_nombre" class="sr-only">Nombre de la variedad</label>
@@ -752,11 +754,12 @@ if ($_SESSION['rol'] === 'admin') {
 $(document).ready(function() {
     // Configura el modal de agregar variedad con el ID del producto
     $('#agregarVariedadModal').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget); // Botón que abrió el modal
-        var productId = button.data('product-id'); // Extrae el ID del producto
-        var modal = $(this);
-        modal.find('#product_id').val(productId);
-    });
+    var button = $(event.relatedTarget); // Botón que abrió el modal
+    var productId = button.data('product-id'); // Extrae el ID del producto
+    var modal = $(this);
+    modal.find('#product_id').val(productId);
+});
+
 
     // Maneja el envío del formulario de agregar variedad
     $('#agregarVariedadForm').on('submit', function(e) {
@@ -860,24 +863,6 @@ function eliminarVariedad(productoId, nombreVariedad) {
 }
 
 
-    // Configurar el modal de edición
-    $('#editarProductoModal').on('show.bs.modal', function (event) {
-        const button = $(event.relatedTarget);
-        const id = button.data('id');
-        const nombre = button.data('nombre');
-        const descripcion = button.data('descripcion');
-        const tipo = button.data('tipo');
-        const precioUnitario = button.data('precio_unitario');
-        const unidad = button.data('unidad');
-
-        const modal = $(this);
-        modal.find('#edit_id').val(id);
-        modal.find('#edit_nombre').val(nombre);
-        modal.find('#edit_descripcion').val(descripcion);
-        modal.find('#edit_tipo').val(tipo);
-        modal.find('#edit_precio_unitario').val(precioUnitario);
-        modal.find('#edit_unidad').val(unidad);
-    });
 </script>
 
 

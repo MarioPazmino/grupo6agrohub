@@ -25,7 +25,7 @@ $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-eas
 $mongoClient = new Client($mongoUri);
 $productosCollection = $mongoClient->grupo6_agrohub->productos;
 
-// Variables para mensajes de éxito y error
+// Variable para mensajes de éxito y error
 $success = [];
 $errors = [];
 
@@ -52,12 +52,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     exit();
 }
 
+// Manejo de la adición y actualización de productos
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     try {
-        // Verificar si variedades está presente y no es null
         $variedades = isset($_POST['variedades']) ? json_decode($_POST['variedades'], true) : [];
-
-        // Verificar si la decodificación fue exitosa
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new Exception('El formato JSON para variedades no es válido.');
         }
@@ -72,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
         ];
 
         if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
-            // Actualizar producto
             $result = $productosCollection->updateOne(
                 ['_id' => new ObjectId($_POST['id'])],
                 ['$set' => $productoData]
@@ -83,7 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
                 $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
             }
         } else {
-            // Agregar producto
             $result = $productosCollection->insertOne($productoData);
             if ($result->getInsertedCount() > 0) {
                 $success[] = 'Producto agregado exitosamente.';
@@ -96,8 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     }
 }
 
-
-// Modifica la parte de eliminación de variedades
+// Manejo de la eliminación de variedades
 if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
     $product_id = $_GET['product_id'];
     $variedad_nombre = $_GET['variedad_nombre'];
@@ -120,27 +115,18 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
     exit();
 }
 
-// Manejo de la agregación de variedades
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_variedad') {
+// Manejo de la adición de variedades
+if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_POST['product_id']) && isset($_POST['variedad_nombre']) && isset($_POST['caracteristicas'])) {
+    $product_id = $_POST['product_id'];
+    $variedad = [
+        'nombre_variedad' => $_POST['variedad_nombre'],
+        'caracteristicas' => $_POST['caracteristicas']
+    ];
+
     try {
-        $variedad = [
-            'nombre_variedad' => $_POST['variedad_nombre'],
-            'caracteristicas' => $_POST['caracteristicas']
-        ];
-
-        $productoData = [
-            'nombre' => $_POST['nombre'],
-            'descripcion' => $_POST['descripcion'],
-            'tipo' => $_POST['tipo_producto'],
-            'precio_unitario' => floatval($_POST['precio_unitario']),
-            'unidad' => $_POST['unidad'],
-            'variedades' => [$variedad]
-        ];
-
-        // Agregar variedad al producto
-        if (strlen($_POST['product_id']) === 24 && ctype_xdigit($_POST['product_id'])) {
+        if (strlen($product_id) === 24 && ctype_xdigit($product_id)) {
             $result = $productosCollection->updateOne(
-                ['_id' => new ObjectId($_POST['product_id'])],
+                ['_id' => new ObjectId($product_id)],
                 ['$push' => ['variedades' => $variedad]]
             );
             if ($result->getModifiedCount() > 0) {
@@ -155,35 +141,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
     }
 
-    echo json_encode(['success' => $success, 'errors' => $errors]);
+    header('Location: productos.php');
     exit();
 }
 
-
-
-
 // Obtener productos para mostrar en la tabla
 try {
-    $productos = $productosCollection->find()->toArray();
+    $productosCursor = $productosCollection->find();
+    $productos = iterator_to_array($productosCursor);
 } catch (Exception $e) {
     $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
 }
 
-
-try {
-    $productos = $productosCollection->find([], ['projection' => ['tipo' => 1, '_id' => 0]]);
-    $tipos = [];
-
-    foreach ($productos as $producto) {
-        if (!in_array($producto['tipo'], $tipos)) {
-            $tipos[] = $producto['tipo'];
-        }
-    }
-
-    echo json_encode(['types' => $tipos]);
-} catch (Exception $e) {
-    echo json_encode(['error' => 'Error al obtener los tipos de producto: ' . $e->getMessage()]);
-}
 
 
 // Contar el número total de empleados y tareas si el usuario es admin

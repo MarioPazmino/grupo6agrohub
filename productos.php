@@ -741,38 +741,39 @@ if ($_SESSION['rol'] === 'admin') {
 <?php endif; ?>
 
 
-<script>
-    $(document).ready(function() {
-        $('#variedadesModal').on('show.bs.modal', function(event) {
-            var button = $(event.relatedTarget); // Botón que activó el modal
-            var id = button.data('id'); // Extraer datos-id del botón
-            var variedades = button.data('variedades'); // Extraer datos-variedades del botón
+$(document).ready(function() {
+    $('#variedadesModal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget); // Botón que activó el modal
+        var id = button.data('id'); // Extraer datos-id del botón
+        var variedades = button.data('variedades'); // Extraer datos-variedades del botón
 
-            var modal = $(this);
-            var variedadesList = modal.find('#variedadesList');
-            variedadesList.empty(); // Limpiar la lista de variedades antes de agregar nuevos elementos
+        var modal = $(this);
+        var variedadesList = modal.find('#variedadesList');
+        variedadesList.empty(); // Limpiar la lista de variedades antes de agregar nuevos elementos
 
-            if (variedades && Array.isArray(variedades)) {
-                variedades.forEach(function(variedad) {
-                    variedadesList.append('<li class="list-group-item">' + htmlspecialchars(variedad.nombre_variedad) + ': ' + htmlspecialchars(variedad.caracteristicas) + '</li>');
-                });
-            } else {
-                variedadesList.append('<li class="list-group-item">No hay variedades disponibles.</li>');
-            }
-        });
-
-        function htmlspecialchars(text) {
-            var map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        if (variedades && Array.isArray(variedades)) {
+            variedades.forEach(function(variedad) {
+                var nombreVariedad = htmlspecialchars(variedad.nombre_variedad);
+                var caracteristicas = htmlspecialchars(variedad.caracteristicas);
+                variedadesList.append('<li class="list-group-item">' + nombreVariedad + ': ' + caracteristicas + '</li>');
+            });
+        } else {
+            variedadesList.append('<li class="list-group-item">No hay variedades disponibles.</li>');
         }
     });
-</script>
+
+    function htmlspecialchars(text) {
+        var map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+});
+
 
 
 

@@ -732,32 +732,34 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-<!-- Ejemplo de código HTML para mostrar el formulario con tipos de productos -->
-<form action="productos.php" method="POST">
+<form action="productos.php" method="POST" class="container mt-4">
     <input type="hidden" name="action" value="add_variedad">
 
-    <!-- Campo para seleccionar el tipo de producto -->
-    <label for="tipo_producto">Tipo de Producto:</label>
-    <select name="tipo_producto" id="tipo_producto">
-        <?php foreach ($tiposProductos as $tipo): ?>
-            <option value="<?php echo htmlspecialchars($tipo['nombre']); ?>">
-                <?php echo htmlspecialchars($tipo['nombre']); ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
+    <div class="form-group">
+        <label for="tipo_producto">Tipo de Producto:</label>
+        <select name="tipo_producto" id="tipo_producto" class="form-control">
+            <?php foreach ($tiposProductos as $tipo): ?>
+                <option value="<?php echo htmlspecialchars($tipo['nombre']); ?>">
+                    <?php echo htmlspecialchars($tipo['nombre']); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
 
-    <!-- Otros campos del formulario -->
-    <label for="variedad_nombre">Nombre de Variedad:</label>
-    <input type="text" name="variedad_nombre" id="variedad_nombre" required>
+    <div class="form-group">
+        <label for="variedad_nombre">Nombre de Variedad:</label>
+        <input type="text" name="variedad_nombre" id="variedad_nombre" class="form-control" required>
+    </div>
 
-    <label for="caracteristicas">Características:</label>
-    <textarea name="caracteristicas" id="caracteristicas" required></textarea>
+    <div class="form-group">
+        <label for="caracteristicas">Características:</label>
+        <textarea name="caracteristicas" id="caracteristicas" class="form-control" required></textarea>
+    </div>
 
     <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product_id); ?>">
 
-    <button type="submit">Agregar Variedad</button>
+    <button type="submit" class="btn btn-primary">Agregar Variedad</button>
 </form>
-
             </div>
         </div>
     </div>

@@ -58,8 +58,21 @@ if ($_SESSION['rol'] === 'admin') {
     }
 }
 
+// Procesar eliminación de siembra
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'delete_siembra' && isset($_GET['id'])) {
+    $siembra_id = $_GET['id'];
 
-
+    try {
+        $result = $siembrasCollection->deleteOne(['_id' => new ObjectId($siembra_id)]);
+        if ($result->getDeletedCount() > 0) {
+            $success[] = 'Siembra eliminada correctamente.';
+        } else {
+            $errors[] = 'No se encontró la siembra para eliminar.';
+        }
+    } catch (Exception $e) {
+        $errors[] = 'Error al eliminar la siembra: ' . $e->getMessage();
+    }
+}
 
 // Procesar formulario de agregar siembra
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST['terreno_id'], $_POST['producto_id'], $_POST['fecha_siembra'], $_POST['estado'])) {
@@ -91,10 +104,6 @@ try {
     $errors[] = 'Error al obtener información de siembras: ' . $e->getMessage();
 }
 ?>
-
-
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -418,47 +427,50 @@ try {
                 </button>
                 <?php endif; ?>
 
-                 <!-- Tabla de siembras -->
-    <div class="table-responsive mt-4">
-        <table class="table table-bordered" id="siembrasTable" width="100%" cellspacing="0">
-            <thead>
-                <tr>
-                    <th>Empleado</th>
-                    <th>Terreno</th>
-                    <th>Producto</th>
-                    <th>Fecha Siembra</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($siembras as $siembra): ?>
-                <tr>
-                    <td><?php 
-                        $empleado = $usuariosCollection->findOne(['_id' => $siembra->empleado_id]);
-                        echo htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido); 
-                    ?></td>
-                    <td><?php 
-                        $terreno = $terrenosCollection->findOne(['_id' => $siembra->terreno_id]);
-                        echo htmlspecialchars($terreno->nombre); 
-                    ?></td>
-                    <td><?php 
-                        $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
-                        echo htmlspecialchars($producto->nombre); 
-                    ?></td>
-                    <td><?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?></td>
-                    <td><?php echo htmlspecialchars($siembra->estado); ?></td>
-                    <td>
-                        <?php if ($_SESSION['rol'] === 'admin'): ?>
-                        <a href="?action=delete_siembra&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
-                            <i class="fas fa-trash"></i> 
-                        </a>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                <!-- Tabla de siembras -->
+                <div class="table-responsive mt-4">
+                    <table class="table table-bordered" id="siembrasTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Terreno</th>
+                                <th>Producto</th>
+                                <th>Fecha Siembra</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($siembras as $siembra): ?>
+                            <tr>
+                                <td><?php 
+                                    $empleado = $usuariosCollection->findOne(['_id' => $siembra->empleado_id]);
+                                    echo htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido); 
+                                ?></td>
+                                <td><?php 
+                                    $terreno = $terrenosCollection->findOne(['_id' => $siembra->terreno_id]);
+                                    echo htmlspecialchars($terreno->nombre); 
+                                ?></td>
+                                <td><?php 
+                                    $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
+                                    echo htmlspecialchars($producto->nombre); 
+                                ?></td>
+                                <td><?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?></td>
+                                <td><?php echo htmlspecialchars($siembra->estado); ?></td>
+                                <td>
+                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
+                                    <a href="?action=delete_siembra&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
+                                        <i class="fas fa-trash"></i> 
+                                    </a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -475,53 +487,56 @@ try {
             <div class="modal-body">
                 <form action="" method="POST">
                     <div class="form-group">
-                        <label for="empleado">Empleado</label>
-                        <select class="form-control" id="empleado" name="empleado_id" required>
-                            <?php foreach ($usuariosCollection->find() as $empleado): ?>
-                            <option value="<?php echo htmlspecialchars($empleado->_id); ?>">
-                                <?php echo htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido); ?>
-                            </option>
-                            <?php endforeach; ?>
+                        <label for="empleado_id">Empleado</label>
+                        <select id="empleado_id" name="empleado_id" class="form-control" required>
+                            <?php
+                            $empleados = $usuariosCollection->find(['rol' => 'empleado']);
+                            foreach ($empleados as $empleado) {
+                                echo '<option value="' . htmlspecialchars($empleado->_id) . '">' . htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido) . '</option>';
+                            }
+                            ?>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="terreno">Terreno</label>
-                        <select class="form-control" id="terreno" name="terreno_id" required>
-                            <?php foreach ($terrenosCollection->find() as $terreno): ?>
-                            <option value="<?php echo htmlspecialchars($terreno->_id); ?>">
-                                <?php echo htmlspecialchars($terreno->nombre); ?>
-                            </option>
-                            <?php endforeach; ?>
+                        <label for="terreno_id">Terreno</label>
+                        <select id="terreno_id" name="terreno_id" class="form-control" required>
+                            <?php
+                            $terrenos = $terrenosCollection->find();
+                            foreach ($terrenos as $terreno) {
+                                echo '<option value="' . htmlspecialchars($terreno->_id) . '">' . htmlspecialchars($terreno->nombre) . '</option>';
+                            }
+                            ?>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="producto">Producto</label>
-                        <select class="form-control" id="producto" name="producto_id" required>
-                            <?php foreach ($productosCollection->find() as $producto): ?>
-                            <option value="<?php echo htmlspecialchars($producto->_id); ?>">
-                                <?php echo htmlspecialchars($producto->nombre); ?>
-                            </option>
-                            <?php endforeach; ?>
+                        <label for="producto_id">Producto</label>
+                        <select id="producto_id" name="producto_id" class="form-control" required>
+                            <?php
+                            $productos = $productosCollection->find();
+                            foreach ($productos as $producto) {
+                                echo '<option value="' . htmlspecialchars($producto->_id) . '">' . htmlspecialchars($producto->nombre) . '</option>';
+                            }
+                            ?>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="fecha_siembra">Fecha de Siembra</label>
-                        <input type="date" class="form-control" id="fecha_siembra" name="fecha_siembra" required>
+                        <input type="date" id="fecha_siembra" name="fecha_siembra" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="estado">Estado</label>
-                        <select class="form-control" id="estado" name="estado" required>
+                        <select id="estado" name="estado" class="form-control" required>
                             <option value="pendiente">Pendiente</option>
-                            <option value="finalizada">Finalizada</option>
+                            <option value="en_proceso">En Proceso</option>
+                            <option value="completada">Completada</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Agregar Siembra</button>
+                    <button type="submit" class="btn btn-primary">Agregar</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-
 
 <script>
     // Función para mostrar variedades en el modal

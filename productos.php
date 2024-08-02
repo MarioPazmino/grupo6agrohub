@@ -601,6 +601,7 @@ if ($_SESSION['rol'] === 'admin') {
 <button type="button" class="btn btn-warning btn-sm" title="Editar" onclick="openEditModal('<?php echo htmlspecialchars($producto->_id); ?>')">
     <i class="fas fa-pencil-alt"></i>
 </button>
+
                             <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');" title="Eliminar">
                                 <i class="fas fa-trash"></i>
                             </a>
@@ -778,31 +779,33 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
-
 <script>
 function openEditModal(id) {
-    $.ajax({
-        url: 'get_producto.php',
-        type: 'GET',
-        data: { id: id },
-        success: function(response) {
-            var producto = JSON.parse(response);
-            
-            $('#edit_id').val(producto._id.$oid);
-            $('#edit_nombre').val(producto.nombre);
-            $('#edit_descripcion').val(producto.descripcion);
-            $('#edit_tipo').val(producto.tipo);
-            $('#edit_precio_unitario').val(producto.precio_unitario);
-            $('#edit_unidad').val(producto.unidad);
-            
-            $('#editarProductoModal').modal('show');
-        },
-        error: function() {
-            alert('Error al cargar los datos del producto');
-        }
-    });
+    // Hacer una solicitud AJAX para obtener los detalles del producto
+    fetch('productos.php?id=' + id)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                // Rellenar el formulario con los datos del producto
+                document.getElementById('edit_id').value = data._id.$oid; // Asegúrate de ajustar esto según el formato del ID
+                document.getElementById('edit_nombre').value = data.nombre;
+                document.getElementById('edit_descripcion').value = data.descripcion;
+                document.getElementById('edit_tipo').value = data.tipo;
+                document.getElementById('edit_precio_unitario').value = data.precio_unitario;
+                document.getElementById('edit_unidad').value = data.unidad;
+
+                // Mostrar el modal
+                $('#editarProductoModal').modal('show');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
 }
 </script>
+
 
 <script>
     // Función para mostrar el modal de agregar variedad

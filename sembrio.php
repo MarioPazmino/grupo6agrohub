@@ -58,6 +58,31 @@ if ($_SESSION['rol'] === 'admin') {
     }
 }
 
+
+
+
+// Procesar formulario de agregar siembra
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST['terreno_id'], $_POST['producto_id'], $_POST['fecha_siembra'], $_POST['estado'])) {
+    $empleado_id = $_POST['empleado_id'];
+    $terreno_id = $_POST['terreno_id'];
+    $producto_id = $_POST['producto_id'];
+    $fecha_siembra = new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_siembra']));
+    $estado = $_POST['estado'];
+
+    try {
+        $siembrasCollection->insertOne([
+            'empleado_id' => new \MongoDB\BSON\ObjectId($empleado_id),
+            'terreno_id' => new \MongoDB\BSON\ObjectId($terreno_id),
+            'producto_id' => new \MongoDB\BSON\ObjectId($producto_id),
+            'fecha_siembra' => $fecha_siembra,
+            'estado' => $estado
+        ]);
+        $success[] = 'Siembra agregada correctamente.';
+    } catch (Exception $e) {
+        $errors[] = 'Error al agregar la siembra: ' . $e->getMessage();
+    }
+}
+
 // Obtener siembras
 $siembras = [];
 try {
@@ -393,50 +418,47 @@ try {
                 </button>
                 <?php endif; ?>
 
-                <!-- Tabla de siembras -->
-                <div class="table-responsive mt-4">
-                    <table class="table table-bordered" id="siembrasTable" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>Empleado</th>
-                                <th>Terreno</th>
-                                <th>Producto</th>
-                                <th>Fecha Siembra</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($siembras as $siembra): ?>
-                            <tr>
-                                <td><?php 
-                                    $empleado = $usuariosCollection->findOne(['_id' => $siembra->empleado_id]);
-                                    echo htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido); 
-                                ?></td>
-                                <td><?php 
-                                    $terreno = $terrenosCollection->findOne(['_id' => $siembra->terreno_id]);
-                                    echo htmlspecialchars($terreno->nombre); 
-                                ?></td>
-                                <td><?php 
-                                    $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
-                                    echo htmlspecialchars($producto->nombre); 
-                                ?></td>
-                                <td><?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?></td>
-                                <td><?php echo htmlspecialchars($siembra->estado); ?></td>
-                                <td>
-                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
-                                    <a href="?action=delete_siembra&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
-                                        <i class="fas fa-trash"></i> 
-                                    </a>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+                 <!-- Tabla de siembras -->
+    <div class="table-responsive mt-4">
+        <table class="table table-bordered" id="siembrasTable" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Empleado</th>
+                    <th>Terreno</th>
+                    <th>Producto</th>
+                    <th>Fecha Siembra</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($siembras as $siembra): ?>
+                <tr>
+                    <td><?php 
+                        $empleado = $usuariosCollection->findOne(['_id' => $siembra->empleado_id]);
+                        echo htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido); 
+                    ?></td>
+                    <td><?php 
+                        $terreno = $terrenosCollection->findOne(['_id' => $siembra->terreno_id]);
+                        echo htmlspecialchars($terreno->nombre); 
+                    ?></td>
+                    <td><?php 
+                        $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
+                        echo htmlspecialchars($producto->nombre); 
+                    ?></td>
+                    <td><?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?></td>
+                    <td><?php echo htmlspecialchars($siembra->estado); ?></td>
+                    <td>
+                        <?php if ($_SESSION['rol'] === 'admin'): ?>
+                        <a href="?action=delete_siembra&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
+                            <i class="fas fa-trash"></i> 
+                        </a>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -451,7 +473,7 @@ try {
                 </button>
             </div>
             <div class="modal-body">
-                <form action="procesar_siembra.php" method="POST">
+                <form action="" method="POST">
                     <div class="form-group">
                         <label for="empleado">Empleado</label>
                         <select class="form-control" id="empleado" name="empleado_id" required>
@@ -490,16 +512,16 @@ try {
                         <label for="estado">Estado</label>
                         <select class="form-control" id="estado" name="estado" required>
                             <option value="pendiente">Pendiente</option>
-                            <option value="en_proceso">En Proceso</option>
-                            <option value="completada">Completada</option>
+                            <option value="finalizada">Finalizada</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Guardar Siembra</button>
+                    <button type="submit" class="btn btn-primary">Agregar Siembra</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 
 <script>
     // Función para mostrar variedades en el modal

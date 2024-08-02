@@ -22,6 +22,8 @@ $mongoClient = new Client($mongoUri);
 $siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
 $empleadosCollection = $mongoClient->grupo6_agrohub->usuarios;
 $terrenosCollection = $mongoClient->grupo6_agrohub->terrenos;
+$productosCollection = $mongoClient->grupo6_agrohub->productos; // Nombre de la colección
+
 
 $siembras = [];
 $errors = [];

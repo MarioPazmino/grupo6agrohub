@@ -1,3 +1,7 @@
+
+
+
+
 <?php
 session_start();
 
@@ -25,6 +29,8 @@ $productosCollection = $mongoClient->grupo6_agrohub->productos;
 $success = [];
 $errors = [];
 
+
+
 // Obtener tipos de productos para mostrar en el formulario
 $tiposProductosCollection = $mongoClient->grupo6_agrohub->productos;
 try {
@@ -33,6 +39,7 @@ try {
 } catch (Exception $e) {
     $errors[] = 'Error al obtener los tipos de productos: ' . $e->getMessage();
 }
+
 
 // Manejo de la eliminación de productos
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
@@ -57,7 +64,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     exit();
 }
 
-// Manejo de productos (agregar o actualizar)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     try {
         // Verificar si variedades está presente y no es null
@@ -102,24 +108,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     }
 }
 
-// Manejo de la eliminación de variedades
+
+// Modifica la parte de eliminación de variedades
 if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
     $product_id = $_GET['product_id'];
     $variedad_nombre = $_GET['variedad_nombre'];
 
     try {
-        if (strlen($product_id) === 24 && ctype_xdigit($product_id)) {
-            $result = $productosCollection->updateOne(
-                ['_id' => new ObjectId($product_id)],
-                ['$pull' => ['variedades' => ['nombre_variedad' => $variedad_nombre]]]
-            );
-            if ($result->getModifiedCount() > 0) {
-                $success[] = 'Variedad eliminada exitosamente.';
-            } else {
-                $errors[] = 'No se pudo eliminar la variedad.';
-            }
+        $result = $productosCollection->updateOne(
+            ['_id' => new ObjectId($product_id)],
+            ['$pull' => ['variedades' => ['nombre_variedad' => $variedad_nombre]]]
+        );
+        if ($result->getModifiedCount() > 0) {
+            $success[] = 'Variedad eliminada exitosamente.';
         } else {
-            $errors[] = 'ID de producto inválido.';
+            $errors[] = 'No se pudo eliminar la variedad.';
         }
     } catch (Exception $e) {
         $errors[] = 'Error al eliminar la variedad: ' . $e->getMessage();
@@ -156,10 +159,11 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
         $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
     }
 
-    // Enviar respuesta como JSON
-    echo json_encode(['success' => $success, 'errors' => $errors]);
+    header('Location: productos.php');
     exit();
 }
+
+
 
 // Obtener productos para mostrar en la tabla
 try {
@@ -167,6 +171,9 @@ try {
 } catch (Exception $e) {
     $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
 }
+
+
+
 
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
@@ -198,6 +205,10 @@ if ($_SESSION['rol'] === 'admin') {
     }
 }
 ?>
+
+
+
+
 
 
 
@@ -710,41 +721,47 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
-<!-- Botón que abre el modal, asegúrate de que tenga el data-product-id correcto -->
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#agregarVariedadModal" data-product-id="60e72b2e4d1d4e3c889a12ab">
-    Agregar Variedad
-</button>
+<!-- Modal Agregar Variedad -->
+<div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarVariedadModalLabel">Agregar Variedad</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+<!-- Ejemplo de código HTML para mostrar el formulario con tipos de productos -->
+<form action="productos.php" method="POST">
+    <input type="hidden" name="action" value="add_variedad">
 
-<!-- Modal para agregar variedad -->
-<div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Agregar Variedad</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="formAgregarVariedad">
-          <input type="hidden" name="product_id">
-          <!-- Otros campos del formulario -->
-          <div class="form-group">
-            <label for="variedad">Nombre de la Variedad</label>
-            <input type="text" class="form-control" id="variedad" name="variedad" required>
-          </div>
-          <!-- Otros campos del formulario -->
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-        <button type="submit" form="formAgregarVariedad" class="btn btn-primary">Guardar Variedad</button>
-      </div>
+    <!-- Campo para seleccionar el tipo de producto -->
+    <label for="tipo_producto">Tipo de Producto:</label>
+    <select name="tipo_producto" id="tipo_producto">
+        <?php foreach ($tiposProductos as $tipo): ?>
+            <option value="<?php echo htmlspecialchars($tipo['nombre']); ?>">
+                <?php echo htmlspecialchars($tipo['nombre']); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+
+    <!-- Otros campos del formulario -->
+    <label for="variedad_nombre">Nombre de Variedad:</label>
+    <input type="text" name="variedad_nombre" id="variedad_nombre" required>
+
+    <label for="caracteristicas">Características:</label>
+    <textarea name="caracteristicas" id="caracteristicas" required></textarea>
+
+    <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product_id); ?>">
+
+    <button type="submit">Agregar Variedad</button>
+</form>
+
+            </div>
+        </div>
     </div>
-  </div>
 </div>
-
-
 
 
 
@@ -757,27 +774,28 @@ if ($_SESSION['rol'] === 'admin') {
 $(document).ready(function() {
     // Configura el modal de agregar variedad con el ID del producto
     $('#agregarVariedadModal').on('show.bs.modal', function(event) {
-        const button = $(event.relatedTarget); // Botón que abrió el modal
-        const productId = button.data('product-id'); // Extrae el ID del producto
-        const modal = $(this);
-        modal.find('#product_id').val(productId); // Asigna el ID al campo oculto
+        var button = $(event.relatedTarget); // Botón que abrió el modal
+        var productId = button.data('product-id'); // Extrae el ID del producto
+        var modal = $(this);
+        modal.find('#product_id').val(productId);
     });
 
     // Maneja el envío del formulario de agregar variedad
     $('#agregarVariedadForm').on('submit', function(e) {
         e.preventDefault(); // Evita el envío normal del formulario
-        const formData = $(this).serialize(); // Serializa los datos del formulario
+        var formData = $(this).serialize(); // Serializa los datos del formulario
 
         $.ajax({
             url: 'productos.php',
             type: 'POST',
-            data: formData,
+            data: formData + '&action=add_variedad', // Agrega la acción al formulario
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
                     alert(response.success[0]);
                     $('#agregarVariedadModal').modal('hide');
-                    location.reload(); // Recargar la página para actualizar la lista
+                    // Recargar la tabla de variedades
+                    showVariedades(response.variedades, $('#product_id').val());
                 } else if (response.errors) {
                     alert(response.errors[0]);
                 }
@@ -824,11 +842,10 @@ function eliminarVariedad(productoId, nombreVariedad) {
         })
         .then(response => response.json())
         .then(data => {
+            let messageHTML = '';
             // Limpiar el contenedor de mensajes antes de agregar nuevos
             const messagesContainer = document.getElementById('messages-container');
             messagesContainer.innerHTML = '';
-
-            let messageHTML = '';
 
             if (data.success && data.success.length > 0) {
                 messageHTML += '<div class="alert alert-success" role="alert">';
@@ -844,14 +861,14 @@ function eliminarVariedad(productoId, nombreVariedad) {
                 });
                 messageHTML += '</div>';
             }
-
+            
             // Insertar los mensajes en el DOM solo si hay mensajes que mostrar
             if (messageHTML !== '') {
                 messagesContainer.innerHTML = messageHTML;
                 // Hacer scroll hacia los mensajes
                 messagesContainer.scrollIntoView({ behavior: "smooth" });
             }
-
+            
             // Recargar la tabla de variedades o la página después de un breve retraso
             setTimeout(() => {
                 location.reload();
@@ -864,25 +881,25 @@ function eliminarVariedad(productoId, nombreVariedad) {
     }
 }
 
-// Configurar el modal de edición
-$('#editarProductoModal').on('show.bs.modal', function (event) {
-    const button = $(event.relatedTarget);
-    const id = button.data('id');
-    const nombre = button.data('nombre');
-    const descripcion = button.data('descripcion');
-    const tipo = button.data('tipo');
-    const precioUnitario = button.data('precio_unitario');
-    const unidad = button.data('unidad');
 
-    const modal = $(this);
-    modal.find('#edit_id').val(id);
-    modal.find('#edit_nombre').val(nombre);
-    modal.find('#edit_descripcion').val(descripcion);
-    modal.find('#edit_tipo').val(tipo);
-    modal.find('#edit_precio_unitario').val(precioUnitario);
-    modal.find('#edit_unidad').val(unidad);
-});
+    // Configurar el modal de edición
+    $('#editarProductoModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const id = button.data('id');
+        const nombre = button.data('nombre');
+        const descripcion = button.data('descripcion');
+        const tipo = button.data('tipo');
+        const precioUnitario = button.data('precio_unitario');
+        const unidad = button.data('unidad');
 
+        const modal = $(this);
+        modal.find('#edit_id').val(id);
+        modal.find('#edit_nombre').val(nombre);
+        modal.find('#edit_descripcion').val(descripcion);
+        modal.find('#edit_tipo').val(tipo);
+        modal.find('#edit_precio_unitario').val(precioUnitario);
+        modal.find('#edit_unidad').val(unidad);
+    });
 </script>
 
 

@@ -85,11 +85,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        if ($_POST['action'] === 'edit_producto' && isset($_POST['id'])) {
+    if ($_POST['action'] === 'edit_producto' && isset($_POST['id'])) {
+    $id = $_POST['id'];
+    error_log("ID recibido: " . print_r($id, true)); // Log para depuración
+
     try {
-        // Validar el ID del producto
-        $id = $_POST['id'];
-        if (is_string($id) && strlen($id) == 24 && ctype_xdigit($id)) {
+        if (!empty($id) && is_string($id) && strlen($id) == 24 && ctype_xdigit($id)) {
             $updateData = [
                 'nombre' => $_POST['nombre'],
                 'descripcion' => $_POST['descripcion'],
@@ -126,14 +127,13 @@ try {
 }
 
 // Manejo de solicitudes AJAX para obtener detalles del producto
-if (isset($_GET['id']) && !isset($_POST['action'])) {
+if (isset($_GET['id'])) {
     $id = $_GET['id'];
     if (is_string($id) && strlen($id) == 24 && ctype_xdigit($id)) {
         try {
             $objectId = new ObjectId($id);
             $producto = $productosCollection->findOne(['_id' => $objectId]);
             if ($producto) {
-                // Convertir el ObjectId a string antes de enviarlo
                 $producto['_id'] = $producto['_id']->__toString();
                 echo json_encode($producto);
             } else {
@@ -143,7 +143,7 @@ if (isset($_GET['id']) && !isset($_POST['action'])) {
             echo json_encode(['error' => 'Error al obtener el producto: ' . $e->getMessage()]);
         }
     } else {
-        echo json_encode(['error' => 'ID de producto inválido: ' . htmlspecialchars($id)]);
+        echo json_encode(['error' => 'ID de producto inválido']);
     }
     exit();
 }
@@ -605,10 +605,9 @@ if ($_SESSION['rol'] === 'admin') {
                         </td>
                         <?php if ($_SESSION['rol'] === 'admin'): ?>
                         <td>
-<button type="button" class="btn btn-warning btn-sm" title="Editar" onclick="openEditModal('<?php echo htmlspecialchars($producto->_id); ?>')">
+<button type="button" class="btn btn-warning btn-sm" title="Editar" onclick="openEditModal('<?php echo $producto->_id; ?>')">
     <i class="fas fa-pencil-alt"></i>
 </button>
-
                             <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');" title="Eliminar">
                                 <i class="fas fa-trash"></i>
                             </a>
@@ -686,8 +685,8 @@ if ($_SESSION['rol'] === 'admin') {
             </div>
             <div class="modal-body">
                 <form action="productos.php" method="POST">
-                    <input type="hidden" id="edit_id" name="id">
-                    <input type="hidden" name="action" value="edit_producto">
+    <input type="hidden" id="edit_id" name="id">
+    <input type="hidden" name="action" value="edit_producto">
                     <div class="form-group">
                         <label for="edit_nombre">Nombre</label>
                         <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
@@ -788,26 +787,26 @@ if ($_SESSION['rol'] === 'admin') {
 
 <script>
 function openEditModal(id) {
-    // Hacer una petición AJAX para obtener los detalles del producto
+    console.log("ID recibido:", id); // Para depuración
     fetch('productos.php?id=' + id)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
                 alert(data.error);
             } else {
-                // Rellenar el formulario del modal con los datos del producto
-                document.getElementById('edit_id').value = data._id.$oid; // Cambiado aquí
+                console.log("Datos recibidos:", data); // Para depuración
+                document.getElementById('edit_id').value = id; // Usa el ID original
                 document.getElementById('edit_nombre').value = data.nombre;
                 document.getElementById('edit_descripcion').value = data.descripcion;
                 document.getElementById('edit_tipo').value = data.tipo;
                 document.getElementById('edit_precio_unitario').value = data.precio_unitario;
                 document.getElementById('edit_unidad').value = data.unidad;
 
-                // Mostrar el modal
                 $('#editarProductoModal').modal('show');
             }
         })
         .catch(error => {
+            console.error('Error:', error); // Para depuración
             alert('Error al obtener los datos del producto.');
         });
 }

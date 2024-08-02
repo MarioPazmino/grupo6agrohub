@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 
@@ -54,51 +53,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
         $errors[] = 'Error al eliminar el producto: ' . $e->getMessage();
     }
 
-    header("Location: productos.php");
-    exit();
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
-    try {
-        // Verificar si variedades está presente y no es null
-        $variedades = isset($_POST['variedades']) ? json_decode($_POST['variedades'], true) : [];
-
-        // Verificar si la decodificación fue exitosa
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception('El formato JSON para variedades no es válido.');
-        }
-
-        $productoData = [
-            'nombre' => $_POST['nombre'],
-            'descripcion' => $_POST['descripcion'],
-            'tipo' => $_POST['tipo'],
-            'precio_unitario' => floatval($_POST['precio_unitario']),
-            'unidad' => $_POST['unidad'],
-            'variedades' => $variedades
-        ];
-
-        if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
-            // Actualizar producto
-            $result = $productosCollection->updateOne(
-                ['_id' => new ObjectId($_POST['id'])],
-                ['$set' => $productoData]
-            );
-            if ($result->getModifiedCount() > 0) {
-                $success[] = 'Producto actualizado exitosamente.';
-            } else {
-                $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
-            }
-        } else {
-            // Agregar producto
-            $result = $productosCollection->insertOne($productoData);
-            if ($result->getInsertedCount() > 0) {
-                $success[] = 'Producto agregado exitosamente.';
-            } else {
-                $errors[] = 'Error al agregar el producto.';
-            }
-        }
-    } catch (Exception $e) {
-        $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
+    // Solo para la eliminación de productos, redirige después de procesar
+    if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad') {
+        echo json_encode(['success' => $success, 'errors' => $errors]);
+        exit();
+    } else {
+        header("Location: productos.php");
+        exit();
     }
 }
 
@@ -121,6 +82,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
         $errors[] = 'Error al eliminar la variedad: ' . $e->getMessage();
     }
 
+    // Enviar la respuesta JSON al navegador
     echo json_encode(['success' => $success, 'errors' => $errors]);
     exit();
 }
@@ -152,6 +114,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
         $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
     }
 
+    // Redirige después de procesar
     header('Location: productos.php');
     exit();
 }
@@ -162,14 +125,6 @@ try {
 } catch (Exception $e) {
     $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
 }
-
-
-
-
-
-
-
-
 
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
@@ -201,9 +156,6 @@ if ($_SESSION['rol'] === 'admin') {
     }
 }
 ?>
-
-
-
 
 
 
@@ -668,7 +620,8 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
-
+<!-- Contenedor para mensajes -->
+<div id="messages-container"></div>
 
 
 <!-- Modal para ver variedades -->
@@ -787,38 +740,25 @@ function eliminarVariedad(productoId, nombreVariedad) {
         })
         .then(response => response.json())
         .then(data => {
-            let messageHTML = '';
-            // Limpiar el contenedor de mensajes antes de agregar nuevos
             const messagesContainer = document.getElementById('messages-container');
             messagesContainer.innerHTML = '';
 
             if (data.success && data.success.length > 0) {
-                messageHTML += '<div class="alert alert-success" role="alert">';
                 data.success.forEach(message => {
-                    messageHTML += `${message}<br>`;
+                    messagesContainer.innerHTML += `<div class="alert alert-success" role="alert">${message}<br></div>`;
                 });
-                messageHTML += '</div>';
             }
+
             if (data.errors && data.errors.length > 0) {
-                messageHTML += '<div class="alert alert-danger" role="alert">';
                 data.errors.forEach(message => {
-                    messageHTML += `${message}<br>`;
+                    messagesContainer.innerHTML += `<div class="alert alert-danger" role="alert">${message}<br></div>`;
                 });
-                messageHTML += '</div>';
             }
-            
-            // Insertar los mensajes en el DOM solo si hay mensajes que mostrar
-            if (messageHTML !== '') {
-                messagesContainer.innerHTML = messageHTML;
-                // Hacer scroll hacia los mensajes
-                messagesContainer.scrollIntoView({ behavior: "smooth" });
-            }
-            
-            // Actualizar la tabla de variedades en lugar de recargar la página
-            if (data.success && data.success.length > 0) {
-                // Llama a una función para recargar los datos de la tabla
-                actualizarTablaVariedades(); // Asume que tienes esta función definida
-            }
+
+            // Recargar la tabla de variedades o la página después de un breve retraso
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
         })
         .catch(error => {
             console.error('Error:', error);
@@ -826,6 +766,7 @@ function eliminarVariedad(productoId, nombreVariedad) {
         });
     }
 }
+
 
 
     // Configurar el modal de edición

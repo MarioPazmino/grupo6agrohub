@@ -409,6 +409,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
 
 
 
+
 <!-- Content Row -->
 <div class="row">
 <div id="messages-container"></div>
@@ -734,13 +735,9 @@ document.getElementById('agregarSiembraForm').addEventListener('submit', functio
 
 
 
-               
-
-
-
                     
 
-               
+                    
 
         <!-- Scroll to Top Button-->
         <a class="scroll-to-top rounded" href="#page-top">

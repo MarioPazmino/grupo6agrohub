@@ -95,29 +95,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_id'])) {
     $empleado_id = $_POST['empleado_id'];
     $terreno_id = $_POST['terreno_id'];
     $producto_id = $_POST['producto_id'];
-    $fecha_siembra = new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_siembra']));
+    $fecha_siembra = new \MongoDB\BSON\UTCDateTime(strtotime($_POST['fecha_siembra']) * 1000);
     $estado = $_POST['estado'];
 
     try {
         $result = $siembrasCollection->updateOne(
             ['_id' => new ObjectId($edit_id)],
             ['$set' => [
-                'empleado_id' => new \MongoDB\BSON\ObjectId($empleado_id),
-                'terreno_id' => new \MongoDB\BSON\ObjectId($terreno_id),
-                'producto_id' => new \MongoDB\BSON\ObjectId($producto_id),
+                'empleado_id' => new ObjectId($empleado_id),
+                'terreno_id' => new ObjectId($terreno_id),
+                'producto_id' => new ObjectId($producto_id),
                 'fecha_siembra' => $fecha_siembra,
                 'estado' => $estado
             ]]
         );
 
         if ($result->getModifiedCount() > 0) {
-            $success[] = 'Siembra actualizada correctamente.';
+            echo json_encode(['success' => true, 'message' => 'Siembra actualizada correctamente.']);
         } else {
-            $errors[] = 'No se encontró la siembra para actualizar.';
+            echo json_encode(['success' => false, 'message' => 'No se encontró la siembra para actualizar.']);
         }
     } catch (Exception $e) {
-        $errors[] = 'Error al actualizar la siembra: ' . $e->getMessage();
+        echo json_encode(['success' => false, 'message' => 'Error al actualizar la siembra: ' . $e->getMessage()]);
     }
+    exit;
+}
+
+// Obtener siembra para mostrar detalles
+if (isset($_GET['action']) && $_GET['action'] === 'get_siembra' && isset($_GET['id'])) {
+    $siembra_id = $_GET['id'];
+    try {
+        $siembra = $siembrasCollection->findOne(['_id' => new ObjectId($siembra_id)]);
+        if ($siembra) {
+            echo json_encode(['success' => true, 'siembra' => $siembra]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Siembra no encontrada']);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Error al obtener la siembra: ' . $e->getMessage()]);
+    }
+    exit;
 }
 
 // Obtener siembras
@@ -128,19 +145,6 @@ try {
     $errors[] = 'Error al obtener información de siembras: ' . $e->getMessage();
 }
 
-// Obtener datos para la ventana modal de edición
-$siembraToEdit = null;
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'edit_siembra' && isset($_GET['id'])) {
-    $siembra_id = $_GET['id'];
-    try {
-        $siembraToEdit = $siembrasCollection->findOne(['_id' => new ObjectId($siembra_id)]);
-        if (!$siembraToEdit) {
-            $errors[] = 'No se encontró la siembra para editar.';
-        }
-    } catch (Exception $e) {
-        $errors[] = 'Error al obtener la siembra para edición: ' . $e->getMessage();
-    }
-}
 
 ?>
 
@@ -655,20 +659,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
 <script>
 function cargarDatosEdicion(siembraId) {
     $.ajax({
-        url: 'obtener_siembra.php',
+        url: 'siembras.php',
         method: 'GET',
-        data: { id: siembraId },
+        data: { action: 'get_siembra', id: siembraId },
         dataType: 'json',
         success: function(response) {
             if (response.success) {
                 var siembra = response.siembra;
                 $('#edit_id').val(siembra._id.$oid);
-                $('#edit_empleado_id').val(siembra.empleado_id.$oid);
-                $('#edit_terreno_id').val(siembra.terreno_id.$oid);
-                $('#edit_producto_id').val(siembra.producto_id.$oid);
-                $('#edit_fecha_siembra').val(new Date(siembra.fecha_siembra.$date).toISOString().split('T')[0]);
-                $('#edit_estado').val(siembra.estado);
-                $('#editarSiembraModal').modal('show');
+                $('#empleado_id').val(siembra.empleado_id.$oid);
+                $('#terreno_id').val(siembra.terreno_id.$oid);
+                $('#producto_id').val(siembra.producto_id.$oid);
+                $('#fecha_siembra').val(new Date(siembra.fecha_siembra.$date.$numberLong).toISOString().split('T')[0]);
+                $('#estado').val(siembra.estado);
+                $('#editSiembraModal').modal('show');
             } else {
                 alert('Error al cargar los datos de la siembra: ' + response.message);
             }
@@ -680,18 +684,17 @@ function cargarDatosEdicion(siembraId) {
 }
 
 $(document).ready(function() {
-    $('#editarSiembraForm').on('submit', function(e) {
+    $('form').on('submit', function(e) {
         e.preventDefault();
         $.ajax({
-            url: $(this).attr('action'),
+            url: 'siembras.php',
             method: 'POST',
             data: $(this).serialize(),
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
                     alert('Siembra actualizada correctamente');
-                    $('#editarSiembraModal').modal('hide');
-                    // Recargar la página o actualizar la tabla de siembras
+                    $('#editSiembraModal').modal('hide');
                     location.reload();
                 } else {
                     alert('Error al actualizar la siembra: ' + response.message);
@@ -703,18 +706,6 @@ $(document).ready(function() {
         });
     });
 });
-</script>
-                
-<script>
-    // Función para mostrar variedades en el modal
-    function showVariedades(variedades, productoId) {
-        let modalBody = document.getElementById('variedadesModalBody');
-        modalBody.innerHTML = '';
-        variedades.forEach(function(variedad) {
-            modalBody.innerHTML += `<p><strong>Variedad:</strong> ${variedad.nombre} <br> <strong>Descripción:</strong> ${variedad.descripcion}</p>`;
-        });
-        $('#variedadesModal').modal('show');
-    }
 </script>
 
 

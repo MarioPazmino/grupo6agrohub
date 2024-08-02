@@ -86,35 +86,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($_POST['action'] === 'edit_producto' && isset($_POST['id'])) {
-            try {
-                // Validar el ID del producto
-                $id = $_POST['id'];
-                if (is_string($id) && strlen($id) == 24 && ctype_xdigit($id)) {
-                    $updateData = [
-                        'nombre' => $_POST['nombre'],
-                        'descripcion' => $_POST['descripcion'],
-                        'tipo' => $_POST['tipo'],
-                        'precio_unitario' => floatval($_POST['precio_unitario']),
-                        'unidad' => $_POST['unidad']
-                    ];
+    try {
+        // Validar el ID del producto
+        $id = $_POST['id'];
+        if (is_string($id) && strlen($id) == 24 && ctype_xdigit($id)) {
+            $updateData = [
+                'nombre' => $_POST['nombre'],
+                'descripcion' => $_POST['descripcion'],
+                'tipo' => $_POST['tipo'],
+                'precio_unitario' => floatval($_POST['precio_unitario']),
+                'unidad' => $_POST['unidad']
+            ];
 
-                    $result = $productosCollection->updateOne(
-                        ['_id' => new ObjectId($id)],
-                        ['$set' => $updateData]
-                    );
+            $result = $productosCollection->updateOne(
+                ['_id' => new ObjectId($id)],
+                ['$set' => $updateData]
+            );
 
-                    if ($result->getModifiedCount() > 0) {
-                        $success[] = 'Producto actualizado exitosamente.';
-                    } else {
-                        $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
-                    }
-                } else {
-                    $errors[] = 'ID de producto inválido: ' . htmlspecialchars($id); // Mostrar el ID para depuración
-                }
-            } catch (Exception $e) {
-                $errors[] = 'Error al actualizar el producto: ' . $e->getMessage();
+            if ($result->getModifiedCount() > 0) {
+                $success[] = 'Producto actualizado exitosamente.';
+            } else {
+                $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
             }
+        } else {
+            $errors[] = 'ID de producto inválido: ' . htmlspecialchars($id);
         }
+    } catch (Exception $e) {
+        $errors[] = 'Error al actualizar el producto: ' . $e->getMessage();
+    }
+}
     }
 }
 
@@ -133,6 +133,8 @@ if (isset($_GET['id']) && !isset($_POST['action'])) {
             $objectId = new ObjectId($id);
             $producto = $productosCollection->findOne(['_id' => $objectId]);
             if ($producto) {
+                // Convertir el ObjectId a string antes de enviarlo
+                $producto['_id'] = $producto['_id']->__toString();
                 echo json_encode($producto);
             } else {
                 echo json_encode(['error' => 'Producto no encontrado']);
@@ -141,7 +143,7 @@ if (isset($_GET['id']) && !isset($_POST['action'])) {
             echo json_encode(['error' => 'Error al obtener el producto: ' . $e->getMessage()]);
         }
     } else {
-        echo json_encode(['error' => 'ID de producto inválido: ' . htmlspecialchars($id)]); // Mostrar el ID para depuración
+        echo json_encode(['error' => 'ID de producto inválido: ' . htmlspecialchars($id)]);
     }
     exit();
 }
@@ -794,7 +796,7 @@ function openEditModal(id) {
                 alert(data.error);
             } else {
                 // Rellenar el formulario del modal con los datos del producto
-                document.getElementById('edit_id').value = data._id;
+                document.getElementById('edit_id').value = data._id.$oid; // Cambiado aquí
                 document.getElementById('edit_nombre').value = data.nombre;
                 document.getElementById('edit_descripcion').value = data.descripcion;
                 document.getElementById('edit_tipo').value = data.tipo;
@@ -809,7 +811,6 @@ function openEditModal(id) {
             alert('Error al obtener los datos del producto.');
         });
 }
-
 </script>
 
 

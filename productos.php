@@ -726,7 +726,7 @@ if ($_SESSION['rol'] === 'admin') {
                 <td>${variedad.caracteristicas}</td>
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <td>
-                    <a href="?action=delete_variedad&product_id=${productId}&variedad_nombre=${encodeURIComponent(variedad.nombre_variedad)}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta variedad?');">
+                    <a href="#" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta variedad?');">
                         <i class="fas fa-trash"></i> Eliminar
                     </a>
                 </td>

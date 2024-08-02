@@ -103,9 +103,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
 }
 
 // Modifica la parte de eliminación de variedades
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_variedad' && isset($_POST['product_id']) && isset($_POST['variedad_nombre'])) {
-    $product_id = $_POST['product_id'];
-    $variedad_nombre = $_POST['variedad_nombre'];
+if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
+    $product_id = $_GET['product_id'];
+    $variedad_nombre = $_GET['variedad_nombre'];
+
+    $success = [];
+    $errors = [];
 
     try {
         $result = $productosCollection->updateOne(
@@ -113,16 +116,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             ['$pull' => ['variedades' => ['nombre_variedad' => $variedad_nombre]]]
         );
         if ($result->getModifiedCount() > 0) {
-            $_SESSION['success'] = 'Variedad eliminada exitosamente.';
+            $success[] = 'Variedad eliminada exitosamente.';
         } else {
-            $_SESSION['error'] = 'No se pudo eliminar la variedad.';
+            $errors[] = 'No se pudo eliminar la variedad.';
         }
     } catch (Exception $e) {
-        $_SESSION['error'] = 'Error al eliminar la variedad: ' . $e->getMessage();
+        $errors[] = 'Error al eliminar la variedad: ' . $e->getMessage();
     }
 
-    // Redirigir a la misma página
-    header('Location: ' . $_SERVER['PHP_SELF']);
+    echo json_encode(['success' => $success, 'errors' => $errors]);
     exit();
 }
 
@@ -826,6 +828,7 @@ $(document).ready(function() {
             });
         }
     }
+
 
 </script>
 

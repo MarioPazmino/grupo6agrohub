@@ -783,51 +783,51 @@ $(document).ready(function() {
     });
 });
 
-    function eliminarVariedad(productoId, nombreVariedad) {
-        if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
-            fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
-                method: 'GET'
-            })
-            .then(response => response.json())
-            .then(data => {
-                let messageHTML = '';
-                // Limpiar el contenedor de mensajes antes de agregar nuevos
-                const messagesContainer = document.getElementById('messages-container');
-                messagesContainer.innerHTML = '';
+function eliminarVariedad(productoId, nombreVariedad) {
+    if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
+        fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(data => {
+            let messageHTML = '';
+            // Limpiar el contenedor de mensajes antes de agregar nuevos
+            const messagesContainer = document.getElementById('messages-container');
+            messagesContainer.innerHTML = '';
 
-                if (data.success && data.success.length > 0) {
-                    messageHTML += '<div class="alert alert-success" role="alert">';
-                    data.success.forEach(message => {
-                        messageHTML += `${message}<br>`;
-                    });
-                    messageHTML += '</div>';
-                }
-                if (data.errors && data.errors.length > 0) {
-                    messageHTML += '<div class="alert alert-danger" role="alert">';
-                    data.errors.forEach(message => {
-                        messageHTML += `${message}<br>`;
-                    });
-                    messageHTML += '</div>';
-                }
-                
-                // Insertar los mensajes en el DOM solo si hay mensajes que mostrar
-                if (messageHTML !== '') {
-                    messagesContainer.innerHTML = messageHTML;
-                    // Hacer scroll hacia los mensajes
-                    messagesContainer.scrollIntoView({ behavior: "smooth" });
-                }
-                
-                // Actualizar la tabla de variedades en lugar de recargar la página
-                if (data.success && data.success.length > 0) {
-                    actualizarTablaVariedades(); // Asegúrate de definir esta función para actualizar la tabla de variedades
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al eliminar variedad');
-            });
-        }
+            if (data.success && data.success.length > 0) {
+                messageHTML += '<div class="alert alert-success" role="alert">';
+                data.success.forEach(message => {
+                    messageHTML += `${message}<br>`;
+                });
+                messageHTML += '</div>';
+            }
+            if (data.errors && data.errors.length > 0) {
+                messageHTML += '<div class="alert alert-danger" role="alert">';
+                data.errors.forEach(message => {
+                    messageHTML += `${message}<br>`;
+                });
+                messageHTML += '</div>';
+            }
+            
+            // Insertar los mensajes en el DOM solo si hay mensajes que mostrar
+            if (messageHTML !== '') {
+                messagesContainer.innerHTML = messageHTML;
+                // Hacer scroll hacia los mensajes
+                messagesContainer.scrollIntoView({ behavior: "smooth" });
+            }
+            
+            // Actualizar la tabla de variedades en lugar de recargar la página
+            if (data.success && data.success.length > 0) {
+                actualizarTablaVariedades(); // Asegúrate de definir esta función para actualizar la tabla de variedades
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar variedad');
+        });
     }
+}
 
 
 </script>

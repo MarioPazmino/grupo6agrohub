@@ -59,7 +59,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 }
 
 // Manejo de la actualización y agregación de productos
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_producto') {
     try {
         $variedades = json_decode($_POST['variedades'], true);
         if (json_last_error() !== JSON_ERROR_NONE) {
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
             'unidad' => $_POST['unidad'],
             'variedades' => $variedades
         ];
-
+error_log("Intentando insertar producto: " . print_r($productoData, true));
         if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
             // Actualizar producto
             $result = $productosCollection->updateOne(

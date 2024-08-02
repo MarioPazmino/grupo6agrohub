@@ -123,6 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
         $errors[] = 'Error al obtener la siembra para edición: ' . $e->getMessage();
     }
 }
+
+
 ?>
 
 
@@ -641,6 +643,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
         </div>
     </div>
 </div>
+
 </div>
 
 <script>

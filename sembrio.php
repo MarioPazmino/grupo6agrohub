@@ -16,22 +16,17 @@ use MongoDB\Client;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Exception\Exception;
 
-// Conexión a MongoDB
+// Conexión a MongoDB con la URL proporcionada
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
-$siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
-$empleadosCollection = $mongoClient->grupo6_agrohub->usuarios;
 $productosCollection = $mongoClient->grupo6_agrohub->productos;
+$collection = $mongoClient->grupo6_agrohub->usuarios;
 $terrenosCollection = $mongoClient->grupo6_agrohub->terrenos;
+$siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
 
-$siembras = [];
+// Variables para mensajes de éxito y error
+$success = [];
 $errors = [];
-
-try {
-    $siembras = $siembrasCollection->find()->toArray();
-} catch (Exception $e) {
-    $errors[] = 'Error al obtener las siembras: ' . $e->getMessage();
-}
 
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
@@ -63,12 +58,15 @@ if ($_SESSION['rol'] === 'admin') {
     }
 }
 
+
+
+
 // Procesar formulario de agregar siembra
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST['terreno_id'], $_POST['producto_id'], $_POST['fecha_siembra'], $_POST['estado'])) {
     $empleado_id = $_POST['empleado_id'];
     $terreno_id = $_POST['terreno_id'];
     $producto_id = $_POST['producto_id'];
-    $fecha_siembra = new \MongoDB\BSON\UTCDateTime((new DateTime($_POST['fecha_siembra']))->getTimestamp() * 1000);
+    $fecha_siembra = new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_siembra']));
     $estado = $_POST['estado'];
 
     try {
@@ -79,44 +77,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
             'fecha_siembra' => $fecha_siembra,
             'estado' => $estado
         ]);
-
-        // Enviar respuesta JSON para AJAX
-        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-            echo json_encode(['success' => true, 'message' => 'Siembra agregada correctamente.']);
-            exit;
-        }
-
         $success[] = 'Siembra agregada correctamente.';
     } catch (Exception $e) {
-        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-            echo json_encode(['success' => false, 'message' => 'Error al agregar la siembra: ' . $e->getMessage()]);
-            exit;
-        }
         $errors[] = 'Error al agregar la siembra: ' . $e->getMessage();
     }
 }
 
-// Eliminar siembra
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'delete_siembra') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $id = $input['id'] ?? null;
-
-    if ($id) {
-        try {
-            $result = $siembrasCollection->deleteOne(['_id' => new ObjectId($id)]);
-
-            if ($result->getDeletedCount() === 1) {
-                echo json_encode(['success' => true, 'message' => 'Siembra eliminada correctamente.']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'No se pudo encontrar la siembra para eliminar.']);
-            }
-        } catch (Exception $e) {
-            echo json_encode(['success' => false, 'message' => 'Error al eliminar la siembra: ' . $e->getMessage()]);
-        }
-    } else {
-        echo json_encode(['success' => false, 'message' => 'ID de siembra no proporcionado.']);
-    }
-    exit;
+// Obtener siembras
+$siembras = [];
+try {
+    $siembras = $siembrasCollection->find()->toArray();
+} catch (Exception $e) {
+    $errors[] = 'Error al obtener información de siembras: ' . $e->getMessage();
 }
 ?>
 
@@ -410,98 +382,86 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
 
 
 
+
+
+
 <!-- Content Row -->
 <div class="row">
-<div id="messages-container"></div>
-
-
-<!-- Siembras -->
-<div class="col-lg-12">
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Siembras</h6>
-        </div>
-        <div class="card-body">
-
-            <!-- Mensajes de éxito y error -->
-            <?php if (!empty($success)): ?>
-            <div class="alert alert-success" role="alert">
-                <?php foreach ($success as $message): ?>
-                <?php echo htmlspecialchars($message); ?><br>
-                <?php endforeach; ?>
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Siembras</h6>
             </div>
-            <?php endif; ?>
+            <div class="card-body">
 
-            <?php if (!empty($errors)): ?>
-            <div class="alert alert-danger" role="alert">
-                <?php foreach ($errors as $message): ?>
-                <?php echo htmlspecialchars($message); ?><br>
-                <?php endforeach; ?>
-            </div>
-            <?php endif; ?>
-<!-- Botón de agregar siembra (solo para admin) -->
-                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <!-- Botón para abrir el modal de agregar siembra -->
-<button type="button" class="btn btn-success" data-toggle="modal" data-target="#agregarSiembraModal">
-    Agregar Nueva Siembra
-</button>
+                <!-- Mensajes de éxito y error -->
+                <?php if (!empty($success)): ?>
+                <div class="alert alert-success" role="alert">
+                    <?php foreach ($success as $message): ?>
+                    <?php echo htmlspecialchars($message); ?><br>
+                    <?php endforeach; ?>
+                </div>
                 <?php endif; ?>
 
-            
-            <!-- Tabla de siembras -->
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Empleado</th>
-                        <th>Terreno</th>
-                        <th>Producto</th>
-                        <th>Fecha de Siembra</th>
-                        <th>Estado</th>
-                        <?php if ($_SESSION['rol'] === 'admin'): ?>
-                        <th>Acciones</th>
-                        <?php endif; ?>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($siembras as $siembra): ?>
-                    <tr>
-                        <td><?php 
-                            $empleado = $usuariosCollection->findOne(['_id' => $siembra->empleado_id]);
-                            echo htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido); 
-                        ?></td>
-                        <td><?php 
-                            $terreno = $terrenosCollection->findOne(['_id' => $siembra->terreno_id]);
-                            echo htmlspecialchars($terreno->nombre); 
-                        ?></td>
-                        <td><?php 
-                            $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
-                            echo htmlspecialchars($producto->nombre); 
-                        ?></td>
-                        <td><?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?></td>
-                        <td><?php echo htmlspecialchars($siembra->estado); ?></td>
-                        <?php if ($_SESSION['rol'] === 'admin'): ?>
-                        <td>
-                            <a href="?action=delete_siembra&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
-                                <i class="fas fa-trash"></i> 
-                            </a>
-                        </td>
-                        <?php endif; ?>
-                    </tr>
+                <?php if (!empty($errors)): ?>
+                <div class="alert alert-danger" role="alert">
+                    <?php foreach ($errors as $message): ?>
+                    <?php echo htmlspecialchars($message); ?><br>
                     <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Botón de agregar siembra (solo para admin) -->
+                <?php if ($_SESSION['rol'] === 'admin'): ?>
+                <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarSiembraModal">
+                    <i class="fas fa-plus"></i> Agregar Siembra
+                </button>
+                <?php endif; ?>
+
+                 <!-- Tabla de siembras -->
+    <div class="table-responsive mt-4">
+        <table class="table table-bordered" id="siembrasTable" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Empleado</th>
+                    <th>Terreno</th>
+                    <th>Producto</th>
+                    <th>Fecha Siembra</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($siembras as $siembra): ?>
+                <tr>
+                    <td><?php 
+                        $empleado = $usuariosCollection->findOne(['_id' => $siembra->empleado_id]);
+                        echo htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido); 
+                    ?></td>
+                    <td><?php 
+                        $terreno = $terrenosCollection->findOne(['_id' => $siembra->terreno_id]);
+                        echo htmlspecialchars($terreno->nombre); 
+                    ?></td>
+                    <td><?php 
+                        $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
+                        echo htmlspecialchars($producto->nombre); 
+                    ?></td>
+                    <td><?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?></td>
+                    <td><?php echo htmlspecialchars($siembra->estado); ?></td>
+                    <td>
+                        <?php if ($_SESSION['rol'] === 'admin'): ?>
+                        <a href="?action=delete_siembra&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
+                            <i class="fas fa-trash"></i> 
+                        </a>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </div>
 
-
-</div>
-
-
-
-                    
-<!-- Modal Agregar Producto (solo para admin) -->
-<?php if ($_SESSION['rol'] === 'admin'): ?>
 <!-- Modal para agregar siembra -->
 <div class="modal fade" id="agregarSiembraModal" tabindex="-1" role="dialog" aria-labelledby="agregarSiembraModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -561,173 +521,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
         </div>
     </div>
 </div>
-<?php endif; ?>
 
-<!-- Modal Editar Producto -->
-<div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editarProductoModalLabel">Editar Producto</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-<form action="productos.php" method="POST" onsubmit="return validarFormulario()">
-    <input type="hidden" id="edit_id" name="id">
-    <input type="hidden" name="action" value="edit_producto">
-    <div class="form-group">
-        <label for="edit_nombre">Nombre</label>
-        <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
-    </div>
-    <div class="form-group">
-        <label for="edit_descripcion">Descripción</label>
-        <textarea class="form-control" id="edit_descripcion" name="descripcion" required></textarea>
-    </div>
-    <div class="form-group">
-        <label for="edit_tipo">Tipo</label>
-        <select class="form-control" id="edit_tipo" name="tipo" required>
-            <option value="">Seleccione Tipo</option>
-            <option value="fruta">Fruta</option>
-            <option value="verdura">Verdura</option>
-            <option value="semilla">Semilla</option>
-            <option value="abono">Abono</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="edit_precio_unitario">Precio Unitario</label>
-        <input type="number" class="form-control" id="edit_precio_unitario" name="precio_unitario" step="0.01" required>
-    </div>
-    <div class="form-group">
-        <label for="edit_unidad">Unidad</label>
-        <select class="form-control" id="edit_unidad" name="unidad" required>
-            <option value="">Seleccione Unidad</option>
-            <option value="kg">kg</option>
-            <option value="unidad">Unidad</option>
-            <option value="litro">Litro</option>
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-</form>
-
-
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para agregar variedad -->
-<div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-<form action="productos.php" method="POST" id="agregarVariedadForm" onsubmit="return validarFormularioVariedad()">
-    <div class="modal-header">
-        <h5 class="modal-title" id="agregarVariedadModalLabel">Agregar Variedad</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-    <div class="modal-body">
-        <input type="hidden" id="product_id" name="product_id">
-
-        <div class="form-group">
-            <label for="variedad_nombre">Nombre de la Variedad</label>
-            <input type="text" class="form-control" id="variedad_nombre" name="variedad_nombre" required>
-        </div>
-
-        <div class="form-group">
-            <label for="caracteristicas">Características</label>
-            <textarea class="form-control" id="caracteristicas" name="caracteristicas" required></textarea>
-        </div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary" name="action" value="add_variedad">Agregar Variedad</button>
-    </div>
-</form>
-
-
-
-        </div>
-    </div>
-</div>
-
-
-
-<!-- Modal para ver variedades -->
-<div class="modal fade" id="verVariedadesModal" tabindex="-1" role="dialog" aria-labelledby="verVariedadesModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="verVariedadesModalLabel">Variedades</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Características</th>
-                            <?php if ($_SESSION['rol'] === 'admin'): ?>
-                            <th>Acciones</th>
-                            <?php endif; ?>
-                        </tr>
-                    </thead>
-                    <tbody id="variedades_table_body">
-                        <!-- Las variedades se cargarán aquí con JavaScript -->
-                    </tbody>
-                </table>
-
-                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <button type="button" class="btn btn-primary" onclick="openAddVariedadModal(document.getElementById('product_id').value)">
-                    <i class="fas fa-plus"></i> Agregar Variedad
-                </button>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script>
-document.getElementById('agregarSiembraForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    
-    var formData = new FormData(this);
-
-    fetch('ruta_a_tu_archivo_php.php', {
-        method: 'POST',
-        body: formData,
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Cerrar modal
-            $('#agregarSiembraModal').modal('hide');
-            
-            // Mostrar mensaje de éxito
-            var successDiv = document.createElement('div');
-            successDiv.className = 'alert alert-success';
-            successDiv.innerHTML = data.message;
-            document.querySelector('.card-body').prepend(successDiv);
-            
-            // Actualizar la tabla de siembras
-            // Aquí debes añadir la lógica para actualizar la tabla con los nuevos datos
-            // Por ejemplo, puedes hacer una solicitud AJAX para obtener la lista actualizada de siembras y renderizarla nuevamente
-
-        } else {
-            // Mostrar mensaje de error
-            var errorDiv = document.createElement('div');
-            errorDiv.className = 'alert alert-danger';
-            errorDiv.innerHTML = data.message;
-            document.querySelector('.card-body').prepend(errorDiv);
-        }
-    })
-    .catch(error => console.error('Error:', error));
-});
+    // Función para mostrar variedades en el modal
+    function showVariedades(variedades, productoId) {
+        let modalBody = document.getElementById('variedadesModalBody');
+        modalBody.innerHTML = '';
+        variedades.forEach(function(variedad) {
+            modalBody.innerHTML += `<p><strong>Variedad:</strong> ${variedad.nombre} <br> <strong>Descripción:</strong> ${variedad.descripcion}</p>`;
+        });
+        $('#variedadesModal').modal('show');
+    }
 </script>
+
 
 
 

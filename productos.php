@@ -708,6 +708,7 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
+
 <!-- Modal para agregar variedad -->
 <div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -780,28 +781,29 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 
 <script>
-function openEditModal(id) {
-    // Hacer una solicitud AJAX para obtener los detalles del producto
-    fetch('productos.php?id=' + id)
+function openEditModal(productId) {
+    // Obtén el producto usando AJAX
+    fetch('productos.php?id=' + productId)
         .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
+        .then(product => {
+            if (product.error) {
+                alert(product.error);
             } else {
-                // Rellenar el formulario con los datos del producto
-                document.getElementById('edit_id').value = data._id.$oid; // Asegúrate de ajustar esto según el formato del ID
-                document.getElementById('edit_nombre').value = data.nombre;
-                document.getElementById('edit_descripcion').value = data.descripcion;
-                document.getElementById('edit_tipo').value = data.tipo;
-                document.getElementById('edit_precio_unitario').value = data.precio_unitario;
-                document.getElementById('edit_unidad').value = data.unidad;
+                // Llena el formulario de edición con los datos del producto
+                document.getElementById('edit_id').value = product._id;
+                document.getElementById('edit_nombre').value = product.nombre;
+                document.getElementById('edit_descripcion').value = product.descripcion;
+                document.getElementById('edit_tipo').value = product.tipo;
+                document.getElementById('edit_precio_unitario').value = product.precio_unitario;
+                document.getElementById('edit_unidad').value = product.unidad;
 
-                // Mostrar el modal
+                // Abre el modal de edición
                 $('#editarProductoModal').modal('show');
             }
         })
         .catch(error => {
             console.error('Error:', error);
+            alert('Error al cargar el producto.');
         });
 }
 </script>

@@ -725,12 +725,13 @@ if ($_SESSION['rol'] === 'admin') {
                 <td>${variedad.nombre_variedad}</td>
                 <td>${variedad.caracteristicas}</td>
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <td>
-                    <a href="?action=delete_variedad&product_id=${productId}&variedad_nombre=${encodeURIComponent(variedad.nombre_variedad)}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta variedad?');">
-                        <i class="fas fa-trash"></i> Eliminar
-                    </a>
-                </td>
-                <?php endif; ?>
+<td>
+    <button class="btn btn-danger btn-sm" onclick="eliminarVariedad('<?php echo $productId; ?>', '<?php echo $variedad_nombre; ?>');">
+        <i class="fas fa-trash"></i> Eliminar
+    </button>
+</td>
+<?php endif; ?>
+
             </tr>`;
         });
 
@@ -784,6 +785,10 @@ $(document).ready(function() {
 });
 
     function eliminarVariedad(productoId, nombreVariedad) {
+        if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
+            fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
+                method: 'GET'
+            })    function eliminarVariedad(productoId, nombreVariedad) {
         if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
             fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
                 method: 'GET'

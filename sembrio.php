@@ -411,18 +411,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
             </div>
             <?php endif; ?>
 
-            <!-- Botón de agregar siembra (solo para admin) -->
-            <?php if ($_SESSION['rol'] === 'admin'): ?>
-            <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarSiembraModal">
-                <i class="fas fa-plus"></i> Agregar Siembra
-            </button>
-            <?php endif; ?>
-
             <!-- Tabla de siembras -->
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Empleado</th>
                         <th>Terreno</th>
                         <th>Producto</th>
@@ -436,19 +428,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
                 <tbody>
                     <?php foreach ($siembras as $siembra): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars((string)$siembra->_id); ?></td>
-                        <td><?php echo htmlspecialchars($siembra->empleado_id); ?></td>
-                        <td><?php echo htmlspecialchars($siembra->terreno_id); ?></td>
-                        <td><?php echo htmlspecialchars($siembra->producto_id); ?></td>
+                        <td><?php 
+                            $empleado = $usuariosCollection->findOne(['_id' => $siembra->empleado_id]);
+                            echo htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido); 
+                        ?></td>
+                        <td><?php 
+                            $terreno = $terrenosCollection->findOne(['_id' => $siembra->terreno_id]);
+                            echo htmlspecialchars($terreno->nombre); 
+                        ?></td>
+                        <td><?php 
+                            $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
+                            echo htmlspecialchars($producto->nombre); 
+                        ?></td>
                         <td><?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?></td>
                         <td><?php echo htmlspecialchars($siembra->estado); ?></td>
                         <?php if ($_SESSION['rol'] === 'admin'): ?>
                         <td>
-                            <button type="button" class="btn btn-warning btn-sm" title="Editar" onclick="openEditModal('<?php echo $siembra->_id; ?>')">
-                                <i class="fas fa-pencil-alt"></i>
-                            </button>
-                            <a href="?action=delete&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');" title="Eliminar">
-                                <i class="fas fa-trash"></i>
+                            <a href="?action=delete_siembra&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
+                                <i class="fas fa-trash"></i> 
                             </a>
                         </td>
                         <?php endif; ?>
@@ -459,6 +456,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
         </div>
     </div>
 </div>
+
 
 </div>
 

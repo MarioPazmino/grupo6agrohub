@@ -781,37 +781,52 @@ $(document).ready(function() {
     });
 });
 
-function eliminarVariedad(productoId, nombreVariedad) {
-    if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
-        // Crear un formulario dinámicamente
-        var form = document.createElement('form');
-        form.method = 'POST';
-        form.action = 'productos.php';
+    function eliminarVariedad(productoId, nombreVariedad) {
+        if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
+            fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                let messageHTML = '';
+                // Limpiar el contenedor de mensajes antes de agregar nuevos
+                const messagesContainer = document.getElementById('messages-container');
+                messagesContainer.innerHTML = '';
 
-        // Crear campos ocultos para los datos
-        var actionField = document.createElement('input');
-        actionField.type = 'hidden';
-        actionField.name = 'action';
-        actionField.value = 'delete_variedad';
-        form.appendChild(actionField);
-
-        var productIdField = document.createElement('input');
-        productIdField.type = 'hidden';
-        productIdField.name = 'product_id';
-        productIdField.value = productoId;
-        form.appendChild(productIdField);
-
-        var variedadNombreField = document.createElement('input');
-        variedadNombreField.type = 'hidden';
-        variedadNombreField.name = 'variedad_nombre';
-        variedadNombreField.value = nombreVariedad;
-        form.appendChild(variedadNombreField);
-
-        // Agregar el formulario al body y enviarlo
-        document.body.appendChild(form);
-        form.submit();
+                if (data.success && data.success.length > 0) {
+                    messageHTML += '<div class="alert alert-success" role="alert">';
+                    data.success.forEach(message => {
+                        messageHTML += `${message}<br>`;
+                    });
+                    messageHTML += '</div>';
+                }
+                if (data.errors && data.errors.length > 0) {
+                    messageHTML += '<div class="alert alert-danger" role="alert">';
+                    data.errors.forEach(message => {
+                        messageHTML += `${message}<br>`;
+                    });
+                    messageHTML += '</div>';
+                }
+                
+                // Insertar los mensajes en el DOM solo si hay mensajes que mostrar
+                if (messageHTML !== '') {
+                    messagesContainer.innerHTML = messageHTML;
+                    // Hacer scroll hacia los mensajes
+                    messagesContainer.scrollIntoView({ behavior: "smooth" });
+                }
+                
+                // Actualizar la tabla de variedades en lugar de recargar la página
+                if (data.success && data.success.length > 0) {
+                    actualizarTablaVariedades(); // Asegúrate de definir esta función para actualizar la tabla de variedades
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al eliminar variedad');
+            });
+        }
     }
-}
+
 </script>
 
 

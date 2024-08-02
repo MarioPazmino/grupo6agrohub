@@ -144,7 +144,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
         // Validar el ID del producto
         if (strlen($product_id) === 24 && ctype_xdigit($product_id)) {
             $result = $productosCollection->updateOne(
-                ['_id' => new ObjectId($product_id)],
+                ['_id' => new ObjectId($product_id)], // Usar el product_id recibido del POST
                 ['$push' => ['variedades' => $variedad]]
             );
             if ($result->getModifiedCount() > 0) {
@@ -561,9 +561,11 @@ if ($_SESSION['rol'] === 'admin') {
                                 <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
                                 <td><?php echo htmlspecialchars($producto->unidad); ?></td>
                                 <td>
-                                    <button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
-                                        <i class="fas fa-eye"></i> Ver Variedades
-                                    </button>
+                                    <!-- Botón Ver Variedades -->
+<button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
+    <i class="fas fa-eye"></i> Ver Variedades
+</button>
+
                                     <?php if ($_SESSION['rol'] === 'admin'): ?>
                                     <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarProductoModal"
                                             data-id="<?php echo htmlspecialchars($producto->_id); ?>"
@@ -807,7 +809,9 @@ $(document).ready(function() {
     });
 });
 
-function showVariedades(variedades, productoId) {
+function showVariedades(variedades, productId) {
+    // Almacena el ID del producto en un campo oculto o en una variable global
+    document.getElementById('product_id').value = productId;
     const section = document.querySelector('#variedadesSection');
     const tableBody = document.querySelector('#variedadesTableBody');
     const isCurrentlyVisible = section.style.display === 'block';
@@ -832,7 +836,7 @@ function showVariedades(variedades, productoId) {
             `;
             tableBody.appendChild(row);
         });
-    }
+    }$('#verVariedadesModal').modal('show');
 }
 
 function eliminarVariedad(productoId, nombreVariedad) {

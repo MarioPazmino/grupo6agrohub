@@ -65,13 +65,12 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
 // Procesar formulario de agregar siembra
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST['terreno_id'], $_POST['producto_id'], $_POST['fecha_siembra'], $_POST['estado'])) {
     $empleado_id = $_POST['empleado_id'];
     $terreno_id = $_POST['terreno_id'];
     $producto_id = $_POST['producto_id'];
-    $fecha_siembra = new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_siembra']));
+    $fecha_siembra = new \MongoDB\BSON\UTCDateTime((new DateTime($_POST['fecha_siembra']))->getTimestamp() * 1000);
     $estado = $_POST['estado'];
 
     try {
@@ -410,7 +409,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>
+<!-- Botón de agregar siembra (solo para admin) -->
+                <?php if ($_SESSION['rol'] === 'admin'): ?>
+                <!-- Botón para abrir el modal de agregar siembra -->
+<button type="button" class="btn btn-success" data-toggle="modal" data-target="#agregarSiembraModal">
+    Agregar Nueva Siembra
+</button>
+                <?php endif; ?>
 
+            
             <!-- Tabla de siembras -->
             <table class="table table-striped">
                 <thead>
@@ -465,54 +472,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
                     
 <!-- Modal Agregar Producto (solo para admin) -->
 <?php if ($_SESSION['rol'] === 'admin'): ?>
-<div class="modal fade" id="agregarProductoModal" tabindex="-1" role="dialog" aria-labelledby="agregarProductoModalLabel" aria-hidden="true">
+<!-- Modal para agregar siembra -->
+<div class="modal fade" id="agregarSiembraModal" tabindex="-1" role="dialog" aria-labelledby="agregarSiembraModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="agregarProductoModalLabel">Agregar Producto</h5>
+                <h5 class="modal-title" id="agregarSiembraModalLabel">Agregar Nueva Siembra</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-<form action="productos.php" method="POST" onsubmit="return validarFormulario()">
-    <input type="hidden" name="action" value="add_producto">
-    <div class="form-group">
-        <label for="nombre">Nombre</label>
-        <input type="text" class="form-control" id="nombre" name="nombre" required>
-    </div>
-    <div class="form-group">
-        <label for="descripcion">Descripción</label>
-        <textarea class="form-control" id="descripcion" name="descripcion"></textarea>
-    </div>
-    <div class="form-group">
-        <label for="tipo">Tipo</label>
-        <select class="form-control" id="tipo" name="tipo" required>
-            <option value="">Seleccione Tipo</option>
-            <option value="fruta">Fruta</option>
-            <option value="verdura">Verdura</option>
-            <option value="semilla">Semilla</option>
-            <option value="abono">Abono</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="precio_unitario">Precio Unitario</label>
-        <input type="number" step="0.01" class="form-control" id="precio_unitario" name="precio_unitario" required>
-    </div>
-    <div class="form-group">
-        <label for="unidad">Unidad</label>
-        <select class="form-control" id="unidad" name="unidad" required>
-            <option value="">Seleccione Unidad</option>
-            <option value="kg">kg</option>
-            <option value="unidad">Unidad</option>
-            <option value="litro">Litro</option>
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Agregar Producto</button>
-</form>
-
-
-
+                <form action="" method="POST">
+                    <div class="form-group">
+                        <label for="empleado">Empleado</label>
+                        <select class="form-control" id="empleado" name="empleado_id" required>
+                            <?php foreach ($usuariosCollection->find() as $empleado): ?>
+                            <option value="<?php echo htmlspecialchars($empleado->_id); ?>">
+                                <?php echo htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="terreno">Terreno</label>
+                        <select class="form-control" id="terreno" name="terreno_id" required>
+                            <?php foreach ($terrenosCollection->find() as $terreno): ?>
+                            <option value="<?php echo htmlspecialchars($terreno->_id); ?>">
+                                <?php echo htmlspecialchars($terreno->nombre); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto">Producto</label>
+                        <select class="form-control" id="producto" name="producto_id" required>
+                            <?php foreach ($productosCollection->find() as $producto): ?>
+                            <option value="<?php echo htmlspecialchars($producto->_id); ?>">
+                                <?php echo htmlspecialchars($producto->nombre); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha_siembra">Fecha de Siembra</label>
+                        <input type="date" class="form-control" id="fecha_siembra" name="fecha_siembra" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="estado">Estado</label>
+                        <select class="form-control" id="estado" name="estado" required>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="finalizada">Finalizada</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Agregar Siembra</button>
+                </form>
             </div>
         </div>
     </div>

@@ -58,12 +58,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     exit();
 }
 
+// Manejo de la actualización y agregación de productos
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     try {
-        // Verificar si variedades está presente y no es null
-        $variedades = isset($_POST['variedades']) ? json_decode($_POST['variedades'], true) : [];
-
-        // Verificar si la decodificación fue exitosa
+        $variedades = json_decode($_POST['variedades'], true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new Exception('El formato JSON para variedades no es válido.');
         }
@@ -74,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
             'tipo' => $_POST['tipo'],
             'precio_unitario' => floatval($_POST['precio_unitario']),
             'unidad' => $_POST['unidad'],
-            'variedades' => $variedades // Aquí se insertan las variedades
+            'variedades' => $variedades
         ];
 
         if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
@@ -89,14 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
                 $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
             }
         } else {
-            // Agregar producto con variedades predeterminadas
-            $productoData['variedades'] = [
-                [
-                    'nombre_variedad' => 'Variedad Default 1',
-                    'caracteristicas' => 'Características predeterminadas.'
-                ]
-            ];
-
+            // Agregar producto
             $result = $productosCollection->insertOne($productoData);
             if ($result->getInsertedCount() > 0) {
                 $success[] = 'Producto agregado exitosamente.';
@@ -108,6 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
         $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
     }
 }
+
 
 // Modifica la parte de eliminación de variedades
 if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
@@ -598,7 +590,7 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-                <form action="productos.php" method="POST" id="formAgregarProducto">
+                <form action="productos.php" method="POST">
                     <input type="hidden" name="action" value="add_producto">
                     <div class="form-group">
                         <label for="nombre">Nombre</label>
@@ -612,10 +604,9 @@ if ($_SESSION['rol'] === 'admin') {
                         <label for="tipo">Tipo</label>
                         <select class="form-control" id="tipo" name="tipo" required>
                             <option value="">Seleccione Tipo</option>
-                            <option value="fruta">Fruta</option>
-                            <option value="verdura">Verdura</option>
-                            <option value="semilla">Semilla</option>
-                            <option value="abono">Abono</option>
+                            <option value="Tipo1">Tipo1</option>
+                            <option value="Tipo2">Tipo2</option>
+                            <!-- Agrega más opciones según sea necesario -->
                         </select>
                     </div>
                     <div class="form-group">

@@ -59,6 +59,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 }
 
 // Manejo de la actualización y agregación de productos
+// Manejo de la actualización y agregación de productos
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         if ($_POST['action'] === 'add_producto') {
@@ -124,7 +125,9 @@ if (isset($_GET['id']) && !isset($_POST['action'])) {
     $id = $_GET['id'];
     if (strlen($id) == 24 && ctype_xdigit($id)) {
         try {
-            $producto = $productosCollection->findOne(['_id' => new ObjectId($id)]);
+            // Asegurarse de que el ID sea una cadena válida
+            $objectId = new ObjectId($id);
+            $producto = $productosCollection->findOne(['_id' => $objectId]);
             if ($producto) {
                 echo json_encode($producto);
             } else {
@@ -138,7 +141,6 @@ if (isset($_GET['id']) && !isset($_POST['action'])) {
     }
     exit();
 }
-
 
 
 

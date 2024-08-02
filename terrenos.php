@@ -581,7 +581,7 @@ if ($_SESSION['rol'] === 'admin') {
                 </div>
             </div>
         </div>
-    </div>
+  
  <script>
 $('#editarTerrenoModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget)

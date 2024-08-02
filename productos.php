@@ -165,22 +165,7 @@ try {
 
 
 
-// Procesar la acción (agregar, eliminar, etc.)
-$response = ['success' => [], 'errors' => []];
 
-if ($action === 'delete_variedad') {
-    // Código para eliminar variedad
-    if ($eliminadoConExito) {
-        $response['success'][] = 'Variedad eliminada exitosamente.';
-    } else {
-        $response['errors'][] = 'Error al eliminar la variedad.';
-    }
-}
-
-// Enviar respuesta JSON
-header('Content-Type: application/json');
-echo json_encode($response);
-exit;
 
 
 

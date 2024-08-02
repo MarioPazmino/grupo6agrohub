@@ -119,6 +119,25 @@ try {
     $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
 }
 
+// Manejo de solicitudes AJAX para obtener detalles del producto
+if (isset($_GET['id']) && !isset($_POST['action'])) {
+    $id = $_GET['id'];
+    if (strlen($id) == 24 && ctype_xdigit($id)) {
+        try {
+            $producto = $productosCollection->findOne(['_id' => new ObjectId($id)]);
+            if ($producto) {
+                echo json_encode($producto);
+            } else {
+                echo json_encode(['error' => 'Producto no encontrado']);
+            }
+        } catch (Exception $e) {
+            echo json_encode(['error' => 'Error al obtener el producto: ' . $e->getMessage()]);
+        }
+    } else {
+        echo json_encode(['error' => 'ID de producto inválido']);
+    }
+    exit();
+}
 
 
 

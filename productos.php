@@ -163,6 +163,29 @@ try {
     $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
 }
 
+
+
+// Procesar la acción (agregar, eliminar, etc.)
+$response = ['success' => [], 'errors' => []];
+
+if ($action === 'delete_variedad') {
+    // Código para eliminar variedad
+    if ($eliminadoConExito) {
+        $response['success'][] = 'Variedad eliminada exitosamente.';
+    } else {
+        $response['errors'][] = 'Error al eliminar la variedad.';
+    }
+}
+
+// Enviar respuesta JSON
+header('Content-Type: application/json');
+echo json_encode($response);
+exit;
+
+
+
+
+
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
 $total_tareas_pendientes = 0;
@@ -488,6 +511,9 @@ if ($_SESSION['rol'] === 'admin') {
 
 <!-- Content Row -->
 <div class="row">
+<div id="messages">
+    <!-- Los mensajes de éxito o error se mostrarán aquí -->
+</div>
 
     <!-- Productos -->
     <div class="col-lg-12">
@@ -803,10 +829,11 @@ function eliminarVariedad(productoId, nombreVariedad) {
                 messagesContainer.scrollIntoView({ behavior: "smooth" });
             }
             
-            // Recargar la tabla de variedades o la página después de un breve retraso
-            setTimeout(() => {
-                location.reload();
-            }, 2000);
+            // Actualizar la tabla de variedades en lugar de recargar la página
+            if (data.success && data.success.length > 0) {
+                // Llama a una función para recargar los datos de la tabla
+                actualizarTablaVariedades(); // Asume que tienes esta función definida
+            }
         })
         .catch(error => {
             console.error('Error:', error);

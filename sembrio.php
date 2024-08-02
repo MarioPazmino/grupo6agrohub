@@ -33,7 +33,6 @@ try {
     $errors[] = 'Error al obtener las siembras: ' . $e->getMessage();
 }
 
-
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
 $total_tareas_pendientes = 0;
@@ -387,11 +386,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
 <div id="messages-container"></div>
 
 
-<!-- Productos -->
+<!-- Siembras -->
 <div class="col-lg-12">
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Productos</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Siembras</h6>
         </div>
         <div class="card-body">
 
@@ -412,47 +411,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
             </div>
             <?php endif; ?>
 
-            <!-- Botón de agregar producto (solo para admin) -->
+            <!-- Botón de agregar siembra (solo para admin) -->
             <?php if ($_SESSION['rol'] === 'admin'): ?>
-            <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarProductoModal">
-                <i class="fas fa-plus"></i> Agregar Producto
+            <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarSiembraModal">
+                <i class="fas fa-plus"></i> Agregar Siembra
             </button>
             <?php endif; ?>
 
-            <!-- Tabla de productos -->
+            <!-- Tabla de siembras -->
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Tipo</th>
-                        <th>Precio Unitario</th>
-                        <th>Unidad</th>
-                        <th>Variedades</th>
+                        <th>ID</th>
+                        <th>Empleado</th>
+                        <th>Terreno</th>
+                        <th>Producto</th>
+                        <th>Fecha de Siembra</th>
+                        <th>Estado</th>
                         <?php if ($_SESSION['rol'] === 'admin'): ?>
                         <th>Acciones</th>
                         <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($productos as $producto): ?>
+                    <?php foreach ($siembras as $siembra): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($producto->nombre); ?></td>
-                        <td><?php echo htmlspecialchars($producto->descripcion); ?></td>
-                        <td><?php echo htmlspecialchars($producto->tipo); ?></td>
-                        <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
-                        <td><?php echo htmlspecialchars($producto->unidad); ?></td>
-                        <td>
-                            <button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
-                                <i class="fas fa-eye"></i> Ver Variedades
-                            </button>
-                        </td>
+                        <td><?php echo htmlspecialchars((string)$siembra->_id); ?></td>
+                        <td><?php echo htmlspecialchars($siembra->empleado_id); ?></td>
+                        <td><?php echo htmlspecialchars($siembra->terreno_id); ?></td>
+                        <td><?php echo htmlspecialchars($siembra->producto_id); ?></td>
+                        <td><?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?></td>
+                        <td><?php echo htmlspecialchars($siembra->estado); ?></td>
                         <?php if ($_SESSION['rol'] === 'admin'): ?>
                         <td>
-<button type="button" class="btn btn-warning btn-sm" title="Editar" onclick="openEditModal('<?php echo $producto->_id; ?>')">
-    <i class="fas fa-pencil-alt"></i>
-</button>
-                            <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');" title="Eliminar">
+                            <button type="button" class="btn btn-warning btn-sm" title="Editar" onclick="openEditModal('<?php echo $siembra->_id; ?>')">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <a href="?action=delete&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');" title="Eliminar">
                                 <i class="fas fa-trash"></i>
                             </a>
                         </td>

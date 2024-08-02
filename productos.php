@@ -638,7 +638,7 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-               <form action="productos.php" method="POST">
+<form action="productos.php" method="POST" onsubmit="return validarFormulario()">
     <input type="hidden" name="action" value="add_producto">
     <div class="form-group">
         <label for="nombre">Nombre</label>
@@ -652,8 +652,10 @@ if ($_SESSION['rol'] === 'admin') {
         <label for="tipo">Tipo</label>
         <select class="form-control" id="tipo" name="tipo" required>
             <option value="">Seleccione Tipo</option>
-            <option value="Tipo1">Tipo1</option>
-            <option value="Tipo2">Tipo2</option>
+            <option value="fruta">Fruta</option>
+            <option value="verdura">Verdura</option>
+            <option value="semilla">Semilla</option>
+            <option value="abono">Abono</option>
         </select>
     </div>
     <div class="form-group">
@@ -662,17 +664,24 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
     <div class="form-group">
         <label for="unidad">Unidad</label>
-        <input type="text" class="form-control" id="unidad" name="unidad" required>
+        <select class="form-control" id="unidad" name="unidad" required>
+            <option value="">Seleccione Unidad</option>
+            <option value="kg">kg</option>
+            <option value="unidad">Unidad</option>
+            <option value="litro">Litro</option>
+        </select>
     </div>
     <button type="submit" class="btn btn-primary">Agregar Producto</button>
 </form>
+
+
+
             </div>
         </div>
     </div>
 </div>
 <?php endif; ?>
 
-<!-- Modal Editar Producto -->
 <!-- Modal Editar Producto -->
 <div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -684,31 +693,44 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-                <form action="productos.php" method="POST">
+<form action="productos.php" method="POST" onsubmit="return validarFormulario()">
     <input type="hidden" id="edit_id" name="id">
     <input type="hidden" name="action" value="edit_producto">
-                    <div class="form-group">
-                        <label for="edit_nombre">Nombre</label>
-                        <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_descripcion">Descripción</label>
-                        <textarea class="form-control" id="edit_descripcion" name="descripcion" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_tipo">Tipo</label>
-                        <input type="text" class="form-control" id="edit_tipo" name="tipo" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_precio_unitario">Precio Unitario</label>
-                        <input type="number" class="form-control" id="edit_precio_unitario" name="precio_unitario" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_unidad">Unidad</label>
-                        <input type="text" class="form-control" id="edit_unidad" name="unidad" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                </form>
+    <div class="form-group">
+        <label for="edit_nombre">Nombre</label>
+        <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
+    </div>
+    <div class="form-group">
+        <label for="edit_descripcion">Descripción</label>
+        <textarea class="form-control" id="edit_descripcion" name="descripcion" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="edit_tipo">Tipo</label>
+        <select class="form-control" id="edit_tipo" name="tipo" required>
+            <option value="">Seleccione Tipo</option>
+            <option value="fruta">Fruta</option>
+            <option value="verdura">Verdura</option>
+            <option value="semilla">Semilla</option>
+            <option value="abono">Abono</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="edit_precio_unitario">Precio Unitario</label>
+        <input type="number" class="form-control" id="edit_precio_unitario" name="precio_unitario" step="0.01" required>
+    </div>
+    <div class="form-group">
+        <label for="edit_unidad">Unidad</label>
+        <select class="form-control" id="edit_unidad" name="unidad" required>
+            <option value="">Seleccione Unidad</option>
+            <option value="kg">kg</option>
+            <option value="unidad">Unidad</option>
+            <option value="litro">Litro</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+</form>
+
+
             </div>
         </div>
     </div>
@@ -718,31 +740,34 @@ if ($_SESSION['rol'] === 'admin') {
 <div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form action="productos.php" method="POST" id="agregarVariedadForm">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="agregarVariedadModalLabel">Agregar Variedad</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="product_id" name="product_id">
+<form action="productos.php" method="POST" id="agregarVariedadForm" onsubmit="return validarFormularioVariedad()">
+    <div class="modal-header">
+        <h5 class="modal-title" id="agregarVariedadModalLabel">Agregar Variedad</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <input type="hidden" id="product_id" name="product_id">
 
-                    <div class="form-group">
-                        <label for="variedad_nombre">Nombre de la Variedad</label>
-                        <input type="text" class="form-control" id="variedad_nombre" name="variedad_nombre" required>
-                    </div>
+        <div class="form-group">
+            <label for="variedad_nombre">Nombre de la Variedad</label>
+            <input type="text" class="form-control" id="variedad_nombre" name="variedad_nombre" required>
+        </div>
 
-                    <div class="form-group">
-                        <label for="caracteristicas">Características</label>
-                        <textarea class="form-control" id="caracteristicas" name="caracteristicas" required></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" name="action" value="add_variedad">Agregar Variedad</button>
-                </div>
-            </form>
+        <div class="form-group">
+            <label for="caracteristicas">Características</label>
+            <textarea class="form-control" id="caracteristicas" name="caracteristicas" required></textarea>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary" name="action" value="add_variedad">Agregar Variedad</button>
+    </div>
+</form>
+
+
+
         </div>
     </div>
 </div>
@@ -812,6 +837,44 @@ function openEditModal(id) {
 }
 </script>
 
+                    <script>
+function validarFormularioVariedad() {
+    var nombreVariedad = document.getElementById('variedad_nombre').value;
+    var caracteristicas = document.getElementById('caracteristicas').value;
+    var regex = /\d/; // Expresión regular para detectar números
+
+    if (regex.test(nombreVariedad)) {
+        alert('El campo "Nombre de la Variedad" no debe contener números.');
+        return false;
+    }
+
+    if (caracteristicas && regex.test(caracteristicas)) {
+        alert('El campo "Características" no debe contener números.');
+        return false;
+    }
+
+    return true; // Si todas las validaciones son correctas
+}
+</script>
+<script>
+function validarFormulario() {
+    var nombre = document.getElementById('edit_nombre').value;
+    var descripcion = document.getElementById('edit_descripcion').value;
+    var regex = /\d/; // Expresión regular para detectar números
+
+    if (regex.test(nombre)) {
+        alert('El campo "Nombre" no debe contener números.');
+        return false;
+    }
+
+    if (regex.test(descripcion)) {
+        alert('El campo "Descripción" no debe contener números.');
+        return false;
+    }
+
+    return true; // Si todas las validaciones son correctas
+}
+</script>
 
 <script>
     // Función para mostrar el modal de agregar variedad

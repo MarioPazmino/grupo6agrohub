@@ -81,12 +81,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
             'fecha_siembra' => $fecha_siembra,
             'estado' => $estado
         ]);
+
+        // Enviar respuesta JSON para AJAX
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            echo json_encode(['success' => true, 'message' => 'Siembra agregada correctamente.']);
+            exit;
+        }
+
         $success[] = 'Siembra agregada correctamente.';
     } catch (Exception $e) {
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            echo json_encode(['success' => false, 'message' => 'Error al agregar la siembra: ' . $e->getMessage()]);
+            exit;
+        }
         $errors[] = 'Error al agregar la siembra: ' . $e->getMessage();
     }
 }
-
 
 ?>
 
@@ -662,190 +672,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
 </div>
 
 <script>
-function openEditModal(id) {
-    console.log("ID recibido:", id); // Para depuración
-    fetch('productos.php?id=' + id)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                console.log("Datos recibidos:", data); // Para depuración
-                document.getElementById('edit_id').value = id; // Usa el ID original
-                document.getElementById('edit_nombre').value = data.nombre;
-                document.getElementById('edit_descripcion').value = data.descripcion;
-                document.getElementById('edit_tipo').value = data.tipo;
-                document.getElementById('edit_precio_unitario').value = data.precio_unitario;
-                document.getElementById('edit_unidad').value = data.unidad;
+document.getElementById('agregarSiembraForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    var formData = new FormData(this);
 
-                $('#editarProductoModal').modal('show');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error); // Para depuración
-            alert('Error al obtener los datos del producto.');
-        });
-}
-</script>
+    fetch('ruta_a_tu_archivo_php.php', {
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Cerrar modal
+            $('#agregarSiembraModal').modal('hide');
+            
+            // Mostrar mensaje de éxito
+            var successDiv = document.createElement('div');
+            successDiv.className = 'alert alert-success';
+            successDiv.innerHTML = data.message;
+            document.querySelector('.card-body').prepend(successDiv);
+            
+            // Actualizar la tabla de siembras
+            // Aquí debes añadir la lógica para actualizar la tabla con los nuevos datos
+            // Por ejemplo, puedes hacer una solicitud AJAX para obtener la lista actualizada de siembras y renderizarla nuevamente
 
-                    <script>
-function validarFormularioVariedad() {
-    var nombreVariedad = document.getElementById('variedad_nombre').value;
-    var caracteristicas = document.getElementById('caracteristicas').value;
-    var regex = /\d/; // Expresión regular para detectar números
-
-    if (regex.test(nombreVariedad)) {
-        alert('El campo "Nombre de la Variedad" no debe contener números.');
-        return false;
-    }
-
-    if (caracteristicas && regex.test(caracteristicas)) {
-        alert('El campo "Características" no debe contener números.');
-        return false;
-    }
-
-    return true; // Si todas las validaciones son correctas
-}
-</script>
-<script>
-function validarFormulario() {
-    var nombre = document.getElementById('edit_nombre').value;
-    var descripcion = document.getElementById('edit_descripcion').value;
-    var regex = /\d/; // Expresión regular para detectar números
-
-    if (regex.test(nombre)) {
-        alert('El campo "Nombre" no debe contener números.');
-        return false;
-    }
-
-    if (regex.test(descripcion)) {
-        alert('El campo "Descripción" no debe contener números.');
-        return false;
-    }
-
-    return true; // Si todas las validaciones son correctas
-}
-</script>
-
-<script>
-    // Función para mostrar el modal de agregar variedad
-    function showVariedades(variedades, productId) {
-        document.getElementById('product_id').value = productId;
-
-        // Mostrar variedades en el modal
-        let variedadesHtml = '';
-        variedades.forEach(variedad => {
-            variedadesHtml += `<tr>
-                <td>${variedad.nombre_variedad}</td>
-                <td>${variedad.caracteristicas}</td>
-                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <td>
-                    <a href="?action=delete_variedad&product_id=${productId}&variedad_nombre=${encodeURIComponent(variedad.nombre_variedad)}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta variedad?');">
-                        <i class="fas fa-trash"></i> Eliminar
-                    </a>
-                </td>
-                <?php endif; ?>
-            </tr>`;
-        });
-
-        document.getElementById('variedades_table_body').innerHTML = variedadesHtml;
-        $('#verVariedadesModal').modal('show');
-    }
-
-    // Función para abrir el modal de agregar variedad
-    function openAddVariedadModal(productId) {
-        document.getElementById('product_id').value = productId;
-        $('#agregarVariedadModal').modal('show');
-    }
-</script>
-
-                    
-<script>
-$(document).ready(function() {
-    // Configura el modal de agregar variedad con el ID del producto
-    $('#agregarVariedadModal').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget); // Botón que abrió el modal
-        var productId = button.data('product-id'); // Extrae el ID del producto
-        var modal = $(this);
-        modal.find('#product_id').val(productId);
-    });
-
-    // Maneja el envío del formulario de agregar variedad
-    $('#agregarVariedadForm').on('submit', function(e) {
-        e.preventDefault(); // Evita el envío normal del formulario
-        var formData = $(this).serialize(); // Serializa los datos del formulario
-
-        $.ajax({
-            url: 'productos.php',
-            type: 'POST',
-            data: formData + '&action=add_variedad', // Agrega la acción al formulario
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    alert(response.success[0]);
-                    $('#agregarVariedadModal').modal('hide');
-                    // Recargar la tabla de variedades
-                    showVariedades(response.variedades, $('#product_id').val());
-                } else if (response.errors) {
-                    alert(response.errors[0]);
-                }
-            },
-            error: function() {
-                alert('Error al agregar la variedad.');
-            }
-        });
-    });
-});
-
-    function eliminarVariedad(productoId, nombreVariedad) {
-        if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
-            fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
-                method: 'GET'
-            })
-            .then(response => response.json())
-            .then(data => {
-                let messageHTML = '';
-                // Limpiar el contenedor de mensajes antes de agregar nuevos
-                const messagesContainer = document.getElementById('messages-container');
-                messagesContainer.innerHTML = '';
-
-                if (data.success && data.success.length > 0) {
-                    messageHTML += '<div class="alert alert-success" role="alert">';
-                    data.success.forEach(message => {
-                        messageHTML += `${message}<br>`;
-                    });
-                    messageHTML += '</div>';
-                }
-                if (data.errors && data.errors.length > 0) {
-                    messageHTML += '<div class="alert alert-danger" role="alert">';
-                    data.errors.forEach(message => {
-                        messageHTML += `${message}<br>`;
-                    });
-                    messageHTML += '</div>';
-                }
-                
-                // Insertar los mensajes en el DOM solo si hay mensajes que mostrar
-                if (messageHTML !== '') {
-                    messagesContainer.innerHTML = messageHTML;
-                    // Hacer scroll hacia los mensajes
-                    messagesContainer.scrollIntoView({ behavior: "smooth" });
-                }
-                
-                // Actualizar la tabla de variedades en lugar de recargar la página
-                if (data.success && data.success.length > 0) {
-                    actualizarTablaVariedades(); // Asegúrate de definir esta función para actualizar la tabla de variedades
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al eliminar variedad');
-            });
+        } else {
+            // Mostrar mensaje de error
+            var errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger';
+            errorDiv.innerHTML = data.message;
+            document.querySelector('.card-body').prepend(errorDiv);
         }
-    }
-
-
+    })
+    .catch(error => console.error('Error:', error));
+});
 </script>
-
 
 
 

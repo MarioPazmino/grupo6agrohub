@@ -783,28 +783,29 @@ if ($_SESSION['rol'] === 'admin') {
 <script>
 function openEditModal(productId) {
     // Obtén el producto usando AJAX
-    fetch('productos.php?id=' + productId)
-        .then(response => response.json())
-        .then(product => {
-            if (product.error) {
-                alert(product.error);
-            } else {
-                // Llena el formulario de edición con los datos del producto
-                document.getElementById('edit_id').value = product._id;
-                document.getElementById('edit_nombre').value = product.nombre;
-                document.getElementById('edit_descripcion').value = product.descripcion;
-                document.getElementById('edit_tipo').value = product.tipo;
-                document.getElementById('edit_precio_unitario').value = product.precio_unitario;
-                document.getElementById('edit_unidad').value = product.unidad;
+fetch('productos.php?id=' + productId)
+    .then(response => response.json())
+    .then(product => {
+        if (product.error) {
+            alert(product.error);
+        } else {
+            // Llena el formulario de edición
+            document.getElementById('edit_id').value = product.id;
+            document.getElementById('edit_nombre').value = product.nombre;
+            document.getElementById('edit_descripcion').value = product.descripcion;
+            document.getElementById('edit_tipo').value = product.tipo;
+            document.getElementById('edit_precio_unitario').value = product.precio_unitario;
+            document.getElementById('edit_unidad').value = product.unidad;
 
-                // Abre el modal de edición
-                $('#editarProductoModal').modal('show');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al cargar el producto.');
-        });
+            // Abre el modal de edición
+            $('#editarProductoModal').modal('show');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al cargar el producto.');
+    });
+
 }
 </script>
 
@@ -928,58 +929,7 @@ $(document).ready(function() {
 
 </script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Datos de ejemplo para tipos y variedades
-    const tiposProductos = {
-        "Tipo1": [
-            {"nombre_variedad": "Variedad1.1", "caracteristicas": "Característica de la Variedad1.1"},
-            {"nombre_variedad": "Variedad1.2", "caracteristicas": "Característica de la Variedad1.2"}
-        ],
-        "Tipo2": [
-            {"nombre_variedad": "Variedad2.1", "caracteristicas": "Característica de la Variedad2.1"},
-            {"nombre_variedad": "Variedad2.2", "caracteristicas": "Característica de la Variedad2.2"}
-        ]
-    };
 
-    // Función para cargar variedades
-    function cargarVariedades(tipo) {
-        const container = document.getElementById('variedades-container');
-        container.innerHTML = ''; // Limpiar el contenedor
-
-        const variedades = tiposProductos[tipo];
-        if (variedades) {
-            variedades.forEach(variedad => {
-                const div = document.createElement('div');
-                div.classList.add('form-check');
-                div.innerHTML = `
-                    <input class="form-check-input" type="checkbox" id="${variedad.nombre_variedad}" name="variedades[]" value="${variedad.nombre_variedad}">
-                    <label class="form-check-label" for="${variedad.nombre_variedad}">
-                        ${variedad.nombre_variedad}: ${variedad.caracteristicas}
-                    </label>
-                `;
-                container.appendChild(div);
-            });
-        } else {
-            container.innerHTML = '<p>No se encontraron variedades para este tipo.</p>';
-        }
-    }
-
-    // Cargar tipos de productos en el <select>
-    const tipoSelect = document.getElementById('tipo');
-    for (const tipo in tiposProductos) {
-        const option = document.createElement('option');
-        option.value = tipo;
-        option.textContent = tipo;
-        tipoSelect.appendChild(option);
-    }
-
-    // Asignar evento para cargar variedades al cambiar el tipo
-    tipoSelect.addEventListener('change', function () {
-        cargarVariedades(this.value);
-    });
-});
-</script>
 
 
 

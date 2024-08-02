@@ -785,11 +785,9 @@ $(document).ready(function() {
 
 function eliminarVariedad(productoId, nombreVariedad) {
     if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
-        fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
-            method: 'GET'
-        })
-        .then(response => response.json())
-        .then(data => {
+        fetch('productos.php?action=obtener_variedades&product_id=' + productoId)
+.then(response => response.text())
+.then(html => {
             let messageHTML = '';
             // Limpiar el contenedor de mensajes antes de agregar nuevos
             const messagesContainer = document.getElementById('messages-container');

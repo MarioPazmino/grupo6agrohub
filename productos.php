@@ -159,9 +159,11 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
         $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
     }
 
-    header('Location: productos.php');
+    // Enviar respuesta como JSON
+    echo json_encode(['success' => $success, 'errors' => $errors]);
     exit();
 }
+
 
 
 
@@ -732,38 +734,27 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-<form action="productos.php" method="POST" class="container mt-4">
-    <input type="hidden" name="action" value="add_variedad">
+                <form id="agregarVariedadForm" action="productos.php" method="POST">
+                    <input type="hidden" name="action" value="add_variedad">
+                    <input type="hidden" name="product_id" id="product_id" value="">
+                    
+                    <div class="form-group">
+                        <label for="variedad_nombre">Nombre de Variedad:</label>
+                        <input type="text" name="variedad_nombre" id="variedad_nombre" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="caracteristicas">Características:</label>
+                        <textarea name="caracteristicas" id="caracteristicas" class="form-control" required></textarea>
+                    </div>
 
-    <div class="form-group">
-        <label for="tipo_producto">Tipo de Producto:</label>
-        <select name="tipo_producto" id="tipo_producto" class="form-control">
-            <?php foreach ($tiposProductos as $tipo): ?>
-                <option value="<?php echo htmlspecialchars($tipo['nombre']); ?>">
-                    <?php echo htmlspecialchars($tipo['nombre']); ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label for="variedad_nombre">Nombre de Variedad:</label>
-        <input type="text" name="variedad_nombre" id="variedad_nombre" class="form-control" required>
-    </div>
-
-    <div class="form-group">
-        <label for="caracteristicas">Características:</label>
-        <textarea name="caracteristicas" id="caracteristicas" class="form-control" required></textarea>
-    </div>
-
-    <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product_id); ?>">
-
-    <button type="submit" class="btn btn-primary">Agregar Variedad</button>
-</form>
+                    <button type="submit" class="btn btn-primary">Agregar Variedad</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
 
 
 
@@ -779,7 +770,7 @@ $(document).ready(function() {
         var button = $(event.relatedTarget); // Botón que abrió el modal
         var productId = button.data('product-id'); // Extrae el ID del producto
         var modal = $(this);
-        modal.find('#product_id').val(productId);
+        modal.find('#product_id').val(productId); // Asigna el ID al campo oculto
     });
 
     // Maneja el envío del formulario de agregar variedad
@@ -790,14 +781,13 @@ $(document).ready(function() {
         $.ajax({
             url: 'productos.php',
             type: 'POST',
-            data: formData + '&action=add_variedad', // Agrega la acción al formulario
+            data: formData,
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
                     alert(response.success[0]);
                     $('#agregarVariedadModal').modal('hide');
-                    // Recargar la tabla de variedades
-                    showVariedades(response.variedades, $('#product_id').val());
+                    location.reload(); // Recargar la página para actualizar la lista
                 } else if (response.errors) {
                     alert(response.errors[0]);
                 }

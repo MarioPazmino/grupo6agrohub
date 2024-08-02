@@ -107,6 +107,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
     $product_id = $_GET['product_id'];
     $variedad_nombre = $_GET['variedad_nombre'];
 
+    $success = [];
+    $errors = [];
+
     try {
         $result = $productosCollection->updateOne(
             ['_id' => new ObjectId($product_id)],
@@ -124,6 +127,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
     echo json_encode(['success' => $success, 'errors' => $errors]);
     exit();
 }
+
 
 // Manejo de la agregación de variedades
 if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_POST['product_id']) && isset($_POST['variedad_nombre']) && isset($_POST['caracteristicas'])) {
@@ -496,9 +500,8 @@ if ($_SESSION['rol'] === 'admin') {
 
 <!-- Content Row -->
 <div class="row">
-<div id="messages">
-    <!-- Los mensajes de éxito o error se mostrarán aquí -->
-</div>
+<div id="messages-container"></div>
+
 
     <!-- Productos -->
     <div class="col-lg-12">
@@ -780,72 +783,53 @@ $(document).ready(function() {
     });
 });
 
-function eliminarVariedad(productoId, nombreVariedad) {
-    if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
-        fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
-            method: 'GET'
-        })
-        .then(response => response.json())
-        .then(data => {
-            let messageHTML = '';
-            // Limpiar el contenedor de mensajes antes de agregar nuevos
-            const messagesContainer = document.getElementById('messages-container');
-            messagesContainer.innerHTML = '';
+    function eliminarVariedad(productoId, nombreVariedad) {
+        if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
+            fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                let messageHTML = '';
+                // Limpiar el contenedor de mensajes antes de agregar nuevos
+                const messagesContainer = document.getElementById('messages-container');
+                messagesContainer.innerHTML = '';
 
-            if (data.success && data.success.length > 0) {
-                messageHTML += '<div class="alert alert-success" role="alert">';
-                data.success.forEach(message => {
-                    messageHTML += `${message}<br>`;
-                });
-                messageHTML += '</div>';
-            }
-            if (data.errors && data.errors.length > 0) {
-                messageHTML += '<div class="alert alert-danger" role="alert">';
-                data.errors.forEach(message => {
-                    messageHTML += `${message}<br>`;
-                });
-                messageHTML += '</div>';
-            }
-            
-            // Insertar los mensajes en el DOM solo si hay mensajes que mostrar
-            if (messageHTML !== '') {
-                messagesContainer.innerHTML = messageHTML;
-                // Hacer scroll hacia los mensajes
-                messagesContainer.scrollIntoView({ behavior: "smooth" });
-            }
-            
-            // Actualizar la tabla de variedades en lugar de recargar la página
-            if (data.success && data.success.length > 0) {
-                // Llama a una función para recargar los datos de la tabla
-                actualizarTablaVariedades(); // Asume que tienes esta función definida
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al eliminar variedad');
-        });
+                if (data.success && data.success.length > 0) {
+                    messageHTML += '<div class="alert alert-success" role="alert">';
+                    data.success.forEach(message => {
+                        messageHTML += `${message}<br>`;
+                    });
+                    messageHTML += '</div>';
+                }
+                if (data.errors && data.errors.length > 0) {
+                    messageHTML += '<div class="alert alert-danger" role="alert">';
+                    data.errors.forEach(message => {
+                        messageHTML += `${message}<br>`;
+                    });
+                    messageHTML += '</div>';
+                }
+                
+                // Insertar los mensajes en el DOM solo si hay mensajes que mostrar
+                if (messageHTML !== '') {
+                    messagesContainer.innerHTML = messageHTML;
+                    // Hacer scroll hacia los mensajes
+                    messagesContainer.scrollIntoView({ behavior: "smooth" });
+                }
+                
+                // Actualizar la tabla de variedades en lugar de recargar la página
+                if (data.success && data.success.length > 0) {
+                    actualizarTablaVariedades(); // Asegúrate de definir esta función para actualizar la tabla de variedades
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al eliminar variedad');
+            });
+        }
     }
-}
 
 
-    // Configurar el modal de edición
-    $('#editarProductoModal').on('show.bs.modal', function (event) {
-        const button = $(event.relatedTarget);
-        const id = button.data('id');
-        const nombre = button.data('nombre');
-        const descripcion = button.data('descripcion');
-        const tipo = button.data('tipo');
-        const precioUnitario = button.data('precio_unitario');
-        const unidad = button.data('unidad');
-
-        const modal = $(this);
-        modal.find('#edit_id').val(id);
-        modal.find('#edit_nombre').val(nombre);
-        modal.find('#edit_descripcion').val(descripcion);
-        modal.find('#edit_tipo').val(tipo);
-        modal.find('#edit_precio_unitario').val(precioUnitario);
-        modal.find('#edit_unidad').val(unidad);
-    });
 </script>
 
 

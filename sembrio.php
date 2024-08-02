@@ -420,58 +420,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
 
                  <!-- Tabla de siembras -->
     <div class="table-responsive mt-4">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Empleado Responsable</th>
-                    <th>Terreno</th>
-                    <th>Producto</th>
-                    <th>Fecha de Siembra</th>
-                    <th>Estado</th>
-                    <th>Empleados Asignados</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($siembras as $siembra): ?>
-                    <tr>
-                        <td><?php echo (string)$siembra['_id']; ?></td>
-                        <td>
-                            <?php
-                            $empleadoResponsable = $empleadosCollection->findOne(['_id' => new ObjectId($siembra['empleado_id'])]);
-                            echo htmlspecialchars($empleadoResponsable['nombre'] . ' ' . $empleadoResponsable['apellido']);
-                            ?>
-                        </td>
-                        <td>
-                            <?php
-                            $terreno = $terrenosCollection->findOne(['_id' => new ObjectId($siembra['terreno_id'])]);
-                            echo htmlspecialchars($terreno['nombre']);
-                            ?>
-                        </td>
-                        <td>
-                            <?php
-                            $producto = $productosCollection->findOne(['_id' => new ObjectId($siembra['producto_id'])]);
-                            echo htmlspecialchars($producto['nombre']);
-                            ?>
-                        </td>
-                        <td><?php echo htmlspecialchars($siembra['fecha_siembra']->toDateTime()->format('Y-m-d')); ?></td>
-                        <td><?php echo htmlspecialchars($siembra['estado']); ?></td>
-                        <td>
-                            <?php
-                            $empleados = [];
-                            foreach ($siembra['empleados_ids'] as $empleado_id) {
-                                $empleado = $empleadosCollection->findOne(['_id' => new ObjectId($empleado_id)]);
-                                if ($empleado) {
-                                    $empleados[] = $empleado['nombre'] . ' ' . $empleado['apellido'];
-                                }
-                            }
-                            echo htmlspecialchars(implode(', ', $empleados));
-                            ?>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Fecha de Siembra</th>
+            <th>Estado</th>
+            <?php if ($_SESSION['rol'] === 'admin'): ?>
+            <th>Acciones</th>
+            <?php endif; ?>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($siembras as $siembra): ?>
+        <tr>
+            <td><?php echo htmlspecialchars($siembra->producto->nombre); ?></td>
+            <td><?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?></td>
+            <td><?php echo htmlspecialchars($siembra->estado); ?></td>
+            <td>
+                <button type="button" class="btn btn-info btn-sm" onclick="showEmpleadosAsignados('<?php echo $siembra->_id; ?>')">
+                    <i class="fas fa-eye"></i> Ver Empleados Asignados
+                </button>
+                <?php if ($_SESSION['rol'] === 'admin'): ?>
+                <button type="button" class="btn btn-warning btn-sm" onclick="openEditSiembraModal('<?php echo $siembra->_id; ?>')">
+                    <i class="fas fa-pencil-alt"></i> Editar
+                </button>
+                <a href="?action=delete_siembra&id=<?php echo $siembra->_id; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
+                    <i class="fas fa-trash"></i> Eliminar
+                </a>
+                <?php endif; ?>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
     </div>
 </div>
 
@@ -534,6 +516,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
         </div>
     </div>
 </div>
+
+<!-- Modal para ver empleados asignados -->
+<div class="modal fade" id="verEmpleadosAsignadosModal" tabindex="-1" role="dialog" aria-labelledby="verEmpleadosAsignadosModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="verEmpleadosAsignadosModalLabel">Empleados Asignados</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                        </tr>
+                    </thead>
+                    <tbody id="empleados_asignados_table_body">
+                        <!-- Los empleados asignados se cargarán aquí con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showEmpleadosAsignados(siembraId) {
+    // Realiza una solicitud AJAX para obtener los empleados asignados a la siembra
+    $.ajax({
+        url: 'obtener_empleados_asignados.php', // Endpoint PHP para obtener empleados asignados
+        type: 'GET',
+        data: { id: siembraId },
+        success: function(data) {
+            // Parsear la respuesta JSON
+            const empleados = JSON.parse(data);
+            const tbody = document.getElementById('empleados_asignados_table_body');
+            tbody.innerHTML = '';
+
+            // Añadir filas a la tabla con los empleados asignados
+            empleados.forEach(empleado => {
+                const row = `<tr>
+                                <td>${empleado.nombre}</td>
+                                <td>${empleado.apellido}</td>
+                                <td>${empleado.email}</td>
+                                <td>${empleado.telefono}</td>
+                            </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+
+            // Mostrar el modal
+            $('#verEmpleadosAsignadosModal').modal('show');
+        },
+        error: function(err) {
+            console.error('Error al obtener empleados asignados:', err);
+        }
+    });
+}
+</script>
 
 
 <script>

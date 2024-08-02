@@ -526,7 +526,7 @@ if ($_SESSION['rol'] === 'admin') {
 <?php endif; ?>
 
 
-
+    </div>
 
 
 

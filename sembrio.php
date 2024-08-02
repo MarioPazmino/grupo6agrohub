@@ -1,7 +1,3 @@
-
-
-
-
 <?php
 session_start();
 
@@ -24,142 +20,13 @@ use MongoDB\Exception\Exception;
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
 $productosCollection = $mongoClient->grupo6_agrohub->productos;
+$collection = $mongoClient->grupo6_agrohub->usuarios;
+$terrenosCollection = $mongoClient->grupo6_agrohub->terrenos;
+$siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
 
 // Variables para mensajes de éxito y error
 $success = [];
 $errors = [];
-
-// Manejo de la eliminación de productos
-if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
-    $id = $_GET['id'];
-    
-    try {
-        if (strlen($id) == 24 && ctype_xdigit($id)) {
-            $result = $productosCollection->deleteOne(['_id' => new ObjectId($id)]);
-            if ($result->getDeletedCount() > 0) {
-                $success[] = 'Producto eliminado exitosamente.';
-            } else {
-                $errors[] = 'No se encontró el producto para eliminar.';
-            }
-        } else {
-            $errors[] = 'ID de producto inválido.';
-        }
-    } catch (Exception $e) {
-        $errors[] = 'Error al eliminar el producto: ' . $e->getMessage();
-    }
-
-    header("Location: productos.php");
-    exit();
-}
-
-// Manejo de la actualización y agregación de productos
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
-    try {
-        $variedades = json_decode($_POST['variedades'], true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception('El formato JSON para variedades no es válido.');
-        }
-
-        $productoData = [
-            'nombre' => $_POST['nombre'],
-            'descripcion' => $_POST['descripcion'],
-            'tipo' => $_POST['tipo'],
-            'precio_unitario' => floatval($_POST['precio_unitario']),
-            'unidad' => $_POST['unidad'],
-            'variedades' => $variedades
-        ];
-
-        if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
-            // Actualizar producto
-            $result = $productosCollection->updateOne(
-                ['_id' => new ObjectId($_POST['id'])],
-                ['$set' => $productoData]
-            );
-            if ($result->getModifiedCount() > 0) {
-                $success[] = 'Producto actualizado exitosamente.';
-            } else {
-                $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
-            }
-        } else {
-            // Agregar producto
-            $result = $productosCollection->insertOne($productoData);
-            if ($result->getInsertedCount() > 0) {
-                $success[] = 'Producto agregado exitosamente.';
-            } else {
-                $errors[] = 'Error al agregar el producto.';
-            }
-        }
-    } catch (Exception $e) {
-        $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
-    }
-}
-
-
-// Modifica la parte de eliminación de variedades
-if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
-    $product_id = $_GET['product_id'];
-    $variedad_nombre = $_GET['variedad_nombre'];
-
-    try {
-        $result = $productosCollection->updateOne(
-            ['_id' => new ObjectId($product_id)],
-            ['$pull' => ['variedades' => ['nombre_variedad' => $variedad_nombre]]]
-        );
-        if ($result->getModifiedCount() > 0) {
-            $success[] = 'Variedad eliminada exitosamente.';
-        } else {
-            $errors[] = 'No se pudo eliminar la variedad.';
-        }
-    } catch (Exception $e) {
-        $errors[] = 'Error al eliminar la variedad: ' . $e->getMessage();
-    }
-
-    echo json_encode(['success' => $success, 'errors' => $errors]);
-    exit();
-}
-
-// Manejo de la agregación de variedades
-if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_POST['product_id']) && isset($_POST['variedad_nombre']) && isset($_POST['caracteristicas'])) {
-    $product_id = $_POST['product_id'];
-    $variedad = [
-        'nombre_variedad' => $_POST['variedad_nombre'],
-        'caracteristicas' => $_POST['caracteristicas']
-    ];
-
-    try {
-        // Validar el ID del producto
-        if (strlen($product_id) === 24 && ctype_xdigit($product_id)) {
-            $result = $productosCollection->updateOne(
-                ['_id' => new ObjectId($product_id)],
-                ['$push' => ['variedades' => $variedad]]
-            );
-            if ($result->getModifiedCount() > 0) {
-                $success[] = 'Variedad agregada exitosamente.';
-            } else {
-                $errors[] = 'No se pudo agregar la variedad. Verifique que el producto exista.';
-            }
-        } else {
-            $errors[] = 'ID de producto inválido.';
-        }
-    } catch (Exception $e) {
-        $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
-    }
-
-    header('Location: productos.php');
-    exit();
-}
-
-
-
-// Obtener productos para mostrar en la tabla
-try {
-    $productos = $productosCollection->find()->toArray();
-} catch (Exception $e) {
-    $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
-}
-
-
-
 
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
@@ -190,11 +57,15 @@ if ($_SESSION['rol'] === 'admin') {
         $errors[] = 'Error al obtener información de empleados: ' . $e->getMessage();
     }
 }
+
+// Obtener siembras
+$siembras = [];
+try {
+    $siembras = $siembrasCollection->find()->toArray();
+} catch (Exception $e) {
+    $errors[] = 'Error al obtener información de siembras: ' . $e->getMessage();
+}
 ?>
-
-
-
-
 
 
 
@@ -490,9 +361,6 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 <!-- Content Row -->
-<!-- Asegúrate de incluir Font Awesome en el <head> de tu documento -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
 <div class="row">
 
     <!-- Productos -->
@@ -525,6 +393,9 @@ if ($_SESSION['rol'] === 'admin') {
                 <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarProductoModal">
                     <i class="fas fa-plus"></i> Agregar Producto
                 </button>
+                <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarSiembraModal">
+                    <i class="fas fa-plus"></i> Agregar Siembra
+                </button>
                 <?php endif; ?>
 
                 <!-- Tabla de productos -->
@@ -541,7 +412,7 @@ if ($_SESSION['rol'] === 'admin') {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($productos as $producto): ?>
+                            <?php foreach ($productosCollection->find() as $producto): ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($producto->nombre); ?></td>
                                 <td><?php echo htmlspecialchars($producto->descripcion); ?></td>
@@ -578,302 +449,132 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
-<!-- Contenedor para mensajes -->
-<div id="messages-container"></div>
-
-<!-- Tabla de Variedades -->
-<div class="row mt-4" id="variedadesSection" style="display: none;">
+<!-- Siembras -->
+<div class="row">
     <div class="col-lg-12">
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Variedades</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Siembras</h6>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="variedadesTable" width="100%" cellspacing="0">
+                <!-- Tabla de siembras -->
+                <div class="table-responsive mt-4">
+                    <table class="table table-bordered" id="siembrasTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Nombre de Variedad</th>
-                                <th>Características</th>
+                                <th>Empleado</th>
+                                <th>Terreno</th>
+                                <th>Producto</th>
+                                <th>Fecha Siembra</th>
+                                <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="variedadesTableBody">
-                            <!-- Las variedades se cargarán aquí dinámicamente -->
+                        <tbody>
+                            <?php foreach ($siembras as $siembra): ?>
+                            <tr>
+                                <td><?php 
+                                    $empleado = $collection->findOne(['_id' => $siembra->empleado_id]);
+                                    echo htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido); 
+                                ?></td>
+                                <td><?php 
+                                    $terreno = $terrenosCollection->findOne(['_id' => $siembra->terreno_id]);
+                                    echo htmlspecialchars($terreno->nombre); 
+                                ?></td>
+                                <td><?php 
+                                    $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
+                                    echo htmlspecialchars($producto->nombre); 
+                                ?></td>
+                                <td><?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?></td>
+                                <td><?php echo htmlspecialchars($siembra->estado); ?></td>
+                                <td>
+                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
+                                    <a href="?action=delete_siembra&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
+                                        <i class="fas fa-trash"></i> 
+                                    </a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
-                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <button type="button" class="btn btn-primary mt-3" data-toggle="modal" data-target="#agregarVariedadModal">
-                    <i class="fas fa-plus"></i> Agregar Variedad
-                </button>
-                <?php endif; ?>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Agregar Variedad -->
-<div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
+<!-- Modal para agregar siembra -->
+<div class="modal fade" id="agregarSiembraModal" tabindex="-1" role="dialog" aria-labelledby="agregarSiembraModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="agregarVariedadModalLabel">Agregar Variedad</h5>
+                <h5 class="modal-title" id="agregarSiembraModalLabel">Agregar Nueva Siembra</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="productos.php" class="form-inline">
-                    <input type="hidden" name="action" value="add_variedad">
-                    <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($producto['_id']); ?>">
-
-                    <div class="form-group mb-2 mr-2">
-                        <label for="variedad_nombre" class="sr-only">Nombre de la variedad</label>
-                        <input type="text" id="variedad_nombre" name="variedad_nombre" class="form-control" placeholder="Nombre de la variedad" required>
-                    </div>
-
-                    <div class="form-group mb-2 mr-2">
-                        <label for="caracteristicas" class="sr-only">Características</label>
-                        <input type="text" id="caracteristicas" name="caracteristicas" class="form-control" placeholder="Características" required>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary mb-2"><i class="fas fa-plus"></i> Agregar Variedad</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Agregar Producto (solo para admin) -->
-<?php if ($_SESSION['rol'] === 'admin'): ?>
-<div class="modal fade" id="agregarProductoModal" tabindex="-1" role="dialog" aria-labelledby="agregarProductoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="agregarProductoModalLabel">Agregar Producto</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="productos.php" method="POST">
-                    <input type="hidden" name="action" value="add_producto">
+                <form action="procesar_siembra.php" method="POST">
                     <div class="form-group">
-                        <label for="nombre">Nombre</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="descripcion">Descripción</label>
-                        <textarea class="form-control" id="descripcion" name="descripcion"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="tipo">Tipo</label>
-                        <select class="form-control" id="tipo" name="tipo" required>
-                            <option value="">Seleccione Tipo</option>
-                            <option value="Tipo1">Tipo1</option>
-                            <option value="Tipo2">Tipo2</option>
-                            <!-- Agrega más opciones según sea necesario -->
+                        <label for="empleado">Empleado</label>
+                        <select class="form-control" id="empleado" name="empleado_id" required>
+                            <?php foreach ($collection->find() as $empleado): ?>
+                            <option value="<?php echo htmlspecialchars($empleado->_id); ?>">
+                                <?php echo htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido); ?>
+                            </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="precio_unitario">Precio Unitario</label>
-                        <input type="number" step="0.01" class="form-control" id="precio_unitario" name="precio_unitario" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="unidad">Unidad</label>
-                        <input type="text" class="form-control" id="unidad" name="unidad" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar Producto</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
-
-<!-- Modal Editar Producto -->
-<div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editarProductoModalLabel">Editar Producto</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="editarProductoForm" action="productos.php" method="POST">
-                    <input type="hidden" name="action" value="edit_producto">
-                    <input type="hidden" name="id" id="edit_producto_id">
-
-                    <div class="form-group">
-                        <label for="edit_nombre">Nombre</label>
-                        <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_descripcion">Descripción</label>
-                        <textarea class="form-control" id="edit_descripcion" name="descripcion"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_tipo">Tipo</label>
-                        <select class="form-control" id="edit_tipo" name="tipo" required>
-                            <option value="">Seleccione Tipo</option>
-                            <option value="Tipo1">Tipo1</option>
-                            <option value="Tipo2">Tipo2</option>
-                            <!-- Agrega más opciones según sea necesario -->
+                        <label for="terreno">Terreno</label>
+                        <select class="form-control" id="terreno" name="terreno_id" required>
+                            <?php foreach ($terrenosCollection->find() as $terreno): ?>
+                            <option value="<?php echo htmlspecialchars($terreno->_id); ?>">
+                                <?php echo htmlspecialchars($terreno->nombre); ?>
+                            </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="edit_precio_unitario">Precio Unitario</label>
-                        <input type="number" step="0.01" class="form-control" id="edit_precio_unitario" name="precio_unitario" required>
+                        <label for="producto">Producto</label>
+                        <select class="form-control" id="producto" name="producto_id" required>
+                            <?php foreach ($productosCollection->find() as $producto): ?>
+                            <option value="<?php echo htmlspecialchars($producto->_id); ?>">
+                                <?php echo htmlspecialchars($producto->nombre); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="edit_unidad">Unidad</label>
-                        <input type="text" class="form-control" id="edit_unidad" name="unidad" required>
+                        <label for="fecha_siembra">Fecha de Siembra</label>
+                        <input type="date" class="form-control" id="fecha_siembra" name="fecha_siembra" required>
                     </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
+                    <div class="form-group">
+                        <label for="estado">Estado</label>
+                        <select class="form-control" id="estado" name="estado" required>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="en_proceso">En Proceso</option>
+                            <option value="completada">Completada</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Siembra</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-
-
-
-
-                    
 <script>
-$(document).ready(function() {
-    // Configura el modal de agregar variedad con el ID del producto
-    $('#agregarVariedadModal').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget); // Botón que abrió el modal
-        var productId = button.data('product-id'); // Extrae el ID del producto
-        var modal = $(this);
-        modal.find('#product_id').val(productId);
-    });
-
-    // Maneja el envío del formulario de agregar variedad
-    $('#agregarVariedadForm').on('submit', function(e) {
-        e.preventDefault(); // Evita el envío normal del formulario
-        var formData = $(this).serialize(); // Serializa los datos del formulario
-
-        $.ajax({
-            url: 'productos.php',
-            type: 'POST',
-            data: formData + '&action=add_variedad', // Agrega la acción al formulario
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    alert(response.success[0]);
-                    $('#agregarVariedadModal').modal('hide');
-                    // Recargar la tabla de variedades
-                    showVariedades(response.variedades, $('#product_id').val());
-                } else if (response.errors) {
-                    alert(response.errors[0]);
-                }
-            },
-            error: function() {
-                alert('Error al agregar la variedad.');
-            }
+    // Función para mostrar variedades en el modal
+    function showVariedades(variedades, productoId) {
+        let modalBody = document.getElementById('variedadesModalBody');
+        modalBody.innerHTML = '';
+        variedades.forEach(function(variedad) {
+            modalBody.innerHTML += `<p><strong>Variedad:</strong> ${variedad.nombre} <br> <strong>Descripción:</strong> ${variedad.descripcion}</p>`;
         });
-    });
-});
-
-function showVariedades(variedades, productoId) {
-    const section = document.querySelector('#variedadesSection');
-    const tableBody = document.querySelector('#variedadesTableBody');
-    const isCurrentlyVisible = section.style.display === 'block';
-
-    // Alternar visibilidad de la sección
-    section.style.display = isCurrentlyVisible ? 'none' : 'block';
-    
-    // Solo actualiza la tabla si se va a mostrar la sección
-    if (!isCurrentlyVisible) {
-        section.dataset.productId = productoId;
-
-        tableBody.innerHTML = ''; // Limpiar contenido previo
-
-        variedades.forEach(variedad => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${variedad.nombre_variedad}</td>
-                <td>${variedad.caracteristicas}</td>
-                <td>
-                    <button class="btn btn-danger btn-sm" onclick="eliminarVariedad('${productoId}', '${variedad.nombre_variedad}')">Eliminar</button>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
+        $('#variedadesModal').modal('show');
     }
-}
-
-function eliminarVariedad(productoId, nombreVariedad) {
-    if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
-        fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
-            method: 'GET'
-        })
-        .then(response => response.json())
-        .then(data => {
-            let messageHTML = '';
-            // Limpiar el contenedor de mensajes antes de agregar nuevos
-            const messagesContainer = document.getElementById('messages-container');
-            messagesContainer.innerHTML = '';
-
-            if (data.success && data.success.length > 0) {
-                messageHTML += '<div class="alert alert-success" role="alert">';
-                data.success.forEach(message => {
-                    messageHTML += `${message}<br>`;
-                });
-                messageHTML += '</div>';
-            }
-            if (data.errors && data.errors.length > 0) {
-                messageHTML += '<div class="alert alert-danger" role="alert">';
-                data.errors.forEach(message => {
-                    messageHTML += `${message}<br>`;
-                });
-                messageHTML += '</div>';
-            }
-            
-            // Insertar los mensajes en el DOM solo si hay mensajes que mostrar
-            if (messageHTML !== '') {
-                messagesContainer.innerHTML = messageHTML;
-                // Hacer scroll hacia los mensajes
-                messagesContainer.scrollIntoView({ behavior: "smooth" });
-            }
-            
-            // Recargar la tabla de variedades o la página después de un breve retraso
-            setTimeout(() => {
-                location.reload();
-            }, 2000);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al eliminar variedad');
-        });
-    }
-}
-
-
-    // Configurar el modal de edición
-    $('#editarProductoModal').on('show.bs.modal', function (event) {
-        const button = $(event.relatedTarget);
-        const id = button.data('id');
-        const nombre = button.data('nombre');
-        const descripcion = button.data('descripcion');
-        const tipo = button.data('tipo');
-        const precioUnitario = button.data('precio_unitario');
-        const unidad = button.data('unidad');
-
-        const modal = $(this);
-        modal.find('#edit_id').val(id);
-        modal.find('#edit_nombre').val(nombre);
-        modal.find('#edit_descripcion').val(descripcion);
-        modal.find('#edit_tipo').val(tipo);
-        modal.find('#edit_precio_unitario').val(precioUnitario);
-        modal.find('#edit_unidad').val(unidad);
-    });
 </script>
 
 

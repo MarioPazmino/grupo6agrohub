@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 
@@ -53,25 +54,52 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
         $errors[] = 'Error al eliminar el producto: ' . $e->getMessage();
     }
 
-    // Solo para la eliminación de productos, redirige después de procesar
-    if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad') {
-        echo json_encode(['success' => $success, 'errors' => $errors]);
-        exit();
-    } else {
-        header("Location: productos.php");
-        exit();
-    }
+    header("Location: productos.php");
+    exit();
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
+    try {
+        // Verificar si variedades está presente y no es null
+        $variedades = isset($_POST['variedades']) ? json_decode($_POST['variedades'], true) : [];
 
-if (isset($_GET['action']) && $_GET['action'] === 'get_variedades') {
-    $productId = $_GET['product_id'];
+        // Verificar si la decodificación fue exitosa
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('El formato JSON para variedades no es válido.');
+        }
 
-    // Aquí deberías implementar la lógica para obtener las variedades desde la base de datos.
-    $variedades = getVariedadesPorProducto($productId); // Supón que esta función obtiene las variedades en formato JSON
+        $productoData = [
+            'nombre' => $_POST['nombre'],
+            'descripcion' => $_POST['descripcion'],
+            'tipo' => $_POST['tipo'],
+            'precio_unitario' => floatval($_POST['precio_unitario']),
+            'unidad' => $_POST['unidad'],
+            'variedades' => $variedades
+        ];
 
-    echo json_encode(['variedades' => $variedades]);
-    exit;
+        if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
+            // Actualizar producto
+            $result = $productosCollection->updateOne(
+                ['_id' => new ObjectId($_POST['id'])],
+                ['$set' => $productoData]
+            );
+            if ($result->getModifiedCount() > 0) {
+                $success[] = 'Producto actualizado exitosamente.';
+            } else {
+                $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
+            }
+        } else {
+            // Agregar producto
+            $result = $productosCollection->insertOne($productoData);
+            if ($result->getInsertedCount() > 0) {
+                $success[] = 'Producto agregado exitosamente.';
+            } else {
+                $errors[] = 'Error al agregar el producto.';
+            }
+        }
+    } catch (Exception $e) {
+        $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
+    }
 }
 
 // Modifica la parte de eliminación de variedades
@@ -93,7 +121,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
         $errors[] = 'Error al eliminar la variedad: ' . $e->getMessage();
     }
 
-    // Enviar la respuesta JSON al navegador
     echo json_encode(['success' => $success, 'errors' => $errors]);
     exit();
 }
@@ -125,7 +152,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
         $errors[] = 'Error al agregar la variedad: ' . $e->getMessage();
     }
 
-    // Redirige después de procesar
     header('Location: productos.php');
     exit();
 }
@@ -136,6 +162,14 @@ try {
 } catch (Exception $e) {
     $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
 }
+
+
+
+
+
+
+
+
 
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
@@ -167,6 +201,9 @@ if ($_SESSION['rol'] === 'admin') {
     }
 }
 ?>
+
+
+
 
 
 
@@ -459,6 +496,9 @@ if ($_SESSION['rol'] === 'admin') {
 
 <!-- Content Row -->
 <div class="row">
+<div id="messages">
+    <!-- Los mensajes de éxito o error se mostrarán aquí -->
+</div>
 
     <!-- Productos -->
     <div class="col-lg-12">
@@ -669,6 +709,7 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
+
 <script>
     // Función para mostrar el modal de agregar variedad
     function showVariedades(variedades, productId) {
@@ -682,7 +723,7 @@ if ($_SESSION['rol'] === 'admin') {
                 <td>${variedad.caracteristicas}</td>
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <td>
-                    <a href="javascript:void(0)" class="btn btn-danger btn-sm" onclick="eliminarVariedad('${productId}', '${encodeURIComponent(variedad.nombre_variedad)}')">
+                    <a href="?action=delete_variedad&product_id=${productId}&variedad_nombre=${encodeURIComponent(variedad.nombre_variedad)}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta variedad?');">
                         <i class="fas fa-trash"></i> Eliminar
                     </a>
                 </td>
@@ -699,57 +740,7 @@ if ($_SESSION['rol'] === 'admin') {
         document.getElementById('product_id').value = productId;
         $('#agregarVariedadModal').modal('show');
     }
-
-    // Función para eliminar una variedad
-    function eliminarVariedad(productoId, nombreVariedad) {
-        if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
-            fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
-                method: 'GET'
-            })
-            .then(response => response.json())
-            .then(data => {
-                const messagesContainer = document.getElementById('messages-container');
-                messagesContainer.innerHTML = '';
-
-                if (data.success && data.success.length > 0) {
-                    data.success.forEach(message => {
-                        messagesContainer.innerHTML += `<div class="alert alert-success" role="alert">${message}<br></div>`;
-                    });
-                }
-
-                if (data.errors && data.errors.length > 0) {
-                    data.errors.forEach(message => {
-                        messagesContainer.innerHTML += `<div class="alert alert-danger" role="alert">${message}<br></div>`;
-                    });
-                }
-
-                // Recargar la tabla de variedades
-                fetchVariedades(productoId);
-
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al eliminar variedad');
-            });
-        }
-    }
-
-    // Función para recuperar y mostrar variedades de un producto
-    function fetchVariedades(productId) {
-        fetch(`productos.php?action=get_variedades&product_id=${productId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.variedades) {
-                showVariedades(data.variedades, productId);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al cargar las variedades');
-        });
-    }
 </script>
-
 
                     
 <script>
@@ -789,6 +780,72 @@ $(document).ready(function() {
     });
 });
 
+function eliminarVariedad(productoId, nombreVariedad) {
+    if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
+        fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(data => {
+            let messageHTML = '';
+            // Limpiar el contenedor de mensajes antes de agregar nuevos
+            const messagesContainer = document.getElementById('messages-container');
+            messagesContainer.innerHTML = '';
+
+            if (data.success && data.success.length > 0) {
+                messageHTML += '<div class="alert alert-success" role="alert">';
+                data.success.forEach(message => {
+                    messageHTML += `${message}<br>`;
+                });
+                messageHTML += '</div>';
+            }
+            if (data.errors && data.errors.length > 0) {
+                messageHTML += '<div class="alert alert-danger" role="alert">';
+                data.errors.forEach(message => {
+                    messageHTML += `${message}<br>`;
+                });
+                messageHTML += '</div>';
+            }
+            
+            // Insertar los mensajes en el DOM solo si hay mensajes que mostrar
+            if (messageHTML !== '') {
+                messagesContainer.innerHTML = messageHTML;
+                // Hacer scroll hacia los mensajes
+                messagesContainer.scrollIntoView({ behavior: "smooth" });
+            }
+            
+            // Actualizar la tabla de variedades en lugar de recargar la página
+            if (data.success && data.success.length > 0) {
+                // Llama a una función para recargar los datos de la tabla
+                actualizarTablaVariedades(); // Asume que tienes esta función definida
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al eliminar variedad');
+        });
+    }
+}
+
+
+    // Configurar el modal de edición
+    $('#editarProductoModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const id = button.data('id');
+        const nombre = button.data('nombre');
+        const descripcion = button.data('descripcion');
+        const tipo = button.data('tipo');
+        const precioUnitario = button.data('precio_unitario');
+        const unidad = button.data('unidad');
+
+        const modal = $(this);
+        modal.find('#edit_id').val(id);
+        modal.find('#edit_nombre').val(nombre);
+        modal.find('#edit_descripcion').val(descripcion);
+        modal.find('#edit_tipo').val(tipo);
+        modal.find('#edit_precio_unitario').val(precioUnitario);
+        modal.find('#edit_unidad').val(unidad);
+    });
 </script>
 
 

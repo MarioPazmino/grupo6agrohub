@@ -98,6 +98,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
     }
 }
 
+
+
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'delete_siembra') {
+    // Decodificar la solicitud JSON
+    $input = json_decode(file_get_contents('php://input'), true);
+    $id = $input['id'];
+
+    try {
+        $result = $siembrasCollection->deleteOne(['_id' => new \MongoDB\BSON\ObjectId($id)]);
+
+        if ($result->getDeletedCount() === 1) {
+            // Enviar respuesta JSON para AJAX
+            echo json_encode(['success' => true, 'message' => 'Siembra eliminada correctamente.']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'No se pudo encontrar la siembra para eliminar.']);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Error al eliminar la siembra: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
 ?>
 
 

@@ -378,7 +378,6 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
 <!-- Content Row -->
 <div class="row">
     <div id="messages-container"></div>
@@ -462,7 +461,6 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
-
 <!-- Modal Agregar Siembra (solo para admin) -->
 <?php if ($_SESSION['rol'] === 'admin'): ?>
     <div class="modal fade" id="agregarSiembraModal" tabindex="-1" role="dialog" aria-labelledby="agregarSiembraModalLabel" aria-hidden="true">
@@ -513,8 +511,9 @@ if ($_SESSION['rol'] === 'admin') {
                         <div class="form-group">
                             <label for="estado">Estado</label>
                             <select class="form-control" id="estado" name="estado" required>
-                                <option value="pendiente">Pendiente</option>
-                                <option value="finalizada">Finalizada</option>
+                                <option value="planificada">Planificada</option>
+                                <option value="en_progreso">En Progreso</option>
+                                <option value="completada">Completada</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Agregar Siembra</button>
@@ -526,13 +525,10 @@ if ($_SESSION['rol'] === 'admin') {
 <?php endif; ?>
 
 
-    </div>
-
-
 
                     
 
-                    
+               
 
         <!-- Scroll to Top Button-->
         <a class="scroll-to-top rounded" href="#page-top">

@@ -61,42 +61,28 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 // Manejo de la actualización y agregación de productos
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_producto') {
     try {
-        $variedades = json_decode($_POST['variedades'], true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception('El formato JSON para variedades no es válido.');
-        }
-
         $productoData = [
             'nombre' => $_POST['nombre'],
             'descripcion' => $_POST['descripcion'],
             'tipo' => $_POST['tipo'],
             'precio_unitario' => floatval($_POST['precio_unitario']),
             'unidad' => $_POST['unidad'],
-            'variedades' => $variedades
+            'variedades' => [] // Inicializamos como un array vacío
         ];
-error_log("Intentando insertar producto: " . print_r($productoData, true));
-        if (isset($_POST['id']) && strlen($_POST['id']) == 24 && ctype_xdigit($_POST['id'])) {
-            // Actualizar producto
-            $result = $productosCollection->updateOne(
-                ['_id' => new ObjectId($_POST['id'])],
-                ['$set' => $productoData]
-            );
-            if ($result->getModifiedCount() > 0) {
-                $success[] = 'Producto actualizado exitosamente.';
-            } else {
-                $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
-            }
+
+        error_log("Intentando insertar producto: " . print_r($productoData, true));
+
+        // Agregar producto
+        $result = $productosCollection->insertOne($productoData);
+        if ($result->getInsertedCount() > 0) {
+            $success[] = 'Producto agregado exitosamente.';
         } else {
-            // Agregar producto
-            $result = $productosCollection->insertOne($productoData);
-            if ($result->getInsertedCount() > 0) {
-                $success[] = 'Producto agregado exitosamente.';
-            } else {
-                $errors[] = 'Error al agregar el producto.';
-            }
+            $errors[] = 'Error al agregar el producto.';
         }
-    } catch (Exception $e) {
-        $errors[] = 'Error al manejar el producto: ' . $e->getMessage();
+    } catch (\MongoDB\Driver\Exception\Exception $e) {
+        $errors[] = 'Error de MongoDB al manejar el producto: ' . $e->getMessage();
+    } catch (\Exception $e) {
+        $errors[] = 'Error general al manejar el producto: ' . $e->getMessage();
     }
 }
 
@@ -590,35 +576,34 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-                <form action="productos.php" method="POST">
-                    <input type="hidden" name="action" value="add_producto">
-                    <div class="form-group">
-                        <label for="nombre">Nombre</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="descripcion">Descripción</label>
-                        <textarea class="form-control" id="descripcion" name="descripcion"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="tipo">Tipo</label>
-                        <select class="form-control" id="tipo" name="tipo" required>
-                            <option value="">Seleccione Tipo</option>
-                            <option value="Tipo1">Tipo1</option>
-                            <option value="Tipo2">Tipo2</option>
-                            <!-- Agrega más opciones según sea necesario -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="precio_unitario">Precio Unitario</label>
-                        <input type="number" step="0.01" class="form-control" id="precio_unitario" name="precio_unitario" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="unidad">Unidad</label>
-                        <input type="text" class="form-control" id="unidad" name="unidad" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar Producto</button>
-                </form>
+               <form action="productos.php" method="POST">
+    <input type="hidden" name="action" value="add_producto">
+    <div class="form-group">
+        <label for="nombre">Nombre</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" required>
+    </div>
+    <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <textarea class="form-control" id="descripcion" name="descripcion"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="tipo">Tipo</label>
+        <select class="form-control" id="tipo" name="tipo" required>
+            <option value="">Seleccione Tipo</option>
+            <option value="Tipo1">Tipo1</option>
+            <option value="Tipo2">Tipo2</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="precio_unitario">Precio Unitario</label>
+        <input type="number" step="0.01" class="form-control" id="precio_unitario" name="precio_unitario" required>
+    </div>
+    <div class="form-group">
+        <label for="unidad">Unidad</label>
+        <input type="text" class="form-control" id="unidad" name="unidad" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Agregar Producto</button>
+</form>
             </div>
         </div>
     </div>

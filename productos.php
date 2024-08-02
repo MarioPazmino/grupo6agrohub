@@ -88,23 +88,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($_POST['action'] === 'edit_producto' && isset($_POST['id'])) {
             try {
-                $updateData = [
-                    'nombre' => $_POST['nombre'],
-                    'descripcion' => $_POST['descripcion'],
-                    'tipo' => $_POST['tipo'],
-                    'precio_unitario' => floatval($_POST['precio_unitario']),
-                    'unidad' => $_POST['unidad']
-                ];
+                // Validar el ID del producto
+                $id = $_POST['id'];
+                if (is_string($id) && strlen($id) == 24 && ctype_xdigit($id)) {
+                    $updateData = [
+                        'nombre' => $_POST['nombre'],
+                        'descripcion' => $_POST['descripcion'],
+                        'tipo' => $_POST['tipo'],
+                        'precio_unitario' => floatval($_POST['precio_unitario']),
+                        'unidad' => $_POST['unidad']
+                    ];
 
-                $result = $productosCollection->updateOne(
-                    ['_id' => new ObjectId($_POST['id'])],
-                    ['$set' => $updateData]
-                );
+                    $result = $productosCollection->updateOne(
+                        ['_id' => new ObjectId($id)],
+                        ['$set' => $updateData]
+                    );
 
-                if ($result->getModifiedCount() > 0) {
-                    $success[] = 'Producto actualizado exitosamente.';
+                    if ($result->getModifiedCount() > 0) {
+                        $success[] = 'Producto actualizado exitosamente.';
+                    } else {
+                        $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
+                    }
                 } else {
-                    $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
+                    $errors[] = 'ID de producto inválido.';
                 }
             } catch (Exception $e) {
                 $errors[] = 'Error al actualizar el producto: ' . $e->getMessage();
@@ -123,9 +129,8 @@ try {
 // Manejo de solicitudes AJAX para obtener detalles del producto
 if (isset($_GET['id']) && !isset($_POST['action'])) {
     $id = $_GET['id'];
-    if (strlen($id) == 24 && ctype_xdigit($id)) {
+    if (is_string($id) && strlen($id) == 24 && ctype_xdigit($id)) {
         try {
-            // Asegurarse de que el ID sea una cadena válida
             $objectId = new ObjectId($id);
             $producto = $productosCollection->findOne(['_id' => $objectId]);
             if ($producto) {
@@ -141,9 +146,6 @@ if (isset($_GET['id']) && !isset($_POST['action'])) {
     }
     exit();
 }
-
-
-
 
 // Modifica la parte de eliminación de variedades
 if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {

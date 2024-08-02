@@ -725,12 +725,12 @@ if ($_SESSION['rol'] === 'admin') {
                 <td>${variedad.nombre_variedad}</td>
                 <td>${variedad.caracteristicas}</td>
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
-    <td>
-        <a href="#" class="btn btn-danger btn-sm" onclick="eliminarVariedad(<?php echo $productId; ?>, '<?php echo addslashes($variedad.nombre_variedad); ?>'); return false;">
-            <i class="fas fa-trash"></i> Eliminar
-        </a>
-    </td>
-<?php endif; ?>
+                <td>
+                    <a href="?action=delete_variedad&product_id=${productId}&variedad_nombre=${encodeURIComponent(variedad.nombre_variedad)}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta variedad?');">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </a>
+                </td>
+                <?php endif; ?>
 
             </tr>`;
         });

@@ -382,147 +382,248 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
 
 
 
-
-
-
 <!-- Content Row -->
 <div class="row">
-    <div class="col-lg-12">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Siembras</h6>
+<div id="messages-container"></div>
+
+
+<!-- Productos -->
+<div class="col-lg-12">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Productos</h6>
+        </div>
+        <div class="card-body">
+
+            <!-- Mensajes de éxito y error -->
+            <?php if (!empty($success)): ?>
+            <div class="alert alert-success" role="alert">
+                <?php foreach ($success as $message): ?>
+                <?php echo htmlspecialchars($message); ?><br>
+                <?php endforeach; ?>
             </div>
-            <div class="card-body">
-
-                <!-- Mensajes de éxito y error -->
-                <?php if (!empty($success)): ?>
-                <div class="alert alert-success" role="alert">
-                    <?php foreach ($success as $message): ?>
-                    <?php echo htmlspecialchars($message); ?><br>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
-
-                <?php if (!empty($errors)): ?>
-                <div class="alert alert-danger" role="alert">
-                    <?php foreach ($errors as $message): ?>
-                    <?php echo htmlspecialchars($message); ?><br>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
-
-                <!-- Botón de agregar siembra (solo para admin) -->
-                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarSiembraModal">
-                    <i class="fas fa-plus"></i> Agregar Siembra
-                </button>
-                <?php endif; ?>
-
-                 <!-- Tabla de siembras -->
-    <div class="table-responsive mt-4">
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Producto</th>
-            <th>Fecha de Siembra</th>
-            <th>Estado</th>
-            <?php if ($_SESSION['rol'] === 'admin'): ?>
-            <th>Acciones</th>
             <?php endif; ?>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($siembras as $siembra): ?>
-        <tr>
-            <td><?php echo htmlspecialchars($siembra->producto->nombre); ?></td>
-            <td><?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?></td>
-            <td><?php echo htmlspecialchars($siembra->estado); ?></td>
-            <td>
-                <button type="button" class="btn btn-info btn-sm" onclick="showEmpleadosAsignados('<?php echo $siembra->_id; ?>')">
-                    <i class="fas fa-eye"></i> Ver Empleados Asignados
-                </button>
-                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <button type="button" class="btn btn-warning btn-sm" onclick="openEditSiembraModal('<?php echo $siembra->_id; ?>')">
-                    <i class="fas fa-pencil-alt"></i> Editar
-                </button>
-                <a href="?action=delete_siembra&id=<?php echo $siembra->_id; ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
-                    <i class="fas fa-trash"></i> Eliminar
-                </a>
-                <?php endif; ?>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+
+            <?php if (!empty($errors)): ?>
+            <div class="alert alert-danger" role="alert">
+                <?php foreach ($errors as $message): ?>
+                <?php echo htmlspecialchars($message); ?><br>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
+            <!-- Botón de agregar producto (solo para admin) -->
+            <?php if ($_SESSION['rol'] === 'admin'): ?>
+            <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarProductoModal">
+                <i class="fas fa-plus"></i> Agregar Producto
+            </button>
+            <?php endif; ?>
+
+            <!-- Tabla de productos -->
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Tipo</th>
+                        <th>Precio Unitario</th>
+                        <th>Unidad</th>
+                        <th>Variedades</th>
+                        <?php if ($_SESSION['rol'] === 'admin'): ?>
+                        <th>Acciones</th>
+                        <?php endif; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($productos as $producto): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($producto->nombre); ?></td>
+                        <td><?php echo htmlspecialchars($producto->descripcion); ?></td>
+                        <td><?php echo htmlspecialchars($producto->tipo); ?></td>
+                        <td><?php echo htmlspecialchars($producto->precio_unitario); ?></td>
+                        <td><?php echo htmlspecialchars($producto->unidad); ?></td>
+                        <td>
+                            <button type="button" class="btn btn-info btn-sm" onclick="showVariedades(<?php echo htmlspecialchars(json_encode($producto->variedades), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($producto->_id); ?>')">
+                                <i class="fas fa-eye"></i> Ver Variedades
+                            </button>
+                        </td>
+                        <?php if ($_SESSION['rol'] === 'admin'): ?>
+                        <td>
+<button type="button" class="btn btn-warning btn-sm" title="Editar" onclick="openEditModal('<?php echo $producto->_id; ?>')">
+    <i class="fas fa-pencil-alt"></i>
+</button>
+                            <a href="?action=delete&id=<?php echo htmlspecialchars($producto->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                        <?php endif; ?>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<!-- Modal para agregar siembra -->
-<div class="modal fade" id="agregarSiembraModal" tabindex="-1" role="dialog" aria-labelledby="agregarSiembraModalLabel" aria-hidden="true">
+</div>
+
+
+
+                    
+<!-- Modal Agregar Producto (solo para admin) -->
+<?php if ($_SESSION['rol'] === 'admin'): ?>
+<div class="modal fade" id="agregarProductoModal" tabindex="-1" role="dialog" aria-labelledby="agregarProductoModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="agregarSiembraModalLabel">Agregar Nueva Siembra</h5>
+                <h5 class="modal-title" id="agregarProductoModalLabel">Agregar Producto</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form action="" method="POST">
-                    <div class="form-group">
-                        <label for="empleado">Empleado</label>
-                        <select class="form-control" id="empleado" name="empleado_id" required>
-                            <?php foreach ($usuariosCollection->find() as $empleado): ?>
-                            <option value="<?php echo htmlspecialchars($empleado->_id); ?>">
-                                <?php echo htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido); ?>
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="terreno">Terreno</label>
-                        <select class="form-control" id="terreno" name="terreno_id" required>
-                            <?php foreach ($terrenosCollection->find() as $terreno): ?>
-                            <option value="<?php echo htmlspecialchars($terreno->_id); ?>">
-                                <?php echo htmlspecialchars($terreno->nombre); ?>
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="producto">Producto</label>
-                        <select class="form-control" id="producto" name="producto_id" required>
-                            <?php foreach ($productosCollection->find() as $producto): ?>
-                            <option value="<?php echo htmlspecialchars($producto->_id); ?>">
-                                <?php echo htmlspecialchars($producto->nombre); ?>
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="fecha_siembra">Fecha de Siembra</label>
-                        <input type="date" class="form-control" id="fecha_siembra" name="fecha_siembra" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="estado">Estado</label>
-                        <select class="form-control" id="estado" name="estado" required>
-                            <option value="pendiente">Pendiente</option>
-                            <option value="finalizada">Finalizada</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Agregar Siembra</button>
-                </form>
+<form action="productos.php" method="POST" onsubmit="return validarFormulario()">
+    <input type="hidden" name="action" value="add_producto">
+    <div class="form-group">
+        <label for="nombre">Nombre</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" required>
+    </div>
+    <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <textarea class="form-control" id="descripcion" name="descripcion"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="tipo">Tipo</label>
+        <select class="form-control" id="tipo" name="tipo" required>
+            <option value="">Seleccione Tipo</option>
+            <option value="fruta">Fruta</option>
+            <option value="verdura">Verdura</option>
+            <option value="semilla">Semilla</option>
+            <option value="abono">Abono</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="precio_unitario">Precio Unitario</label>
+        <input type="number" step="0.01" class="form-control" id="precio_unitario" name="precio_unitario" required>
+    </div>
+    <div class="form-group">
+        <label for="unidad">Unidad</label>
+        <select class="form-control" id="unidad" name="unidad" required>
+            <option value="">Seleccione Unidad</option>
+            <option value="kg">kg</option>
+            <option value="unidad">Unidad</option>
+            <option value="litro">Litro</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Agregar Producto</button>
+</form>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Modal Editar Producto -->
+<div class="modal fade" id="editarProductoModal" tabindex="-1" role="dialog" aria-labelledby="editarProductoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarProductoModalLabel">Editar Producto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+<form action="productos.php" method="POST" onsubmit="return validarFormulario()">
+    <input type="hidden" id="edit_id" name="id">
+    <input type="hidden" name="action" value="edit_producto">
+    <div class="form-group">
+        <label for="edit_nombre">Nombre</label>
+        <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
+    </div>
+    <div class="form-group">
+        <label for="edit_descripcion">Descripción</label>
+        <textarea class="form-control" id="edit_descripcion" name="descripcion" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="edit_tipo">Tipo</label>
+        <select class="form-control" id="edit_tipo" name="tipo" required>
+            <option value="">Seleccione Tipo</option>
+            <option value="fruta">Fruta</option>
+            <option value="verdura">Verdura</option>
+            <option value="semilla">Semilla</option>
+            <option value="abono">Abono</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="edit_precio_unitario">Precio Unitario</label>
+        <input type="number" class="form-control" id="edit_precio_unitario" name="precio_unitario" step="0.01" required>
+    </div>
+    <div class="form-group">
+        <label for="edit_unidad">Unidad</label>
+        <select class="form-control" id="edit_unidad" name="unidad" required>
+            <option value="">Seleccione Unidad</option>
+            <option value="kg">kg</option>
+            <option value="unidad">Unidad</option>
+            <option value="litro">Litro</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+</form>
+
+
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal para ver empleados asignados -->
-<div class="modal fade" id="verEmpleadosAsignadosModal" tabindex="-1" role="dialog" aria-labelledby="verEmpleadosAsignadosModalLabel" aria-hidden="true">
+<!-- Modal para agregar variedad -->
+<div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+<form action="productos.php" method="POST" id="agregarVariedadForm" onsubmit="return validarFormularioVariedad()">
+    <div class="modal-header">
+        <h5 class="modal-title" id="agregarVariedadModalLabel">Agregar Variedad</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <input type="hidden" id="product_id" name="product_id">
+
+        <div class="form-group">
+            <label for="variedad_nombre">Nombre de la Variedad</label>
+            <input type="text" class="form-control" id="variedad_nombre" name="variedad_nombre" required>
+        </div>
+
+        <div class="form-group">
+            <label for="caracteristicas">Características</label>
+            <textarea class="form-control" id="caracteristicas" name="caracteristicas" required></textarea>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary" name="action" value="add_variedad">Agregar Variedad</button>
+    </div>
+</form>
+
+
+
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal para ver variedades -->
+<div class="modal fade" id="verVariedadesModal" tabindex="-1" role="dialog" aria-labelledby="verVariedadesModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="verEmpleadosAsignadosModalLabel">Empleados Asignados</h5>
+                <h5 class="modal-title" id="verVariedadesModalLabel">Variedades</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -532,65 +633,210 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
                     <thead>
                         <tr>
                             <th>Nombre</th>
-                            <th>Apellido</th>
-                            <th>Correo</th>
-                            <th>Teléfono</th>
+                            <th>Características</th>
+                            <?php if ($_SESSION['rol'] === 'admin'): ?>
+                            <th>Acciones</th>
+                            <?php endif; ?>
                         </tr>
                     </thead>
-                    <tbody id="empleados_asignados_table_body">
-                        <!-- Los empleados asignados se cargarán aquí con JavaScript -->
+                    <tbody id="variedades_table_body">
+                        <!-- Las variedades se cargarán aquí con JavaScript -->
                     </tbody>
                 </table>
+
+                <?php if ($_SESSION['rol'] === 'admin'): ?>
+                <button type="button" class="btn btn-primary" onclick="openAddVariedadModal(document.getElementById('product_id').value)">
+                    <i class="fas fa-plus"></i> Agregar Variedad
+                </button>
+                <?php endif; ?>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-function showEmpleadosAsignados(siembraId) {
-    // Realiza una solicitud AJAX para obtener los empleados asignados a la siembra
-    $.ajax({
-        url: 'obtener_empleados_asignados.php', // Endpoint PHP para obtener empleados asignados
-        type: 'GET',
-        data: { id: siembraId },
-        success: function(data) {
-            // Parsear la respuesta JSON
-            const empleados = JSON.parse(data);
-            const tbody = document.getElementById('empleados_asignados_table_body');
-            tbody.innerHTML = '';
+function openEditModal(id) {
+    console.log("ID recibido:", id); // Para depuración
+    fetch('productos.php?id=' + id)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                console.log("Datos recibidos:", data); // Para depuración
+                document.getElementById('edit_id').value = id; // Usa el ID original
+                document.getElementById('edit_nombre').value = data.nombre;
+                document.getElementById('edit_descripcion').value = data.descripcion;
+                document.getElementById('edit_tipo').value = data.tipo;
+                document.getElementById('edit_precio_unitario').value = data.precio_unitario;
+                document.getElementById('edit_unidad').value = data.unidad;
 
-            // Añadir filas a la tabla con los empleados asignados
-            empleados.forEach(empleado => {
-                const row = `<tr>
-                                <td>${empleado.nombre}</td>
-                                <td>${empleado.apellido}</td>
-                                <td>${empleado.email}</td>
-                                <td>${empleado.telefono}</td>
-                            </tr>`;
-                tbody.insertAdjacentHTML('beforeend', row);
-            });
-
-            // Mostrar el modal
-            $('#verEmpleadosAsignadosModal').modal('show');
-        },
-        error: function(err) {
-            console.error('Error al obtener empleados asignados:', err);
-        }
-    });
+                $('#editarProductoModal').modal('show');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error); // Para depuración
+            alert('Error al obtener los datos del producto.');
+        });
 }
 </script>
 
+                    <script>
+function validarFormularioVariedad() {
+    var nombreVariedad = document.getElementById('variedad_nombre').value;
+    var caracteristicas = document.getElementById('caracteristicas').value;
+    var regex = /\d/; // Expresión regular para detectar números
+
+    if (regex.test(nombreVariedad)) {
+        alert('El campo "Nombre de la Variedad" no debe contener números.');
+        return false;
+    }
+
+    if (caracteristicas && regex.test(caracteristicas)) {
+        alert('El campo "Características" no debe contener números.');
+        return false;
+    }
+
+    return true; // Si todas las validaciones son correctas
+}
+</script>
+<script>
+function validarFormulario() {
+    var nombre = document.getElementById('edit_nombre').value;
+    var descripcion = document.getElementById('edit_descripcion').value;
+    var regex = /\d/; // Expresión regular para detectar números
+
+    if (regex.test(nombre)) {
+        alert('El campo "Nombre" no debe contener números.');
+        return false;
+    }
+
+    if (regex.test(descripcion)) {
+        alert('El campo "Descripción" no debe contener números.');
+        return false;
+    }
+
+    return true; // Si todas las validaciones son correctas
+}
+</script>
 
 <script>
-    // Función para mostrar variedades en el modal
-    function showVariedades(variedades, productoId) {
-        let modalBody = document.getElementById('variedadesModalBody');
-        modalBody.innerHTML = '';
-        variedades.forEach(function(variedad) {
-            modalBody.innerHTML += `<p><strong>Variedad:</strong> ${variedad.nombre} <br> <strong>Descripción:</strong> ${variedad.descripcion}</p>`;
+    // Función para mostrar el modal de agregar variedad
+    function showVariedades(variedades, productId) {
+        document.getElementById('product_id').value = productId;
+
+        // Mostrar variedades en el modal
+        let variedadesHtml = '';
+        variedades.forEach(variedad => {
+            variedadesHtml += `<tr>
+                <td>${variedad.nombre_variedad}</td>
+                <td>${variedad.caracteristicas}</td>
+                <?php if ($_SESSION['rol'] === 'admin'): ?>
+                <td>
+                    <a href="?action=delete_variedad&product_id=${productId}&variedad_nombre=${encodeURIComponent(variedad.nombre_variedad)}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta variedad?');">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </a>
+                </td>
+                <?php endif; ?>
+            </tr>`;
         });
-        $('#variedadesModal').modal('show');
+
+        document.getElementById('variedades_table_body').innerHTML = variedadesHtml;
+        $('#verVariedadesModal').modal('show');
     }
+
+    // Función para abrir el modal de agregar variedad
+    function openAddVariedadModal(productId) {
+        document.getElementById('product_id').value = productId;
+        $('#agregarVariedadModal').modal('show');
+    }
+</script>
+
+                    
+<script>
+$(document).ready(function() {
+    // Configura el modal de agregar variedad con el ID del producto
+    $('#agregarVariedadModal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget); // Botón que abrió el modal
+        var productId = button.data('product-id'); // Extrae el ID del producto
+        var modal = $(this);
+        modal.find('#product_id').val(productId);
+    });
+
+    // Maneja el envío del formulario de agregar variedad
+    $('#agregarVariedadForm').on('submit', function(e) {
+        e.preventDefault(); // Evita el envío normal del formulario
+        var formData = $(this).serialize(); // Serializa los datos del formulario
+
+        $.ajax({
+            url: 'productos.php',
+            type: 'POST',
+            data: formData + '&action=add_variedad', // Agrega la acción al formulario
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    alert(response.success[0]);
+                    $('#agregarVariedadModal').modal('hide');
+                    // Recargar la tabla de variedades
+                    showVariedades(response.variedades, $('#product_id').val());
+                } else if (response.errors) {
+                    alert(response.errors[0]);
+                }
+            },
+            error: function() {
+                alert('Error al agregar la variedad.');
+            }
+        });
+    });
+});
+
+    function eliminarVariedad(productoId, nombreVariedad) {
+        if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
+            fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                let messageHTML = '';
+                // Limpiar el contenedor de mensajes antes de agregar nuevos
+                const messagesContainer = document.getElementById('messages-container');
+                messagesContainer.innerHTML = '';
+
+                if (data.success && data.success.length > 0) {
+                    messageHTML += '<div class="alert alert-success" role="alert">';
+                    data.success.forEach(message => {
+                        messageHTML += `${message}<br>`;
+                    });
+                    messageHTML += '</div>';
+                }
+                if (data.errors && data.errors.length > 0) {
+                    messageHTML += '<div class="alert alert-danger" role="alert">';
+                    data.errors.forEach(message => {
+                        messageHTML += `${message}<br>`;
+                    });
+                    messageHTML += '</div>';
+                }
+                
+                // Insertar los mensajes en el DOM solo si hay mensajes que mostrar
+                if (messageHTML !== '') {
+                    messagesContainer.innerHTML = messageHTML;
+                    // Hacer scroll hacia los mensajes
+                    messagesContainer.scrollIntoView({ behavior: "smooth" });
+                }
+                
+                // Actualizar la tabla de variedades en lugar de recargar la página
+                if (data.success && data.success.length > 0) {
+                    actualizarTablaVariedades(); // Asegúrate de definir esta función para actualizar la tabla de variedades
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al eliminar variedad');
+            });
+        }
+    }
+
+
 </script>
 
 

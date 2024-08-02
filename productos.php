@@ -124,10 +124,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_G
         $errors[] = 'Error al eliminar la variedad: ' . $e->getMessage();
     }
 
-    echo json_encode(['success' => $success, 'errors' => $errors]);
+    // Redirigir a la página de productos después de la eliminación
+    header("Location: productos.php");
     exit();
 }
-
 
 // Manejo de la agregación de variedades
 if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_POST['product_id']) && isset($_POST['variedad_nombre']) && isset($_POST['caracteristicas'])) {

@@ -22,12 +22,39 @@ $mongoClient = new Client($mongoUri);
 $siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
 $empleadosCollection = $mongoClient->grupo6_agrohub->usuarios;
 $terrenosCollection = $mongoClient->grupo6_agrohub->terrenos;
-$productosCollection = $mongoClient->grupo6_agrohub->productos; // Nombre de la colección
-
+$productosCollection = $mongoClient->grupo6_agrohub->productos;
 
 $siembras = [];
 $errors = [];
+$success = [];
 
+// Proceso de agregar nueva siembra
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['empleado_id'], $_POST['terreno_id'], $_POST['producto_id'], $_POST['fecha_siembra'], $_POST['estado'])) {
+        $empleado_id = new ObjectId($_POST['empleado_id']);
+        $terreno_id = new ObjectId($_POST['terreno_id']);
+        $producto_id = new ObjectId($_POST['producto_id']);
+        $fecha_siembra = new DateTime($_POST['fecha_siembra']);
+        $estado = $_POST['estado'];
+
+        try {
+            $siembrasCollection->insertOne([
+                'empleado_id' => $empleado_id,
+                'terreno_id' => $terreno_id,
+                'producto_id' => $producto_id,
+                'fecha_siembra' => $fecha_siembra,
+                'estado' => $estado
+            ]);
+            $success[] = 'Siembra agregada exitosamente.';
+        } catch (Exception $e) {
+            $errors[] = 'Error al agregar la siembra: ' . $e->getMessage();
+        }
+    } else {
+        $errors[] = 'Por favor complete todos los campos requeridos.';
+    }
+}
+
+// Obtener lista de siembras
 try {
     $siembras = $siembrasCollection->find()->toArray();
 } catch (Exception $e) {

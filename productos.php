@@ -579,65 +579,57 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
-<!-- Modal para agregar producto -->
+<!-- Modal Agregar Producto (solo para admin) -->
+<?php if ($_SESSION['rol'] === 'admin'): ?>
 <div class="modal fade" id="agregarProductoModal" tabindex="-1" role="dialog" aria-labelledby="agregarProductoModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form action="productos.php" method="POST">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="agregarProductoModalLabel">Agregar/Editar Producto</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="id" name="id">
-
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarProductoModalLabel">Agregar Producto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="productos.php" method="POST">
+                    <input type="hidden" name="action" value="add_producto">
                     <div class="form-group">
                         <label for="nombre">Nombre</label>
                         <input type="text" class="form-control" id="nombre" name="nombre" required>
                     </div>
-
                     <div class="form-group">
                         <label for="descripcion">Descripción</label>
-                        <textarea class="form-control" id="descripcion" name="descripcion" required></textarea>
+                        <textarea class="form-control" id="descripcion" name="descripcion"></textarea>
                     </div>
-
                     <div class="form-group">
                         <label for="tipo">Tipo</label>
                         <select class="form-control" id="tipo" name="tipo" required>
-                            <?php foreach ($tiposProductos as $tipoProducto): ?>
-                            <option value="<?php echo htmlspecialchars($tipoProducto->nombre); ?>">
-                                <?php echo htmlspecialchars($tipoProducto->nombre); ?>
-                            </option>
-                            <?php endforeach; ?>
+                            <option value="">Seleccione Tipo</option>
+                            <!-- Opciones dinámicas -->
                         </select>
                     </div>
-
+                    <div class="form-group">
+                        <label for="variedades">Variedades</label>
+                        <div id="variedades-container">
+                            <!-- Las variedades se cargarán aquí -->
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label for="precio_unitario">Precio Unitario</label>
                         <input type="number" step="0.01" class="form-control" id="precio_unitario" name="precio_unitario" required>
                     </div>
-
                     <div class="form-group">
                         <label for="unidad">Unidad</label>
                         <input type="text" class="form-control" id="unidad" name="unidad" required>
                     </div>
-
-                    <div class="form-group">
-                        <label for="variedades">Variedades (JSON)</label>
-                        <textarea class="form-control" id="variedades" name="variedades" rows="4"></textarea>
-                        <small class="form-text text-muted">Introduce un array JSON de variedades, por ejemplo: [{"nombre_variedad": "Variedad 1", "caracteristicas": "Características 1"}]</small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar Producto</button>
-                </div>
-            </form>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar Producto</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+<?php endif; ?>
+
 
 <!-- Modal para agregar variedad -->
 <div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
@@ -832,6 +824,58 @@ $(document).ready(function() {
 
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Datos de ejemplo para tipos y variedades
+    const tiposProductos = {
+        "Tipo1": [
+            {"nombre_variedad": "Variedad1.1", "caracteristicas": "Característica de la Variedad1.1"},
+            {"nombre_variedad": "Variedad1.2", "caracteristicas": "Característica de la Variedad1.2"}
+        ],
+        "Tipo2": [
+            {"nombre_variedad": "Variedad2.1", "caracteristicas": "Característica de la Variedad2.1"},
+            {"nombre_variedad": "Variedad2.2", "caracteristicas": "Característica de la Variedad2.2"}
+        ]
+    };
+
+    // Función para cargar variedades
+    function cargarVariedades(tipo) {
+        const container = document.getElementById('variedades-container');
+        container.innerHTML = ''; // Limpiar el contenedor
+
+        const variedades = tiposProductos[tipo];
+        if (variedades) {
+            variedades.forEach(variedad => {
+                const div = document.createElement('div');
+                div.classList.add('form-check');
+                div.innerHTML = `
+                    <input class="form-check-input" type="checkbox" id="${variedad.nombre_variedad}" name="variedades[]" value="${variedad.nombre_variedad}">
+                    <label class="form-check-label" for="${variedad.nombre_variedad}">
+                        ${variedad.nombre_variedad}: ${variedad.caracteristicas}
+                    </label>
+                `;
+                container.appendChild(div);
+            });
+        } else {
+            container.innerHTML = '<p>No se encontraron variedades para este tipo.</p>';
+        }
+    }
+
+    // Cargar tipos de productos en el <select>
+    const tipoSelect = document.getElementById('tipo');
+    for (const tipo in tiposProductos) {
+        const option = document.createElement('option');
+        option.value = tipo;
+        option.textContent = tipo;
+        tipoSelect.appendChild(option);
+    }
+
+    // Asignar evento para cargar variedades al cambiar el tipo
+    tipoSelect.addEventListener('change', function () {
+        cargarVariedades(this.value);
+    });
+});
+</script>
 
 
 

@@ -350,7 +350,6 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
 <!-- Content Row -->
 <div class="row">
     <div id="messages-container"></div>
@@ -433,6 +432,7 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
+
 
 <!-- Modal Agregar Siembra (solo para admin) -->
 <?php if ($_SESSION['rol'] === 'admin'): ?>

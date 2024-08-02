@@ -59,35 +59,32 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 }
 
 // Manejo de la actualización y agregación de productos
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_producto') {
-    try {
-        $productoData = [
-            'nombre' => $_POST['nombre'],
-            'descripcion' => $_POST['descripcion'],
-            'tipo' => $_POST['tipo'],
-            'precio_unitario' => floatval($_POST['precio_unitario']),
-            'unidad' => $_POST['unidad'],
-            'variedades' => [] // Inicializamos como un array vacío
-        ];
-
-        error_log("Intentando insertar producto: " . print_r($productoData, true));
-
-        // Agregar producto
-        $result = $productosCollection->insertOne($productoData);
-        if ($result->getInsertedCount() > 0) {
-            $success[] = 'Producto agregado exitosamente.';
-        } else {
-            $errors[] = 'Error al agregar el producto.';
-        }
-    } catch (\MongoDB\Driver\Exception\Exception $e) {
-        $errors[] = 'Error de MongoDB al manejar el producto: ' . $e->getMessage();
-    } catch (\Exception $e) {
-        $errors[] = 'Error general al manejar el producto: ' . $e->getMessage();
-    }
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
+        if ($_POST['action'] === 'add_producto') {
+            try {
+                $productoData = [
+                    'nombre' => $_POST['nombre'],
+                    'descripcion' => $_POST['descripcion'],
+                    'tipo' => $_POST['tipo'],
+                    'precio_unitario' => floatval($_POST['precio_unitario']),
+                    'unidad' => $_POST['unidad'],
+                    'variedades' => [] // Inicializamos como un array vacío
+                ];
+
+                $result = $productosCollection->insertOne($productoData);
+                if ($result->getInsertedCount() > 0) {
+                    $success[] = 'Producto agregado exitosamente.';
+                } else {
+                    $errors[] = 'Error al agregar el producto.';
+                }
+            } catch (\MongoDB\Driver\Exception\Exception $e) {
+                $errors[] = 'Error de MongoDB al manejar el producto: ' . $e->getMessage();
+            } catch (\Exception $e) {
+                $errors[] = 'Error general al manejar el producto: ' . $e->getMessage();
+            }
+        }
+
         if ($_POST['action'] === 'edit_producto' && isset($_POST['id'])) {
             try {
                 $updateData = [
@@ -112,25 +109,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors[] = 'Error al actualizar el producto: ' . $e->getMessage();
             }
         }
-        // Aquí iría el código para manejar otras acciones como 'add_producto'
     }
 }
 
-
-if (isset($_GET['id'])) {
-    $id = $_GET['id'];
-    $producto = $productosCollection->findOne(['_id' => new ObjectId($id)]);
-    
-    if ($producto) {
-        echo json_encode($producto);
-    } else {
-        http_response_code(404);
-        echo json_encode(['error' => 'Producto no encontrado']);
-    }
-} else {
-    http_response_code(400);
-    echo json_encode(['error' => 'ID de producto no proporcionado']);
+// Obtener productos para mostrar en la tabla
+try {
+    $productos = $productosCollection->find()->toArray();
+} catch (Exception $e) {
+    $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
 }
+
+
 
 
 
@@ -193,12 +182,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'add_variedad' && isset($_PO
     exit();
 }
 
-// Obtener productos para mostrar en la tabla
-try {
-    $productos = $productosCollection->find()->toArray();
-} catch (Exception $e) {
-    $errors[] = 'Error al obtener los productos: ' . $e->getMessage();
-}
 
 
 
@@ -678,7 +661,7 @@ if ($_SESSION['rol'] === 'admin') {
                 </button>
             </div>
             <div class="modal-body">
-                <form id="editProductForm" action="productos.php" method="POST">
+                <form action="productos.php" method="POST">
                     <input type="hidden" id="edit_id" name="id">
                     <input type="hidden" name="action" value="edit_producto">
                     <div class="form-group">
@@ -687,7 +670,7 @@ if ($_SESSION['rol'] === 'admin') {
                     </div>
                     <div class="form-group">
                         <label for="edit_descripcion">Descripción</label>
-                        <textarea class="form-control" id="edit_descripcion" name="descripcion"></textarea>
+                        <textarea class="form-control" id="edit_descripcion" name="descripcion" required></textarea>
                     </div>
                     <div class="form-group">
                         <label for="edit_tipo">Tipo</label>
@@ -695,7 +678,7 @@ if ($_SESSION['rol'] === 'admin') {
                     </div>
                     <div class="form-group">
                         <label for="edit_precio_unitario">Precio Unitario</label>
-                        <input type="number" step="0.01" class="form-control" id="edit_precio_unitario" name="precio_unitario" required>
+                        <input type="number" class="form-control" id="edit_precio_unitario" name="precio_unitario" step="0.01" required>
                     </div>
                     <div class="form-group">
                         <label for="edit_unidad">Unidad</label>
@@ -707,7 +690,6 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
-
 
 <!-- Modal para agregar variedad -->
 <div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
@@ -781,32 +763,31 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 
 <script>
-function openEditModal(productId) {
-    // Obtén el producto usando AJAX
-fetch('productos.php?id=' + productId)
-    .then(response => response.json())
-    .then(product => {
-        if (product.error) {
-            alert(product.error);
-        } else {
-            // Llena el formulario de edición
-            document.getElementById('edit_id').value = product.id;
-            document.getElementById('edit_nombre').value = product.nombre;
-            document.getElementById('edit_descripcion').value = product.descripcion;
-            document.getElementById('edit_tipo').value = product.tipo;
-            document.getElementById('edit_precio_unitario').value = product.precio_unitario;
-            document.getElementById('edit_unidad').value = product.unidad;
+function openEditModal(id) {
+    // Hacer una petición AJAX para obtener los detalles del producto
+    fetch('productos.php?id=' + id)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                // Rellenar el formulario del modal con los datos del producto
+                document.getElementById('edit_id').value = data._id;
+                document.getElementById('edit_nombre').value = data.nombre;
+                document.getElementById('edit_descripcion').value = data.descripcion;
+                document.getElementById('edit_tipo').value = data.tipo;
+                document.getElementById('edit_precio_unitario').value = data.precio_unitario;
+                document.getElementById('edit_unidad').value = data.unidad;
 
-            // Abre el modal de edición
-            $('#editarProductoModal').modal('show');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al cargar el producto.');
-    });
-
+                // Mostrar el modal
+                $('#editarProductoModal').modal('show');
+            }
+        })
+        .catch(error => {
+            alert('Error al obtener los datos del producto.');
+        });
 }
+
 </script>
 
 

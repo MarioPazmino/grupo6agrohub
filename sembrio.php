@@ -16,17 +16,23 @@ use MongoDB\Client;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Exception\Exception;
 
-// Conexión a MongoDB con la URL proporcionada
+// Conexión a MongoDB
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
-$productosCollection = $mongoClient->grupo6_agrohub->productos;
-$collection = $mongoClient->grupo6_agrohub->usuarios;
-$terrenosCollection = $mongoClient->grupo6_agrohub->terrenos;
 $siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
+$empleadosCollection = $mongoClient->grupo6_agrohub->usuarios;
+$productosCollection = $mongoClient->grupo6_agrohub->productos;
+$terrenosCollection = $mongoClient->grupo6_agrohub->terrenos;
 
-// Variables para mensajes de éxito y error
-$success = [];
+$siembras = [];
 $errors = [];
+
+try {
+    $siembras = $siembrasCollection->find()->toArray();
+} catch (Exception $e) {
+    $errors[] = 'Error al obtener las siembras: ' . $e->getMessage();
+}
+
 
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
@@ -83,13 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST
     }
 }
 
-// Obtener siembras
-$siembras = [];
-try {
-    $siembras = $siembrasCollection->find()->toArray();
-} catch (Exception $e) {
-    $errors[] = 'Error al obtener información de siembras: ' . $e->getMessage();
-}
+
 ?>
 
 
@@ -420,42 +420,55 @@ try {
 
                  <!-- Tabla de siembras -->
     <div class="table-responsive mt-4">
-        <table class="table table-bordered" id="siembrasTable" width="100%" cellspacing="0">
+        <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Empleado</th>
+                    <th>ID</th>
+                    <th>Empleado Responsable</th>
                     <th>Terreno</th>
                     <th>Producto</th>
-                    <th>Fecha Siembra</th>
+                    <th>Fecha de Siembra</th>
                     <th>Estado</th>
-                    <th>Acciones</th>
+                    <th>Empleados Asignados</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($siembras as $siembra): ?>
-                <tr>
-                    <td><?php 
-                        $empleado = $usuariosCollection->findOne(['_id' => $siembra->empleado_id]);
-                        echo htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido); 
-                    ?></td>
-                    <td><?php 
-                        $terreno = $terrenosCollection->findOne(['_id' => $siembra->terreno_id]);
-                        echo htmlspecialchars($terreno->nombre); 
-                    ?></td>
-                    <td><?php 
-                        $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
-                        echo htmlspecialchars($producto->nombre); 
-                    ?></td>
-                    <td><?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?></td>
-                    <td><?php echo htmlspecialchars($siembra->estado); ?></td>
-                    <td>
-                        <?php if ($_SESSION['rol'] === 'admin'): ?>
-                        <a href="?action=delete_siembra&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
-                            <i class="fas fa-trash"></i> 
-                        </a>
-                        <?php endif; ?>
-                    </td>
-                </tr>
+                    <tr>
+                        <td><?php echo (string)$siembra['_id']; ?></td>
+                        <td>
+                            <?php
+                            $empleadoResponsable = $empleadosCollection->findOne(['_id' => new ObjectId($siembra['empleado_id'])]);
+                            echo htmlspecialchars($empleadoResponsable['nombre'] . ' ' . $empleadoResponsable['apellido']);
+                            ?>
+                        </td>
+                        <td>
+                            <?php
+                            $terreno = $terrenosCollection->findOne(['_id' => new ObjectId($siembra['terreno_id'])]);
+                            echo htmlspecialchars($terreno['nombre']);
+                            ?>
+                        </td>
+                        <td>
+                            <?php
+                            $producto = $productosCollection->findOne(['_id' => new ObjectId($siembra['producto_id'])]);
+                            echo htmlspecialchars($producto['nombre']);
+                            ?>
+                        </td>
+                        <td><?php echo htmlspecialchars($siembra['fecha_siembra']->toDateTime()->format('Y-m-d')); ?></td>
+                        <td><?php echo htmlspecialchars($siembra['estado']); ?></td>
+                        <td>
+                            <?php
+                            $empleados = [];
+                            foreach ($siembra['empleados_ids'] as $empleado_id) {
+                                $empleado = $empleadosCollection->findOne(['_id' => new ObjectId($empleado_id)]);
+                                if ($empleado) {
+                                    $empleados[] = $empleado['nombre'] . ' ' . $empleado['apellido'];
+                                }
+                            }
+                            echo htmlspecialchars(implode(', ', $empleados));
+                            ?>
+                        </td>
+                    </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>

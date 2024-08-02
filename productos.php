@@ -59,7 +59,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 }
 
 // Manejo de la actualización y agregación de productos
-// Manejo de la actualización y agregación de productos
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         if ($_POST['action'] === 'add_producto') {
@@ -110,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $errors[] = 'No se encontró el producto para actualizar o no hubo cambios.';
                     }
                 } else {
-                    $errors[] = 'ID de producto inválido.';
+                    $errors[] = 'ID de producto inválido: ' . htmlspecialchars($id); // Mostrar el ID para depuración
                 }
             } catch (Exception $e) {
                 $errors[] = 'Error al actualizar el producto: ' . $e->getMessage();
@@ -142,7 +141,7 @@ if (isset($_GET['id']) && !isset($_POST['action'])) {
             echo json_encode(['error' => 'Error al obtener el producto: ' . $e->getMessage()]);
         }
     } else {
-        echo json_encode(['error' => 'ID de producto inválido']);
+        echo json_encode(['error' => 'ID de producto inválido: ' . htmlspecialchars($id)]); // Mostrar el ID para depuración
     }
     exit();
 }

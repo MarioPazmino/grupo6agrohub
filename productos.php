@@ -63,6 +63,17 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     }
 }
 
+
+if (isset($_GET['action']) && $_GET['action'] === 'get_variedades') {
+    $productId = $_GET['product_id'];
+
+    // Aquí deberías implementar la lógica para obtener las variedades desde la base de datos.
+    $variedades = getVariedadesPorProducto($productId); // Supón que esta función obtiene las variedades en formato JSON
+
+    echo json_encode(['variedades' => $variedades]);
+    exit;
+}
+
 // Modifica la parte de eliminación de variedades
 if (isset($_GET['action']) && $_GET['action'] === 'delete_variedad' && isset($_GET['product_id']) && isset($_GET['variedad_nombre'])) {
     $product_id = $_GET['product_id'];

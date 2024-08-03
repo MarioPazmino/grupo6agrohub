@@ -467,14 +467,19 @@ if ($_SESSION['rol'] === 'admin') {
                                 <td><?php 
                                     // Obtener la siembra correspondiente
                                     $siembra = $siembrasCollection->findOne(['_id' => $cosecha->siembra_id]);
-                                    // Verificar si la siembra fue encontrada y si el campo 'nombre' está presente
-                                    $siembraNombre = isset($siembra->nombre) ? $siembra->nombre : 'Desconocido';
-                                    echo htmlspecialchars($siembraNombre); 
+                                    // Verificar si la siembra fue encontrada y si el campo 'producto_id' está presente
+                                    $productoId = isset($siembra->producto_id) ? $siembra->producto_id : null;
+                                    $productoNombre = 'Desconocido';
+                                    if ($productoId) {
+                                        $producto = $productosCollection->findOne(['_id' => $productoId]);
+                                        $productoNombre = isset($producto->nombre) ? $producto->nombre : 'Desconocido';
+                                    }
+                                    echo htmlspecialchars((string)$productoNombre); 
                                 ?></td>
                                 <td><?php echo htmlspecialchars($cosecha->fecha_cosecha->toDateTime()->format('Y-m-d')); ?></td>
-                                <td><?php echo htmlspecialchars($cosecha->cantidad); ?></td>
-                                <td><?php echo htmlspecialchars($cosecha->unidad); ?></td>
-                                <td><?php echo htmlspecialchars($cosecha->detalles_cosecha); ?></td>
+                                <td><?php echo htmlspecialchars((string)$cosecha->cantidad); ?></td>
+                                <td><?php echo htmlspecialchars((string)$cosecha->unidad); ?></td>
+                                <td><?php echo htmlspecialchars((string)$cosecha->detalles_cosecha); ?></td>
                                 <td>
                                     <?php if ($_SESSION['rol'] === 'admin'): ?>
                                     <a href="?action=delete_cosecha&id=<?php echo htmlspecialchars($cosecha->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta cosecha?');">

@@ -553,7 +553,6 @@ foreach ($errors as $message) {
         </div>
     </div>
 </div>
-
 <!-- Modal para editar cosecha -->
 <div class="modal fade" id="editarCosechaModal" tabindex="-1" role="dialog" aria-labelledby="editarCosechaModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -568,7 +567,18 @@ foreach ($errors as $message) {
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="siembra_id">Siembra ID</label>
-                        <input type="text" class="form-control" id="siembra_id" name="siembra_id" required>
+                        <select id="siembra_id" name="siembra_id" class="form-control" required>
+                            <option value="">Seleccione una siembra</option>
+                            <?php
+                            // Obtener todas las siembras para el selector
+                            $siembras = $siembrasCollection->find();
+                            foreach ($siembras as $siembra) {
+                                $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
+                                $productoNombre = $producto ? $producto->nombre : 'Desconocido';
+                                echo '<option value="' . htmlspecialchars($siembra->_id) . '" data-fecha-siembra="' . htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')) . '">' . htmlspecialchars($productoNombre) . '</option>';
+                            }
+                            ?>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="fecha_cosecha">Fecha de Cosecha</label>
@@ -596,6 +606,7 @@ foreach ($errors as $message) {
         </div>
     </div>
 </div>
+   </div>
 
 <script>
     $('#editarCosechaModal').on('show.bs.modal', function (event) {

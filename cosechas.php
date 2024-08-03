@@ -63,7 +63,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     exit();
 }
 
-// Manejo de la actualización y agregación de cosechas
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         if ($_POST['action'] === 'add_cosecha') {
@@ -139,6 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
 
 // Obtener cosechas para mostrar en la tabla
 try {
@@ -654,7 +654,6 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
 <!-- Modal Agregar Cosecha (solo para admin) -->
 <?php if ($_SESSION['rol'] === 'admin'): ?>
 <!-- Modal para agregar detalles de cosecha -->
@@ -702,8 +701,54 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
-
 <?php endif; ?>
+
+<script>
+    function agregarDetalleCosecha() {
+        // Contenedor para los detalles de cosecha
+        var container = document.getElementById('detalles_cosecha_container');
+        
+        // Contador de detalles de cosecha
+        var detalleIndex = container.children.length;
+        
+        // Crear elementos para un nuevo detalle de cosecha
+        var detalleDiv = document.createElement('div');
+        detalleDiv.classList.add('form-group');
+        detalleDiv.id = 'detalle_' + detalleIndex;
+
+        var cantidadRecolectadaLabel = document.createElement('label');
+        cantidadRecolectadaLabel.innerText = 'Cantidad Recolectada';
+
+        var cantidadRecolectadaInput = document.createElement('input');
+        cantidadRecolectadaInput.type = 'number';
+        cantidadRecolectadaInput.className = 'form-control';
+        cantidadRecolectadaInput.name = 'detalles_cosecha[' + detalleIndex + '][cantidad_recolectada]';
+        cantidadRecolectadaInput.required = true;
+
+        var calidadLabel = document.createElement('label');
+        calidadLabel.innerText = 'Calidad';
+
+        var calidadInput = document.createElement('input');
+        calidadInput.type = 'text';
+        calidadInput.className = 'form-control';
+        calidadInput.name = 'detalles_cosecha[' + detalleIndex + '][calidad]';
+        calidadInput.required = true;
+
+        // Agregar los campos al contenedor de detalles de cosecha
+        detalleDiv.appendChild(cantidadRecolectadaLabel);
+        detalleDiv.appendChild(cantidadRecolectadaInput);
+        detalleDiv.appendChild(calidadLabel);
+        detalleDiv.appendChild(calidadInput);
+
+        container.appendChild(detalleDiv);
+    }
+
+    function validarFormularioDetalleCosecha() {
+        // Aquí puedes agregar lógica de validación adicional si es necesario
+        return true; // Retorna false si quieres evitar el envío del formulario
+    }
+</script>
+
 
 <!-- Modal Editar Cosecha -->
 <div class="modal fade" id="editarCosechaModal" tabindex="-1" role="dialog" aria-labelledby="editarCosechaModalLabel" aria-hidden="true">

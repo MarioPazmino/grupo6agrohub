@@ -107,7 +107,6 @@ try {
 
 
 
-
 // Procesar formulario de edición de siembra
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
     $siembra_id = $_POST['siembra_id'];
@@ -145,7 +144,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
         $errors[] = 'ID de siembra o IDs relacionados no válidos.';
     }
 }
-
 
 
 ?>
@@ -599,8 +597,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
                 </button>
             </div>
             <div class="modal-body">
-                <form id="editarSiembraForm" action="" method="POST">
-                    <input type="hidden" id="edit_siembra_id" name="siembra_id">
+<form id="editarSiembraForm" action="" method="POST">
+    <input type="hidden" id="edit_siembra_id" name="siembra_id">
                     <div class="form-group">
                         <label for="edit_empleado_id">Empleado</label>
                         <select id="edit_empleado_id" name="empleado_id" class="form-control" required>
@@ -672,10 +670,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
         modal.find('#edit_estado').val(estado);
     });
 </script>
-
-
-
-
                     
 
                     

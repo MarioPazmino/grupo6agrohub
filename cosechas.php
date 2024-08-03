@@ -461,6 +461,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_cosecha' && isset($_GE
                                 <td><?php echo htmlspecialchars($cosecha->detalles_cosecha); ?></td>
                                 <td>
                                     <?php if ($_SESSION['rol'] === 'admin'): ?>
+                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarCosechaModal" data-id="<?php echo htmlspecialchars($cosecha->_id); ?>" data-fecha="<?php echo htmlspecialchars($cosecha->fecha_cosecha->toDateTime()->format('Y-m-d')); ?>" data-cantidad="<?php echo htmlspecialchars($cosecha->cantidad); ?>" data-unidad="<?php echo htmlspecialchars($cosecha->unidad); ?>" data-detalles="<?php echo htmlspecialchars($cosecha->detalles_cosecha); ?>">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
                                     <a href="?action=delete_cosecha&id=<?php echo htmlspecialchars($cosecha->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta cosecha?');">
                                         <i class="fas fa-trash"></i>
                                     </a>
@@ -475,6 +478,73 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_cosecha' && isset($_GE
         </div>
     </div>
 </div>
+
+<!-- Modal Editar Cosecha -->
+<div class="modal fade" id="editarCosechaModal" tabindex="-1" role="dialog" aria-labelledby="editarCosechaModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarCosechaModalLabel">Editar Cosecha</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="?action=update_cosecha" method="POST" id="editarCosechaForm">
+                <div class="modal-body">
+                    <input type="hidden" id="editarCosechaId" name="cosecha_id">
+                    <div class="form-group">
+                        <label for="editarFechaCosecha">Fecha de Cosecha</label>
+                        <input type="date" id="editarFechaCosecha" name="fecha_cosecha" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editarCantidad">Cantidad</label>
+                        <input type="number" id="editarCantidad" name="cantidad" class="form-control" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editarUnidad">Unidad</label>
+                        <select id="editarUnidad" name="unidad" class="form-control" required>
+                            <option value="">Seleccione una unidad</option>
+                            <option value="kg">Kilogramos</option>
+                            <option value="g">Gramos</option>
+                            <option value="lb">Libras</option>
+                            <option value="oz">Onzas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editarDetallesCosecha">Detalles de la Cosecha</label>
+                        <textarea id="editarDetallesCosecha" name="detalles_cosecha" class="form-control" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Script para llenar el modal de edición -->
+<script>
+$(document).ready(function() {
+    $('#editarCosechaModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        var fecha = button.data('fecha');
+        var cantidad = button.data('cantidad');
+        var unidad = button.data('unidad');
+        var detalles = button.data('detalles');
+
+        var modal = $(this);
+        modal.find('#editarCosechaId').val(id);
+        modal.find('#editarFechaCosecha').val(fecha);
+        modal.find('#editarCantidad').val(cantidad);
+        modal.find('#editarUnidad').val(unidad);
+        modal.find('#editarDetallesCosecha').val(detalles);
+    });
+});
+</script>
+
 
 
 <!-- Modal para agregar cosecha -->

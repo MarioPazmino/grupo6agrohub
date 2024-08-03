@@ -503,56 +503,46 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
-
-<!-- Modal para agregar cosecha -->
-<div class="modal fade" id="agregarCosechaModal" tabindex="-1" role="dialog" aria-labelledby="agregarCosechaModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="agregarCosechaModalLabel">Agregar Nueva Cosecha</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="" method="POST">
-                    <div class="form-group">
-                        <label for="siembra_id">Siembra</label>
-                        <select id="siembra_id" name="siembra_id" class="form-control" required>
-                            <?php
-                            $siembras = $siembrasCollection->find();
-                            foreach ($siembras as $siembra) {
-                                $empleado = $usuariosCollection->findOne(['_id' => $siembra->empleado_id]);
-                                $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
-                                $productoNombre = isset($producto->nombre) ? htmlspecialchars($producto->nombre) : 'Desconocido';
-                                echo '<option value="' . htmlspecialchars($siembra->_id) . '">' . htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido) . ' - ' . $productoNombre . '</option>';
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="fecha_cosecha">Fecha de Cosecha</label>
-                        <input type="date" id="fecha_cosecha" name="fecha_cosecha" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cantidad">Cantidad</label>
-                        <input type="number" id="cantidad" name="cantidad" class="form-control" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="unidad">Unidad</label>
-                        <input type="text" id="unidad" name="unidad" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="detalles_cosecha">Detalles</label>
-                        <textarea id="detalles_cosecha" name="detalles_cosecha" class="form-control" rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Agregar</button>
-                </form>
+<!-- Modal HTML -->
+    <div class="modal fade" id="agregarCosechaModal" tabindex="-1" role="dialog" aria-labelledby="agregarCosechaModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="agregarCosechaModalLabel">Agregar Nueva Cosecha</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Formulario para agregar cosechas -->
+                    <form method="POST" action="">
+                        <!-- Campos del formulario -->
+                        <div class="form-group">
+                            <label for="siembra_id">ID de Siembra</label>
+                            <input type="text" class="form-control" id="siembra_id" name="siembra_id" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fecha_cosecha">Fecha de Cosecha</label>
+                            <input type="date" class="form-control" id="fecha_cosecha" name="fecha_cosecha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cantidad">Cantidad</label>
+                            <input type="number" class="form-control" id="cantidad" name="cantidad" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="unidad">Unidad</label>
+                            <input type="text" class="form-control" id="unidad" name="unidad" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="detalles_cosecha">Detalles de la Cosecha</label>
+                            <textarea class="form-control" id="detalles_cosecha" name="detalles_cosecha"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" name="create">Guardar</button>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-
+    </div>    </div>
 
 <!-- Modal para editar siembra -->
 <div class="modal fade" id="editarSiembraModal" tabindex="-1" role="dialog" aria-labelledby="editarSiembraModalLabel" aria-hidden="true">

@@ -73,68 +73,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
         $errors[] = 'Error al eliminar la siembra: ' . $e->getMessage();
     }
 }
-// Manejo de la actualización y agregación de siembras
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
-        if ($_POST['action'] === 'add_siembra') {
-            try {
-                // Validar y sanitizar los datos de la siembra
-                $siembraData = [
-                    'empleado_id' => new \MongoDB\BSON\ObjectId($_POST['empleado_id']),
-                    'terreno_id' => new \MongoDB\BSON\ObjectId($_POST['terreno_id']),
-                    'producto_id' => new \MongoDB\BSON\ObjectId($_POST['producto_id']),
-                    'fecha_siembra' => new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_siembra'])),
-                    'estado' => filter_var($_POST['estado'], FILTER_SANITIZE_STRING)
-                ];
 
-                $result = $siembrasCollection->insertOne($siembraData);
-                if ($result->getInsertedCount() > 0) {
-                    $success[] = 'Siembra agregada exitosamente.';
-                } else {
-                    $errors[] = 'Error al agregar la siembra.';
-                }
-            } catch (\MongoDB\Driver\Exception\Exception $e) {
-                $errors[] = 'Error de MongoDB al manejar la siembra: ' . $e->getMessage();
-            } catch (\Exception $e) {
-                $errors[] = 'Error general al manejar la siembra: ' . $e->getMessage();
-            }
-        } elseif ($_POST['action'] === 'edit_siembra' && isset($_POST['siembra_id'])) {
-            $siembra_id = $_POST['siembra_id'];
-            error_log("ID de siembra recibido: " . print_r($siembra_id, true)); // Log para depuración
+// Procesar formulario de agregar siembra
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST['terreno_id'], $_POST['producto_id'], $_POST['fecha_siembra'], $_POST['estado'])) {
+    $empleado_id = $_POST['empleado_id'];
+    $terreno_id = $_POST['terreno_id'];
+    $producto_id = $_POST['producto_id'];
+    $fecha_siembra = new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_siembra']));
+    $estado = $_POST['estado'];
 
-            try {
-                // Validar formato del ID de siembra
-                if (!empty($siembra_id) && is_string($siembra_id) && strlen($siembra_id) == 24 && ctype_xdigit($siembra_id)) {
-                    $updateData = [
-                        'empleado_id' => new \MongoDB\BSON\ObjectId($_POST['empleado_id']),
-                        'terreno_id' => new \MongoDB\BSON\ObjectId($_POST['terreno_id']),
-                        'producto_id' => new \MongoDB\BSON\ObjectId($_POST['producto_id']),
-                        'fecha_siembra' => new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_siembra'])),
-                        'estado' => filter_var($_POST['estado'], FILTER_SANITIZE_STRING)
-                    ];
-
-                    $result = $siembrasCollection->updateOne(
-                        ['_id' => new \MongoDB\BSON\ObjectId($siembra_id)],
-                        ['$set' => $updateData]
-                    );
-
-                    if ($result->getModifiedCount() > 0) {
-                        $success[] = 'Siembra actualizada exitosamente.';
-                    } else {
-                        $errors[] = 'No se encontró la siembra para actualizar o no hubo cambios.';
-                    }
-                } else {
-                    $errors[] = 'ID de siembra inválido: ' . htmlspecialchars($siembra_id);
-                }
-            } catch (\MongoDB\Driver\Exception\Exception $e) {
-                $errors[] = 'Error de MongoDB al actualizar la siembra: ' . $e->getMessage();
-            } catch (\Exception $e) {
-                $errors[] = 'Error al actualizar la siembra: ' . $e->getMessage();
-            }
-        }
+    try {
+        $siembrasCollection->insertOne([
+            'empleado_id' => new \MongoDB\BSON\ObjectId($empleado_id),
+            'terreno_id' => new \MongoDB\BSON\ObjectId($terreno_id),
+            'producto_id' => new \MongoDB\BSON\ObjectId($producto_id),
+            'fecha_siembra' => $fecha_siembra,
+            'estado' => $estado
+        ]);
+        $success[] = 'Siembra agregada correctamente.';
+    } catch (Exception $e) {
+        $errors[] = 'Error al agregar la siembra: ' . $e->getMessage();
     }
 }
-
 
 // Obtener siembras
 $siembras = [];
@@ -146,6 +106,45 @@ try {
 
 
 
+
+
+// Procesar formulario de edición de siembra
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
+    $siembra_id = $_POST['siembra_id'];
+    $empleado_id = $_POST['empleado_id'];
+    $terreno_id = $_POST['terreno_id'];
+    $producto_id = $_POST['producto_id'];
+    $fecha_siembra = new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_siembra']));
+    $estado = $_POST['estado'];
+
+    // Validar el formato del ID
+    if (preg_match('/^[a-f0-9]{24}$/i', $siembra_id) &&
+        preg_match('/^[a-f0-9]{24}$/i', $empleado_id) &&
+        preg_match('/^[a-f0-9]{24}$/i', $terreno_id) &&
+        preg_match('/^[a-f0-9]{24}$/i', $producto_id)) {
+        try {
+            $result = $siembrasCollection->updateOne(
+                ['_id' => new \MongoDB\BSON\ObjectId($siembra_id)],
+                ['$set' => [
+                    'empleado_id' => new \MongoDB\BSON\ObjectId($empleado_id),
+                    'terreno_id' => new \MongoDB\BSON\ObjectId($terreno_id),
+                    'producto_id' => new \MongoDB\BSON\ObjectId($producto_id),
+                    'fecha_siembra' => $fecha_siembra,
+                    'estado' => $estado
+                ]]
+            );
+            if ($result->getModifiedCount() > 0) {
+                $success[] = 'Siembra actualizada correctamente.';
+            } else {
+                $errors[] = 'No se encontraron cambios para actualizar.';
+            }
+        } catch (Exception $e) {
+            $errors[] = 'Error al actualizar la siembra: ' . $e->getMessage();
+        }
+    } else {
+        $errors[] = 'ID de siembra o IDs relacionados no válidos.';
+    }
+}
 
 
 ?>
@@ -600,7 +599,7 @@ try {
                 </button>
             </div>
             <div class="modal-body">
-                <form id="editarSiembraForm" action="siembras.php" method="POST">
+                <form id="editarSiembraForm" action="" method="POST">
                     <input type="hidden" id="edit_siembra_id" name="siembra_id">
                     <div class="form-group">
                         <label for="edit_empleado_id">Empleado</label>
@@ -608,8 +607,7 @@ try {
                             <?php
                             $empleados = $usuariosCollection->find(['rol' => 'empleado']);
                             foreach ($empleados as $empleado) {
-                                $selected = $empleado->_id == $siembra->empleado_id ? 'selected' : '';
-                                echo '<option value="' . htmlspecialchars($empleado->_id) . '" ' . $selected . '>' . htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido) . '</option>';
+                                echo '<option value="' . htmlspecialchars($empleado->_id) . '">' . htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido) . '</option>';
                             }
                             ?>
                         </select>
@@ -620,8 +618,7 @@ try {
                             <?php
                             $terrenos = $terrenosCollection->find();
                             foreach ($terrenos as $terreno) {
-                                $selected = $terreno->_id == $siembra->terreno_id ? 'selected' : '';
-                                echo '<option value="' . htmlspecialchars($terreno->_id) . '" ' . $selected . '>' . htmlspecialchars($terreno->nombre) . '</option>';
+                                echo '<option value="' . htmlspecialchars($terreno->_id) . '">' . htmlspecialchars($terreno->nombre) . '</option>';
                             }
                             ?>
                         </select>
@@ -632,22 +629,21 @@ try {
                             <?php
                             $productos = $productosCollection->find();
                             foreach ($productos as $producto) {
-                                $selected = $producto->_id == $siembra->producto_id ? 'selected' : '';
-                                echo '<option value="' . htmlspecialchars($producto->_id) . '" ' . $selected . '>' . htmlspecialchars($producto->nombre) . '</option>';
+                                echo '<option value="' . htmlspecialchars($producto->_id) . '">' . htmlspecialchars($producto->nombre) . '</option>';
                             }
                             ?>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="edit_fecha_siembra">Fecha de Siembra</label>
-                        <input type="date" id="edit_fecha_siembra" name="fecha_siembra" class="form-control" required value="<?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?>">
+                        <input type="date" id="edit_fecha_siembra" name="fecha_siembra" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="edit_estado">Estado</label>
                         <select id="edit_estado" name="estado" class="form-control" required>
-                            <option value="pendiente" <?php echo $siembra->estado == 'pendiente' ? 'selected' : ''; ?>>Pendiente</option>
-                            <option value="en_proceso" <?php echo $siembra->estado == 'en_proceso' ? 'selected' : ''; ?>>En Proceso</option>
-                            <option value="completada" <?php echo $siembra->estado == 'completada' ? 'selected' : ''; ?>>Completada</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="en_proceso">En Proceso</option>
+                            <option value="completada">Completada</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Actualizar</button>
@@ -656,45 +652,24 @@ try {
         </div>
     </div>
 </div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Función para abrir el modal de edición y cargar los datos de la siembra
-    function openEditSiembraModal(siembraId) {
-        // Realizar una solicitud para obtener los datos de la siembra por ID
-        fetch(`get_siembra.php?id=${siembraId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Asignar los valores a los campos del formulario
-                    document.getElementById('edit_siembra_id').value = data.siembra._id;
-                    document.getElementById('edit_empleado_id').value = data.siembra.empleado_id;
-                    document.getElementById('edit_terreno_id').value = data.siembra.terreno_id;
-                    document.getElementById('edit_producto_id').value = data.siembra.producto_id;
-                    document.getElementById('edit_fecha_siembra').value = new Date(data.siembra.fecha_siembra).toISOString().split('T')[0];
-                    document.getElementById('edit_estado').value = data.siembra.estado;
+    $('#editarSiembraModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var siembraId = button.data('id');
+        var empleadoId = button.data('empleado');
+        var terrenoId = button.data('terreno');
+        var productoId = button.data('producto');
+        var fechaSiembra = button.data('fecha');
+        var estado = button.data('estado');
 
-                    // Mostrar el modal
-                    $('#editarSiembraModal').modal('show');
-                } else {
-                    alert('Error al cargar los datos de la siembra.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al cargar los datos de la siembra.');
-            });
-    }
-
-    // Event listener para el botón de edición
-    document.querySelectorAll('.btn-edit-siembra').forEach(button => {
-        button.addEventListener('click', function() {
-            const siembraId = this.getAttribute('data-id');
-            openEditSiembraModal(siembraId);
-        });
+        var modal = $(this);
+        modal.find('#edit_siembra_id').val(siembraId);
+        modal.find('#edit_empleado_id').val(empleadoId);
+        modal.find('#edit_terreno_id').val(terrenoId);
+        modal.find('#edit_producto_id').val(productoId);
+        modal.find('#edit_fecha_siembra').val(fechaSiembra);
+        modal.find('#edit_estado').val(estado);
     });
-});
-
 </script>
 
 

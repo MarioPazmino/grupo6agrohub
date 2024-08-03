@@ -118,7 +118,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
     $estado = $_POST['estado'];
 
     // Validar el formato del ID
-    if (preg_match('/^[a-f0-9]{24}$/i', $siembra_id)) {
+    if (preg_match('/^[a-f0-9]{24}$/i', $siembra_id) &&
+        preg_match('/^[a-f0-9]{24}$/i', $empleado_id) &&
+        preg_match('/^[a-f0-9]{24}$/i', $terreno_id) &&
+        preg_match('/^[a-f0-9]{24}$/i', $producto_id)) {
         try {
             $result = $siembrasCollection->updateOne(
                 ['_id' => new \MongoDB\BSON\ObjectId($siembra_id)],
@@ -139,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
             $errors[] = 'Error al actualizar la siembra: ' . $e->getMessage();
         }
     } else {
-        $errors[] = 'ID de siembra no válido.';
+        $errors[] = 'ID de siembra o IDs relacionados no válidos.';
     }
 }
 

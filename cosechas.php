@@ -480,31 +480,43 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_cosecha' && isset($_GE
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <form action="" method="POST">
-                    <div class="form-group">
-                        <label for="siembra_id">ID de Siembra</label>
-                        <input type="text" id="siembra_id" name="siembra_id" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="fecha_cosecha">Fecha de Cosecha</label>
-                        <input type="date" id="fecha_cosecha" name="fecha_cosecha" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cantidad">Cantidad</label>
-                        <input type="number" id="cantidad" name="cantidad" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="unidad">Unidad</label>
-                        <input type="text" id="unidad" name="unidad" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="detalles_cosecha">Detalles</label>
-                        <textarea id="detalles_cosecha" name="detalles_cosecha" class="form-control" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Agregar</button>
-                </form>
-            </div>
+           <div class="modal-body">
+    <form action="" method="POST">
+        <div class="form-group">
+            <label for="siembra_id">Seleccionar Siembra</label>
+            <select id="siembra_id" name="siembra_id" class="form-control" required>
+                <option value="">Seleccione una siembra</option>
+                <?php
+                // Obtener todas las siembras para el selector
+                $siembras = $siembrasCollection->find();
+                foreach ($siembras as $siembra) {
+                    $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
+                    $productoNombre = $producto ? $producto->nombre : 'Desconocido';
+                    echo '<option value="' . htmlspecialchars($siembra->_id) . '">' . htmlspecialchars($productoNombre . ' (ID Siembra: ' . $siembra->_id . ')') . '</option>';
+                }
+                ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="fecha_cosecha">Fecha de Cosecha</label>
+            <input type="date" id="fecha_cosecha" name="fecha_cosecha" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="cantidad">Cantidad</label>
+            <input type="number" id="cantidad" name="cantidad" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="unidad">Unidad</label>
+            <input type="text" id="unidad" name="unidad" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="detalles_cosecha">Detalles de la Cosecha</label>
+            <textarea id="detalles_cosecha" name="detalles_cosecha" class="form-control" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Agregar</button>
+    </form>
+</div>
+
         </div>
     </div>
 </div>

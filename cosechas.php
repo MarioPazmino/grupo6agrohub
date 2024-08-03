@@ -75,6 +75,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 $cosechas = $cosechasCollection->find()->toArray();
 $siembras = $siembrasCollection->find()->toArray();
 $productos = $productosCollection->find()->toArray();
+
+// Mapear productos para fácil acceso por ID
+$productosMap = [];
+foreach ($productos as $producto) {
+    $productosMap[(string)$producto->_id] = $producto->nombre;
+}
+
+// Mapear siembras para obtener nombres de productos
+$siembrasMap = [];
+foreach ($siembras as $siembra) {
+    $productoNombre = isset($productosMap[(string)$siembra->producto_id]) ? $productosMap[(string)$siembra->producto_id] : 'Desconocido';
+    $siembrasMap[(string)$siembra->_id] = $productoNombre;
+}
 ?>
 
 <!DOCTYPE html>
@@ -107,9 +120,9 @@ $productos = $productosCollection->find()->toArray();
             <div class="form-group">
                 <label for="siembra_id">ID de Siembra</label>
                 <select class="form-control" id="siembra_id" name="siembra_id" required>
-                    <?php foreach ($siembras as $siembra): ?>
-                        <option value="<?php echo $siembra->_id; ?>">
-                            Siembra ID: <?php echo $siembra->_id; ?> - Producto ID: <?php echo $siembra->producto_id; ?>
+                    <?php foreach ($siembrasMap as $siembraId => $productoNombre): ?>
+                        <option value="<?php echo $siembraId; ?>">
+                            Siembra ID: <?php echo $siembraId; ?> - Producto: <?php echo $productoNombre; ?>
                         </option>
                     <?php endforeach; ?>
                 </select>

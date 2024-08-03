@@ -4,7 +4,6 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Verificar si el usuario está autenticado
 if (!isset($_SESSION['rol'])) {
     header("Location: index.php");
     exit();
@@ -16,88 +15,25 @@ use MongoDB\Client;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Exception\Exception;
 
-// Conexión a MongoDB con la URL proporcionada
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
 $cosechasCollection = $mongoClient->grupo6_agrohub->cosechas;
+$siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
 
-// Variables para mensajes de éxito y error
 $success = [];
 $errors = [];
 
-// Obtener siembras para mostrar en el formulario de cosechas
-$siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
 try {
     $siembrasCursor = $siembrasCollection->find();
     $siembras = iterator_to_array($siembrasCursor);
-} catch (Exception $e) {
-    $errors[] = 'Error al obtener las siembras: ' . $e->getMessage();
-}
+    $siembrasMap = [];
 
-
-
-
-
-// Obtener siembras y la información del empleado encargado
-try {
-    $siembrasCursor = $siembrasCollection->aggregate([
-        [
-            '$lookup' => [
-                'from' => 'usuarios',
-                'localField' => 'empleado_id',
-                'foreignField' => '_id',
-                'as' => 'empleado_info'
-            ]
-        ],
-        [
-            '$unwind' => '$empleado_info'
-        ],
-        [
-            '$project' => [
-                '_id' => 1,
-                'empleado_id' => 1,
-                'terreno_id' => 1,
-                'producto_id' => 1,
-                'fecha_siembra' => 1,
-                'estado' => 1,
-                'empleado_nombre' => ['$concat' => ['$empleado_info.nombre', ' ', '$empleado_info.apellido']]
-            ]
-        ]
-    ]);
-
-    $siembras = iterator_to_array($siembrasCursor);
-} catch (Exception $e) {
-    $errors[] = 'Error al obtener las siembras: ' . $e->getMessage();
-}
-
-// Obtener cosechas y mapear la información del empleado encargado
-try {
-    $cosechasCursor = $cosechasCollection->find();
-    $cosechas = [];
-
-    foreach ($cosechasCursor as $cosecha) {
-        // Encontrar la siembra correspondiente para obtener el nombre del empleado encargado
-        $siembra = array_filter($siembras, function($s) use ($cosecha) {
-            return (string)$s['_id'] === (string)$cosecha['siembra_id'];
-        });
-
-        if ($siembra) {
-            $siembra = array_values($siembra)[0]; // Obtener el primer elemento
-            $cosecha['nombre_empleado'] = $siembra['empleado_nombre'];
-        } else {
-            $cosecha['nombre_empleado'] = 'Desconocido';
-        }
-
-        $cosechas[] = $cosecha;
+    foreach ($siembras as $siembra) {
+        $siembrasMap[(string)$siembra->_id] = $siembra->producto;
     }
 } catch (Exception $e) {
-    $errors[] = 'Error al obtener las cosechas: ' . $e->getMessage();
+    $errors[] = 'Error al obtener las siembras: ' . $e->getMessage();
 }
-
-
-
-
-
 
 
 // Manejo de la eliminación de cosechas
@@ -618,12 +554,9 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
-                    <!-- Content Row -->
 <div class="row">
     <div id="messages-container"></div>
 
-    <!-- Cosechas -->
     <div class="col-lg-12">
         <div class="card shadow mb-4">
             <div class="card-header py-3">
@@ -631,7 +564,6 @@ if ($_SESSION['rol'] === 'admin') {
             </div>
             <div class="card-body">
 
-                <!-- Mensajes de éxito y error -->
                 <?php if (!empty($success)): ?>
                 <div class="alert alert-success" role="alert">
                     <?php foreach ($success as $message): ?>
@@ -648,18 +580,16 @@ if ($_SESSION['rol'] === 'admin') {
                 </div>
                 <?php endif; ?>
 
-                <!-- Botón de agregar cosecha (solo para admin) -->
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarCosechaModal">
                     <i class="fas fa-plus"></i> Agregar Cosecha
                 </button>
                 <?php endif; ?>
 
-                <!-- Tabla de cosechas -->
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Empleado Encargado</th>
+                            <th>Producto Sembrado</th>
                             <th>Fecha de Cosecha</th>
                             <th>Cantidad Recolectada</th>
                             <th>Calidad</th>
@@ -671,13 +601,13 @@ if ($_SESSION['rol'] === 'admin') {
                     <tbody>
                         <?php foreach ($cosechas as $cosecha): ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($cosecha->nombre_empleado ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars(date('Y-m-d', strtotime($cosecha->fecha_cosecha ?? ''))); ?></td>
+                            <td><?php echo htmlspecialchars($siembrasMap[(string)$cosecha['siembra_id']] ?? 'Producto Desconocido'); ?></td>
+                            <td><?php echo htmlspecialchars(date('Y-m-d', $cosecha['fecha_cosecha']->toDateTime()->getTimestamp())); ?></td>
                             <td>
                                 <?php 
                                 $totalCantidadRecolectada = 0;
-                                if (isset($cosecha->detalles_cosecha)) {
-                                    foreach ($cosecha->detalles_cosecha as $detalle) {
+                                if (isset($cosecha['detalles_cosecha'])) {
+                                    foreach ($cosecha['detalles_cosecha'] as $detalle) {
                                         $totalCantidadRecolectada += $detalle['cantidad_recolectada'] ?? 0;
                                     }
                                 }
@@ -687,8 +617,8 @@ if ($_SESSION['rol'] === 'admin') {
                             <td>
                                 <?php
                                 $calidades = [];
-                                if (isset($cosecha->detalles_cosecha)) {
-                                    foreach ($cosecha->detalles_cosecha as $detalle) {
+                                if (isset($cosecha['detalles_cosecha'])) {
+                                    foreach ($cosecha['detalles_cosecha'] as $detalle) {
                                         $calidades[] = htmlspecialchars($detalle['calidad'] ?? 'N/A');
                                     }
                                 }
@@ -697,14 +627,14 @@ if ($_SESSION['rol'] === 'admin') {
                             </td>
                             <?php if ($_SESSION['rol'] === 'admin'): ?>
                             <td>
-                                <button type="button" class="btn btn-info btn-sm" onclick="showDetallesCosecha(<?php echo htmlspecialchars(json_encode($cosecha->detalles_cosecha), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($cosecha->_id); ?>')">
-                                    <i class="fas fa-eye"></i> Ver Detalles
+                                <button type="button" class="btn btn-info btn-sm" onclick="showDetallesCosecha(<?php echo htmlspecialchars(json_encode($cosecha['detalles_cosecha']), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($cosecha['_id']); ?>')">
+                                    <i class="fas fa-info-circle"></i> Detalles
                                 </button>
-                                <button type="button" class="btn btn-warning btn-sm" title="Editar" onclick="openEditModal('<?php echo $cosecha->_id; ?>')">
-                                    <i class="fas fa-pencil-alt"></i>
+                                <button type="button" class="btn btn-warning btn-sm" onclick="editCosecha('<?php echo htmlspecialchars($cosecha['_id']); ?>', '<?php echo htmlspecialchars((string)$cosecha['siembra_id']); ?>', '<?php echo htmlspecialchars($cosecha['fecha_cosecha']->toDateTime()->format('Y-m-d')); ?>', '<?php echo htmlspecialchars($cosecha['cantidad']); ?>', '<?php echo htmlspecialchars($cosecha['unidad']); ?>', <?php echo htmlspecialchars(json_encode($cosecha['detalles_cosecha']), ENT_QUOTES, 'UTF-8'); ?>)">
+                                    <i class="fas fa-edit"></i> Editar
                                 </button>
-                                <a href="?action=delete&id=<?php echo htmlspecialchars($cosecha->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta cosecha?');" title="Eliminar">
-                                    <i class="fas fa-trash"></i>
+                                <a href="cosechas.php?action=delete&id=<?php echo htmlspecialchars($cosecha['_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta cosecha?')">
+                                    <i class="fas fa-trash"></i> Eliminar
                                 </a>
                             </td>
                             <?php endif; ?>
@@ -712,10 +642,12 @@ if ($_SESSION['rol'] === 'admin') {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+
             </div>
         </div>
     </div>
 </div>
+
 
 
 

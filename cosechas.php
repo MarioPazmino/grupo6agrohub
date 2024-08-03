@@ -622,6 +622,26 @@ if ($_SESSION['rol'] === 'admin') {
 
 
                     
+<script>
+    // Espera a que el DOM esté completamente cargado
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializa el modal de Bootstrap
+        $('#agregarCosechaModal').on('shown.bs.modal', function (e) {
+            // Aquí puedes agregar cualquier lógica adicional para cuando el modal se muestre
+        });
+
+        // Manejador de eventos para cuando se hace clic en el botón de agregar cosecha
+        $('#agregarCosechaModal').on('show.bs.modal', function (e) {
+            // Opcional: puedes inicializar campos o cargar datos dinámicamente aquí
+        });
+
+        // Si estás usando algún sistema de formularios AJAX para enviar datos, puedes manejarlo aquí
+        $('form').on('submit', function(event) {
+            event.preventDefault();
+            // Aquí puedes agregar la lógica para enviar el formulario por AJAX si es necesario
+        });
+    });
+</script>
 
                     
 

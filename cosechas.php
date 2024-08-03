@@ -415,7 +415,6 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
 <!-- Content Row -->
 <div class="row">
     <div class="col-lg-12">
@@ -466,8 +465,11 @@ if ($_SESSION['rol'] === 'admin') {
                             <?php foreach ($cosechas as $cosecha): ?>
                             <tr>
                                 <td><?php 
+                                    // Obtener la siembra correspondiente
                                     $siembra = $siembrasCollection->findOne(['_id' => $cosecha->siembra_id]);
-                                    echo htmlspecialchars($siembra ? $siembra->nombre : 'Desconocido'); 
+                                    // Verificar si la siembra fue encontrada y si el campo 'nombre' está presente
+                                    $siembraNombre = isset($siembra->nombre) ? $siembra->nombre : 'Desconocido';
+                                    echo htmlspecialchars($siembraNombre); 
                                 ?></td>
                                 <td><?php echo htmlspecialchars($cosecha->fecha_cosecha->toDateTime()->format('Y-m-d')); ?></td>
                                 <td><?php echo htmlspecialchars($cosecha->cantidad); ?></td>
@@ -492,6 +494,7 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
+
 
 
 <!-- Modal para agregar siembra -->

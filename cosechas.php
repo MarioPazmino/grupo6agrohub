@@ -492,7 +492,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_cosecha' && isset($_GE
                 foreach ($siembras as $siembra) {
                     $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
                     $productoNombre = $producto ? $producto->nombre : 'Desconocido';
-                    echo '<option value="' . htmlspecialchars($siembra->_id) . '">' . htmlspecialchars($productoNombre . ' (ID Siembra: ' . $siembra->_id . ')') . '</option>';
+                    echo '<option value="' . htmlspecialchars($siembra->_id) . '">' . htmlspecialchars($productoNombre) . '</option>';
                 }
                 ?>
             </select>

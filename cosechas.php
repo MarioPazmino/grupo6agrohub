@@ -20,6 +20,8 @@ use MongoDB\Exception\Exception;
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
 $cosechasCollection = $mongoClient->grupo6_agrohub->cosechas;
+$siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
+$productosCollection = $mongoClient->grupo6_agrohub->productos;
 
 // Variables para mensajes de éxito y error
 $success = [];
@@ -71,6 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 // Leer (Obtener) documentos
 $cosechas = $cosechasCollection->find()->toArray();
+$siembras = $siembrasCollection->find()->toArray();
+$productos = $productosCollection->find()->toArray();
 ?>
 
 <!DOCTYPE html>
@@ -102,7 +106,13 @@ $cosechas = $cosechasCollection->find()->toArray();
         <form method="POST">
             <div class="form-group">
                 <label for="siembra_id">ID de Siembra</label>
-                <input type="text" class="form-control" id="siembra_id" name="siembra_id" required>
+                <select class="form-control" id="siembra_id" name="siembra_id" required>
+                    <?php foreach ($siembras as $siembra): ?>
+                        <option value="<?php echo $siembra->_id; ?>">
+                            Siembra ID: <?php echo $siembra->_id; ?> - Producto ID: <?php echo $siembra->producto_id; ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <div class="form-group">
                 <label for="fecha_cosecha">Fecha de Cosecha</label>

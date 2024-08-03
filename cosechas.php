@@ -23,7 +23,10 @@ $productosCollection = $mongoClient->grupo6_agrohub->productos;
 $collection = $mongoClient->grupo6_agrohub->usuarios;
 $terrenosCollection = $mongoClient->grupo6_agrohub->terrenos;
 $siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
+$cosechasCollection = $mongoClient->grupo6_agrohub->cosechas;
 
+
+    
 // Variables para mensajes de éxito y error
 $success = [];
 $errors = [];

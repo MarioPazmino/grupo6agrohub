@@ -34,6 +34,72 @@ try {
     $errors[] = 'Error al obtener las siembras: ' . $e->getMessage();
 }
 
+
+
+
+
+// Obtener siembras y la información del empleado encargado
+try {
+    $siembrasCursor = $siembrasCollection->aggregate([
+        [
+            '$lookup' => [
+                'from' => 'usuarios',
+                'localField' => 'empleado_id',
+                'foreignField' => '_id',
+                'as' => 'empleado_info'
+            ]
+        ],
+        [
+            '$unwind' => '$empleado_info'
+        ],
+        [
+            '$project' => [
+                '_id' => 1,
+                'empleado_id' => 1,
+                'terreno_id' => 1,
+                'producto_id' => 1,
+                'fecha_siembra' => 1,
+                'estado' => 1,
+                'empleado_nombre' => ['$concat' => ['$empleado_info.nombre', ' ', '$empleado_info.apellido']]
+            ]
+        ]
+    ]);
+
+    $siembras = iterator_to_array($siembrasCursor);
+} catch (Exception $e) {
+    $errors[] = 'Error al obtener las siembras: ' . $e->getMessage();
+}
+
+// Obtener cosechas y mapear la información del empleado encargado
+try {
+    $cosechasCursor = $cosechasCollection->find();
+    $cosechas = [];
+
+    foreach ($cosechasCursor as $cosecha) {
+        // Encontrar la siembra correspondiente para obtener el nombre del empleado encargado
+        $siembra = array_filter($siembras, function($s) use ($cosecha) {
+            return (string)$s['_id'] === (string)$cosecha['siembra_id'];
+        });
+
+        if ($siembra) {
+            $siembra = array_values($siembra)[0]; // Obtener el primer elemento
+            $cosecha['nombre_empleado'] = $siembra['empleado_nombre'];
+        } else {
+            $cosecha['nombre_empleado'] = 'Desconocido';
+        }
+
+        $cosechas[] = $cosecha;
+    }
+} catch (Exception $e) {
+    $errors[] = 'Error al obtener las cosechas: ' . $e->getMessage();
+}
+
+
+
+
+
+
+
 // Manejo de la eliminación de cosechas
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $id = $_GET['id'];

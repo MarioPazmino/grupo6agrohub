@@ -472,9 +472,12 @@ if ($_SESSION['rol'] === 'admin') {
                                     $productoNombre = 'Desconocido';
                                     if ($productoId) {
                                         $producto = $productosCollection->findOne(['_id' => $productoId]);
-                                        $productoNombre = isset($producto->nombre) ? $producto->nombre : 'Desconocido';
+                                        if ($producto && isset($producto->nombre)) {
+                                            // Asegurarse de que el nombre es un string
+                                            $productoNombre = is_array($producto->nombre) ? implode(', ', $producto->nombre) : (string)$producto->nombre;
+                                        }
                                     }
-                                    echo htmlspecialchars((string)$productoNombre); 
+                                    echo htmlspecialchars($productoNombre); 
                                 ?></td>
                                 <td><?php echo htmlspecialchars($cosecha->fecha_cosecha->toDateTime()->format('Y-m-d')); ?></td>
                                 <td><?php echo htmlspecialchars((string)$cosecha->cantidad); ?></td>

@@ -444,8 +444,9 @@ if ($_SESSION['rol'] === 'admin') {
                 <!-- Botón de agregar cosecha (solo para admin) -->
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarCosechaModal">
-                    <i class="fas fa-plus"></i> Agregar Cosecha
-                </button>
+    <i class="fas fa-plus"></i> Agregar Cosecha
+</button>
+
                 <?php endif; ?>
 
                 <!-- Tabla de cosechas -->

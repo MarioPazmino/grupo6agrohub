@@ -10,100 +10,121 @@ if (!isset($_SESSION['rol'])) {
     exit();
 }
 
+// Cargar el autoload de Composer
 require __DIR__ . '/vendor/autoload.php';
 
 use MongoDB\Client;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Exception\Exception;
 
-// Conexión a MongoDB con la URL proporcionada
+// Configuración de conexión a MongoDB
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
+
+// Colecciones de MongoDB
 $cosechasCollection = $mongoClient->grupo6_agrohub->cosechas;
 $siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
-$productosCollection = $mongoClient->grupo6_agrohub->productos;
+$empleadosCollection = $mongoClient->grupo6_agrohub->empleados; // Si es necesario para mostrar empleados
+$terrenosCollection = $mongoClient->grupo6_agrohub->terrenos; // Si es necesario para mostrar terrenos
+$productosCollection = $mongoClient->grupo6_agrohub->productos; // Si es necesario para mostrar productos
 
 // Variables para mensajes de éxito y error
 $success = [];
 $errors = [];
 
-// Manejo de solicitudes de formulario
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['create'])) {
-        // Crear (Insertar) un nuevo documento
+// Procesar eliminación de cosecha
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'delete_cosecha' && isset($_GET['id'])) {
+    $cosecha_id = $_GET['id'];
+
+    if (preg_match('/^[a-f0-9]{24}$/i', $cosecha_id)) {
         try {
-            $newCosecha = [
-                'siembra_id' => new ObjectId($_POST['siembra_id']),
-                'fecha_cosecha' => new \DateTime($_POST['fecha_cosecha']),
-                'cantidad' => (int)$_POST['cantidad'],
-                'unidad' => $_POST['unidad'],
-                'detalles_cosecha' => $_POST['detalles_cosecha']
-            ];
-            $result = $cosechasCollection->insertOne($newCosecha);
-            $success[] = "Cosecha insertada con el ID: " . $result->getInsertedId();
-        } catch (Exception $e) {
-            $errors[] = 'Error al insertar la cosecha: ' . $e->getMessage();
-        }
-    } elseif (isset($_POST['update'])) {
-        // Actualizar un documento
-        try {
-            $filter = ['_id' => new ObjectId($_POST['update_id'])];
-            $update = [
-                '$set' => [
-                    'cantidad' => (int)$_POST['update_cantidad'],
-                    'detalles_cosecha' => $_POST['update_detalles_cosecha']
-                ]
-            ];
-            $result = $cosechasCollection->updateOne($filter, $update);
-            $success[] = "Documentos modificados: " . $result->getModifiedCount();
-        } catch (Exception $e) {
-            $errors[] = 'Error al actualizar la cosecha: ' . $e->getMessage();
-        }
-    } elseif (isset($_POST['delete'])) {
-        // Eliminar un documento
-        try {
-            $filter = ['_id' => new ObjectId($_POST['delete_id'])];
-            $result = $cosechasCollection->deleteOne($filter);
-            $success[] = "Documentos eliminados: " . $result->getDeletedCount();
+            $result = $cosechasCollection->deleteOne(['_id' => new ObjectId($cosecha_id)]);
+            if ($result->getDeletedCount() > 0) {
+                $success[] = 'Cosecha eliminada correctamente.';
+            } else {
+                $errors[] = 'No se encontró la cosecha para eliminar.';
+            }
         } catch (Exception $e) {
             $errors[] = 'Error al eliminar la cosecha: ' . $e->getMessage();
         }
+    } else {
+        $errors[] = 'ID de cosecha no válido.';
     }
 }
 
-// Leer (Obtener) documentos
-$cosechas = $cosechasCollection->find()->toArray();
-$siembras = $siembrasCollection->find()->toArray();
-$productos = $productosCollection->find()->toArray();
+// Procesar formulario de agregar cosecha
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'], $_POST['fecha_cosecha'], $_POST['cantidad'], $_POST['unidad'], $_POST['detalles_cosecha'])) {
+    $siembra_id = $_POST['siembra_id'];
+    $fecha_cosecha = new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_cosecha']));
+    $cantidad = (int)$_POST['cantidad'];
+    $unidad = $_POST['unidad'];
+    $detalles_cosecha = $_POST['detalles_cosecha'];
 
-// Mapear productos para fácil acceso por ID
-$productosMap = [];
-foreach ($productos as $producto) {
-    $productosMap[(string)$producto->_id] = $producto->nombre;
+    if (preg_match('/^[a-f0-9]{24}$/i', $siembra_id)) {
+        try {
+            $cosechasCollection->insertOne([
+                'siembra_id' => new \MongoDB\BSON\ObjectId($siembra_id),
+                'fecha_cosecha' => $fecha_cosecha,
+                'cantidad' => $cantidad,
+                'unidad' => $unidad,
+                'detalles_cosecha' => $detalles_cosecha
+            ]);
+            $success[] = 'Cosecha agregada correctamente.';
+        } catch (Exception $e) {
+            $errors[] = 'Error al agregar la cosecha: ' . $e->getMessage();
+        }
+    } else {
+        $errors[] = 'ID de siembra no válido.';
+    }
 }
 
-// Mapear siembras para obtener nombres de productos
-$siembrasMap = [];
-foreach ($siembras as $siembra) {
-    $productoNombre = isset($productosMap[(string)$siembra->producto_id]) ? $productosMap[(string)$siembra->producto_id] : 'Desconocido';
-    $siembrasMap[(string)$siembra->_id] = $productoNombre;
+// Obtener cosechas
+$cosechas = [];
+try {
+    $cosechas = $cosechasCollection->find()->toArray();
+} catch (Exception $e) {
+    $errors[] = 'Error al obtener información de cosechas: ' . $e->getMessage();
+}
+
+// Procesar formulario de edición de cosecha
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cosecha_id'])) {
+    $cosecha_id = $_POST['cosecha_id'];
+    $siembra_id = $_POST['siembra_id'];
+    $fecha_cosecha = new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_cosecha']));
+    $cantidad = (int)$_POST['cantidad'];
+    $unidad = $_POST['unidad'];
+    $detalles_cosecha = $_POST['detalles_cosecha'];
+
+    if (preg_match('/^[a-f0-9]{24}$/i', $cosecha_id) &&
+        preg_match('/^[a-f0-9]{24}$/i', $siembra_id)) {
+        try {
+            $result = $cosechasCollection->updateOne(
+                ['_id' => new \MongoDB\BSON\ObjectId($cosecha_id)],
+                ['$set' => [
+                    'siembra_id' => new \MongoDB\BSON\ObjectId($siembra_id),
+                    'fecha_cosecha' => $fecha_cosecha,
+                    'cantidad' => $cantidad,
+                    'unidad' => $unidad,
+                    'detalles_cosecha' => $detalles_cosecha
+                ]]
+            );
+            if ($result->getModifiedCount() > 0) {
+                $success[] = 'Cosecha actualizada correctamente.';
+            } else {
+                $errors[] = 'No se encontraron cambios para actualizar.';
+            }
+        } catch (Exception $e) {
+            $errors[] = 'Error al actualizar la cosecha: ' . $e->getMessage();
+        }
+    } else {
+        $errors[] = 'ID de cosecha o ID de siembra no válidos.';
+    }
 }
 
 
 
 
-
-
-
-
-
-// Contar el número total de empleados y tareas si el usuario es admin
-$total_empleados = 0;
-$total_tareas_pendientes = 0;
-$total_tareas_proceso = 0;
-$total_tareas_completadas = 0;
-
-if ($_SESSION['rol'] === 'admin') {
+    if ($_SESSION['rol'] === 'admin') {
     try {
         $usuariosCollection = $mongoClient->grupo6_agrohub->usuarios;
         $total_empleados = $usuariosCollection->countDocuments(['rol' => 'empleado']);
@@ -127,7 +148,6 @@ if ($_SESSION['rol'] === 'admin') {
     }
 }
 ?>
-
 
 
 <!DOCTYPE html>
@@ -415,6 +435,8 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
+
+
 <!-- Content Row -->
 <div class="row">
     <div class="col-lg-12">
@@ -444,9 +466,8 @@ if ($_SESSION['rol'] === 'admin') {
                 <!-- Botón de agregar cosecha (solo para admin) -->
                 <?php if ($_SESSION['rol'] === 'admin'): ?>
                 <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarCosechaModal">
-    <i class="fas fa-plus"></i> Agregar Cosecha
-</button>
-
+                    <i class="fas fa-plus"></i> Agregar Cosecha
+                </button>
                 <?php endif; ?>
 
                 <!-- Tabla de cosechas -->
@@ -466,34 +487,34 @@ if ($_SESSION['rol'] === 'admin') {
                             <?php foreach ($cosechas as $cosecha): ?>
                             <tr>
                                 <td><?php 
-                                    // Obtener la siembra correspondiente
                                     $siembra = $siembrasCollection->findOne(['_id' => $cosecha->siembra_id]);
-                                    // Verificar si la siembra fue encontrada y si el campo 'producto_id' está presente
-                                    $productoId = isset($siembra->producto_id) ? $siembra->producto_id : null;
-                                    $productoNombre = 'Desconocido';
-                                    if ($productoId) {
-                                        $producto = $productosCollection->findOne(['_id' => $productoId]);
-                                        if ($producto && isset($producto->nombre)) {
-                                            // Asegurarse de que el nombre es un string
-                                            $productoNombre = is_array($producto->nombre) ? implode(', ', $producto->nombre) : (string)$producto->nombre;
-                                        }
-                                    }
-                                    echo htmlspecialchars($productoNombre); 
+                                    echo htmlspecialchars($siembra ? $siembra->nombre : 'No disponible'); 
                                 ?></td>
                                 <td><?php echo htmlspecialchars($cosecha->fecha_cosecha->toDateTime()->format('Y-m-d')); ?></td>
-                                <td><?php echo htmlspecialchars((string)$cosecha->cantidad); ?></td>
-                                <td><?php echo htmlspecialchars((string)$cosecha->unidad); ?></td>
-                                <td><?php echo htmlspecialchars((string)$cosecha->detalles_cosecha); ?></td>
+                                <td><?php echo htmlspecialchars($cosecha->cantidad); ?></td>
+                                <td><?php echo htmlspecialchars($cosecha->unidad); ?></td>
+                                <td><?php echo htmlspecialchars($cosecha->detalles_cosecha); ?></td>
                                 <td>
-                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
-                                    <a href="?action=delete_cosecha&id=<?php echo htmlspecialchars($cosecha->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta cosecha?');">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarCosechaModal" data-id="<?php echo htmlspecialchars($cosecha->_id); ?>" data-siembra="<?php echo htmlspecialchars($cosecha->siembra_id); ?>" data-fecha="<?php echo htmlspecialchars($cosecha->fecha_cosecha->toDateTime()->format('Y-m-d')); ?>" data-cantidad="<?php echo htmlspecialchars($cosecha->cantidad); ?>" data-unidad="<?php echo htmlspecialchars($cosecha->unidad); ?>" data-detalles="<?php echo htmlspecialchars($cosecha->detalles_cosecha); ?>">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <?php endif; ?>
-                                </td>
+    <?php if ($_SESSION['rol'] === 'admin'): ?>
+    <a href="?action=delete_cosecha&id=<?php echo htmlspecialchars($cosecha->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta cosecha?');">
+        <i class="fas fa-trash"></i>
+    </a>
+    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarCosechaModal" data-id="<?php echo htmlspecialchars($cosecha->_id); ?>" data-siembra="<?php echo htmlspecialchars($cosecha->siembra_id); ?>" data-fecha="<?php echo htmlspecialchars($cosecha->fecha_cosecha->toDateTime()->format('Y-m-d')); ?>" data-cantidad="<?php echo htmlspecialchars($cosecha->cantidad); ?>" data-unidad="<?php echo htmlspecialchars($cosecha->unidad); ?>" data-detalles="<?php echo htmlspecialchars($cosecha->detalles_cosecha); ?>">
+        <i class="fas fa-edit"></i>
+    </button>
+    <?php endif; ?>
+</td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -504,46 +525,71 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
 </div>
 
-<!-- Modal HTML -->
-    <div class="modal fade" id="agregarCosechaModal" tabindex="-1" role="dialog" aria-labelledby="agregarCosechaModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="agregarCosechaModalLabel">Agregar Nueva Cosecha</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <!-- Formulario para agregar cosechas -->
-                    <form method="POST" action="">
-                        <!-- Campos del formulario -->
-                        <div class="form-group">
-                            <label for="siembra_id">ID de Siembra</label>
-                            <input type="text" class="form-control" id="siembra_id" name="siembra_id" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="fecha_cosecha">Fecha de Cosecha</label>
-                            <input type="date" class="form-control" id="fecha_cosecha" name="fecha_cosecha" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="cantidad">Cantidad</label>
-                            <input type="number" class="form-control" id="cantidad" name="cantidad" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="unidad">Unidad</label>
-                            <input type="text" class="form-control" id="unidad" name="unidad" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="detalles_cosecha">Detalles de la Cosecha</label>
-                            <textarea class="form-control" id="detalles_cosecha" name="detalles_cosecha"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary" name="create">Guardar</button>
-                    </form>
-                </div>
+<!-- Modal para agregar siembra -->
+<div class="modal fade" id="agregarSiembraModal" tabindex="-1" role="dialog" aria-labelledby="agregarSiembraModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarSiembraModalLabel">Agregar Nueva Siembra</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="" method="POST">
+                    <div class="form-group">
+                        <label for="empleado_id">Empleado</label>
+                        <select id="empleado_id" name="empleado_id" class="form-control" required>
+                            <?php
+                            $empleados = $usuariosCollection->find(['rol' => 'empleado']);
+                            foreach ($empleados as $empleado) {
+                                echo '<option value="' . htmlspecialchars($empleado->_id) . '">' . htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="terreno_id">Terreno</label>
+                        <select id="terreno_id" name="terreno_id" class="form-control" required>
+                            <?php
+                            $terrenos = $terrenosCollection->find();
+                            foreach ($terrenos as $terreno) {
+                                echo '<option value="' . htmlspecialchars($terreno->_id) . '">' . htmlspecialchars($terreno->nombre) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto_id">Producto</label>
+                        <select id="producto_id" name="producto_id" class="form-control" required>
+                            <?php
+                            $productos = $productosCollection->find();
+                            foreach ($productos as $producto) {
+                                echo '<option value="' . htmlspecialchars($producto->_id) . '">' . htmlspecialchars($producto->nombre) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha_siembra">Fecha de Siembra</label>
+                        <input type="date" id="fecha_siembra" name="fecha_siembra" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="estado">Estado</label>
+                        <select id="estado" name="estado" class="form-control" required>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="en_proceso">En Proceso</option>
+                            <option value="completada">Completada</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                </form>
             </div>
         </div>
-    </div>    </div>
+    </div>
+</div>
+
+
 
 <!-- Modal para editar siembra -->
 <div class="modal fade" id="editarSiembraModal" tabindex="-1" role="dialog" aria-labelledby="editarSiembraModalLabel" aria-hidden="true">
@@ -609,30 +655,29 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
+<script>
+    $('#editarSiembraModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var siembraId = button.data('id');
+        var empleadoId = button.data('empleado');
+        var terrenoId = button.data('terreno');
+        var productoId = button.data('producto');
+        var fechaSiembra = button.data('fecha');
+        var estado = button.data('estado');
+
+        var modal = $(this);
+        modal.find('#edit_siembra_id').val(siembraId);
+        modal.find('#edit_empleado_id').val(empleadoId);
+        modal.find('#edit_terreno_id').val(terrenoId);
+        modal.find('#edit_producto_id').val(productoId);
+        modal.find('#edit_fecha_siembra').val(fechaSiembra);
+        modal.find('#edit_estado').val(estado);
+    });
+</script>
 
 
 
                     
-<script>
-    // Espera a que el DOM esté completamente cargado
-    document.addEventListener('DOMContentLoaded', function() {
-        // Inicializa el modal de Bootstrap
-        $('#agregarCosechaModal').on('shown.bs.modal', function (e) {
-            // Aquí puedes agregar cualquier lógica adicional para cuando el modal se muestre
-        });
-
-        // Manejador de eventos para cuando se hace clic en el botón de agregar cosecha
-        $('#agregarCosechaModal').on('show.bs.modal', function (e) {
-            // Opcional: puedes inicializar campos o cargar datos dinámicamente aquí
-        });
-
-        // Si estás usando algún sistema de formularios AJAX para enviar datos, puedes manejarlo aquí
-        $('form').on('submit', function(event) {
-            event.preventDefault();
-            // Aquí puedes agregar la lógica para enviar el formulario por AJAX si es necesario
-        });
-    });
-</script>
 
                     
 
@@ -682,5 +727,3 @@ if ($_SESSION['rol'] === 'admin') {
     </body>
 
 </html>
-
-

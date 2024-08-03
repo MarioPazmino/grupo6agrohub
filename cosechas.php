@@ -20,7 +20,6 @@ use MongoDB\Exception\Exception;
 $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
 $mongoClient = new Client($mongoUri);
 $productosCollection = $mongoClient->grupo6_agrohub->productos;
-$terrenosCollection = $mongoClient->grupo6_agrohub->terrenos;
 $siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
 $cosechasCollection = $mongoClient->grupo6_agrohub->cosechas;
 
@@ -66,7 +65,7 @@ try {
     $errors[] = 'Error al obtener las cosechas: ' . $e->getMessage();
 }
 
-// Manejo del formulario de agregar cosecha
+// Manejo del formulario de agregar/editar cosecha
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $siembra_id = $_POST['siembra_id'] ?? '';
     $fecha_cosecha = $_POST['fecha_cosecha'] ?? '';
@@ -130,6 +129,7 @@ foreach ($errors as $message) {
     echo '<div class="alert alert-danger">' . htmlspecialchars($message) . '</div>';
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

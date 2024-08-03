@@ -58,54 +58,55 @@ if ($_SESSION['rol'] === 'admin') {
     }
 }
 
-// Procesar eliminación de siembra
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'delete_siembra' && isset($_GET['id'])) {
-    $siembra_id = $_GET['id'];
 
-    try {
-        $result = $siembrasCollection->deleteOne(['_id' => new ObjectId($siembra_id)]);
-        if ($result->getDeletedCount() > 0) {
-            $success[] = 'Siembra eliminada correctamente.';
-        } else {
-            $errors[] = 'No se encontró la siembra para eliminar.';
-        }
-    } catch (Exception $e) {
-        $errors[] = 'Error al eliminar la siembra: ' . $e->getMessage();
-    }
-}
 
-// Procesar formulario de agregar siembra
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleado_id'], $_POST['terreno_id'], $_POST['producto_id'], $_POST['fecha_siembra'], $_POST['estado'])) {
-    $empleado_id = $_POST['empleado_id'];
-    $terreno_id = $_POST['terreno_id'];
-    $producto_id = $_POST['producto_id'];
-    $fecha_siembra = new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_siembra']));
-    $estado = $_POST['estado'];
 
-    try {
-        $siembrasCollection->insertOne([
-            'empleado_id' => new \MongoDB\BSON\ObjectId($empleado_id),
-            'terreno_id' => new \MongoDB\BSON\ObjectId($terreno_id),
-            'producto_id' => new \MongoDB\BSON\ObjectId($producto_id),
-            'fecha_siembra' => $fecha_siembra,
-            'estado' => $estado
-        ]);
-        $success[] = 'Siembra agregada correctamente.';
-    } catch (Exception $e) {
-        $errors[] = 'Error al agregar la siembra: ' . $e->getMessage();
-    }
-}
 
-// Obtener siembras
-$siembras = [];
+    // Obtener todas las cosechas
+$cosechas = [];
 try {
-    $siembras = $siembrasCollection->find()->toArray();
+    $cosechas = $cosechasCollection->find()->toArray();
 } catch (Exception $e) {
-    $errors[] = 'Error al obtener información de siembras: ' . $e->getMessage();
+    $errors[] = 'Error al obtener las cosechas: ' . $e->getMessage();
 }
 
+// Manejo del formulario de agregar cosecha
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $siembra_id = $_POST['siembra_id'];
+    $fecha_cosecha = $_POST['fecha_cosecha'];
+    $cantidad = (int) $_POST['cantidad'];
+    $unidad = $_POST['unidad'];
+    $detalles_cosecha = $_POST['detalles_cosecha'];
 
+    // Validar campos
+    if (empty($siembra_id) || empty($fecha_cosecha) || empty($cantidad) || empty($unidad) || empty($detalles_cosecha)) {
+        $errors[] = 'Todos los campos son obligatorios.';
+    } else {
+        try {
+            $cosechasCollection->insertOne([
+                'siembra_id' => new ObjectId($siembra_id),
+                'fecha_cosecha' => new \MongoDB\BSON\UTCDateTime((new DateTime($fecha_cosecha))->getTimestamp()*1000),
+                'cantidad' => $cantidad,
+                'unidad' => $unidad,
+                'detalles_cosecha' => $detalles_cosecha
+            ]);
+            $success[] = 'Cosecha agregada exitosamente.';
+        } catch (Exception $e) {
+            $errors[] = 'Error al agregar la cosecha: ' . $e->getMessage();
+        }
+    }
+}
 
+// Manejo de eliminación de cosecha
+if (isset($_GET['action']) && $_GET['action'] === 'delete_cosecha' && isset($_GET['id'])) {
+    $cosechaId = $_GET['id'];
+    try {
+        $cosechasCollection->deleteOne(['_id' => new ObjectId($cosechaId)]);
+        $success[] = 'Cosecha eliminada exitosamente.';
+    } catch (Exception $e) {
+        $errors[] = 'Error al eliminar la cosecha: ' . $e->getMessage();
+    }
+}
 
 ?>
 

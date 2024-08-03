@@ -399,7 +399,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_cosecha' && isset($_GE
 
 
 
-
 <!-- Content Row -->
 <div class="row">
     <div class="col-lg-12">
@@ -433,26 +432,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_cosecha' && isset($_GE
                 </button>
                 <?php endif; ?>
 
-                <!-- Filtros para la tabla -->
-                <div class="form-group">
-                    <label for="filter_producto">Filtrar por Producto</label>
-                    <select id="filter_producto" class="form-control">
-                        <option value="">Todos los productos</option>
-                        <?php
-                        // Obtener nombres de productos únicos
-                        $productos = [];
-                        foreach ($cosechas as $cosecha) {
-                            $producto = $productosCollection->findOne(['_id' => $cosecha->producto_id]);
-                            $productoNombre = $producto ? $producto->nombre : 'Desconocido';
-                            if (!in_array($productoNombre, $productos)) {
-                                $productos[] = $productoNombre;
-                                echo '<option value="' . htmlspecialchars($productoNombre) . '">' . htmlspecialchars($productoNombre) . '</option>';
-                            }
-                        }
-                        ?>
-                    </select>
-                </div>
-
                 <!-- Tabla de cosechas -->
                 <div class="table-responsive mt-4">
                     <table class="table table-bordered" id="cosechasTable" width="100%" cellspacing="0">
@@ -470,7 +449,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_cosecha' && isset($_GE
                             <?php foreach ($cosechas as $cosecha): ?>
                             <?php
                             // Obtener nombre del producto asociado a la cosecha
-                            $producto = $productosCollection->findOne(['_id' => $cosecha->producto_id]);
+                            $siembra = $siembrasCollection->findOne(['_id' => $cosecha->siembra_id]);
+                            $producto = $siembra ? $productosCollection->findOne(['_id' => $siembra->producto_id]) : null;
                             $productoNombre = $producto ? $producto->nombre : 'Desconocido';
                             ?>
                             <tr>
@@ -496,17 +476,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_cosecha' && isset($_GE
     </div>
 </div>
 
-<script>
-    document.getElementById('filter_producto').addEventListener('change', function () {
-        var filterValue = this.value.toLowerCase();
-        var tableRows = document.querySelectorAll('#cosechasTable tbody tr');
-
-        tableRows.forEach(function (row) {
-            var productoCell = row.querySelector('td:first-child').textContent.toLowerCase();
-            row.style.display = productoCell.includes(filterValue) || filterValue === '' ? '' : 'none';
-        });
-    });
-</script>
 
 <!-- Modal para agregar cosecha -->
 <div class="modal fade" id="agregarCosechaModal" tabindex="-1" role="dialog" aria-labelledby="agregarCosechaModalLabel" aria-hidden="true">

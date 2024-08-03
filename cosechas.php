@@ -584,11 +584,12 @@ if ($_SESSION['rol'] === 'admin') {
                 </div>
                 <?php endif; ?>
 
-                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarCosechaModal">
-                    <i class="fas fa-plus"></i> Agregar Cosecha
-                </button>
-                <?php endif; ?>
+<!-- Botón para abrir el modal de agregar cosecha (solo para admin) -->
+<?php if ($_SESSION['rol'] === 'admin'): ?>
+<button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarDetalleCosechaModal">
+    <i class="fas fa-plus"></i> Agregar Cosecha
+</button>
+<?php endif; ?>
 
                 <table class="table table-striped">
                     <thead>

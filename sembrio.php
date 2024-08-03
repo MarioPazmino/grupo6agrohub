@@ -103,6 +103,43 @@ try {
 } catch (Exception $e) {
     $errors[] = 'Error al obtener información de siembras: ' . $e->getMessage();
 }
+
+
+
+
+
+
+
+    // Procesar formulario de edición de siembra
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
+    $siembra_id = $_POST['siembra_id'];
+    $empleado_id = $_POST['empleado_id'];
+    $terreno_id = $_POST['terreno_id'];
+    $producto_id = $_POST['producto_id'];
+    $fecha_siembra = new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_siembra']));
+    $estado = $_POST['estado'];
+
+    try {
+        $result = $siembrasCollection->updateOne(
+            ['_id' => new ObjectId($siembra_id)],
+            ['$set' => [
+                'empleado_id' => new \MongoDB\BSON\ObjectId($empleado_id),
+                'terreno_id' => new \MongoDB\BSON\ObjectId($terreno_id),
+                'producto_id' => new \MongoDB\BSON\ObjectId($producto_id),
+                'fecha_siembra' => $fecha_siembra,
+                'estado' => $estado
+            ]]
+        );
+        if ($result->getModifiedCount() > 0) {
+            $success[] = 'Siembra actualizada correctamente.';
+        } else {
+            $errors[] = 'No se encontraron cambios para actualizar.';
+        }
+    } catch (Exception $e) {
+        $errors[] = 'Error al actualizar la siembra: ' . $e->getMessage();
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -458,12 +495,16 @@ try {
                                 <td><?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?></td>
                                 <td><?php echo htmlspecialchars($siembra->estado); ?></td>
                                 <td>
-                                    <?php if ($_SESSION['rol'] === 'admin'): ?>
-                                    <a href="?action=delete_siembra&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
-                                        <i class="fas fa-trash"></i> 
-                                    </a>
-                                    <?php endif; ?>
-                                </td>
+    <?php if ($_SESSION['rol'] === 'admin'): ?>
+    <a href="?action=delete_siembra&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
+        <i class="fas fa-trash"></i>
+    </a>
+    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarSiembraModal" data-id="<?php echo htmlspecialchars($siembra->_id); ?>" data-empleado="<?php echo htmlspecialchars($siembra->empleado_id); ?>" data-terreno="<?php echo htmlspecialchars($siembra->terreno_id); ?>" data-producto="<?php echo htmlspecialchars($siembra->producto_id); ?>" data-fecha="<?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?>" data-estado="<?php echo htmlspecialchars($siembra->estado); ?>">
+        <i class="fas fa-edit"></i>
+    </button>
+    <?php endif; ?>
+</td>
+
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -540,6 +581,89 @@ try {
 
 
 
+<!-- Modal para editar siembra -->
+<div class="modal fade" id="editarSiembraModal" tabindex="-1" role="dialog" aria-labelledby="editarSiembraModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarSiembraModalLabel">Editar Siembra</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editarSiembraForm" action="" method="POST">
+                    <input type="hidden" id="edit_siembra_id" name="siembra_id">
+                    <div class="form-group">
+                        <label for="edit_empleado_id">Empleado</label>
+                        <select id="edit_empleado_id" name="empleado_id" class="form-control" required>
+                            <?php
+                            $empleados = $usuariosCollection->find(['rol' => 'empleado']);
+                            foreach ($empleados as $empleado) {
+                                echo '<option value="' . htmlspecialchars($empleado->_id) . '">' . htmlspecialchars($empleado->nombre . ' ' . $empleado->apellido) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_terreno_id">Terreno</label>
+                        <select id="edit_terreno_id" name="terreno_id" class="form-control" required>
+                            <?php
+                            $terrenos = $terrenosCollection->find();
+                            foreach ($terrenos as $terreno) {
+                                echo '<option value="' . htmlspecialchars($terreno->_id) . '">' . htmlspecialchars($terreno->nombre) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_producto_id">Producto</label>
+                        <select id="edit_producto_id" name="producto_id" class="form-control" required>
+                            <?php
+                            $productos = $productosCollection->find();
+                            foreach ($productos as $producto) {
+                                echo '<option value="' . htmlspecialchars($producto->_id) . '">' . htmlspecialchars($producto->nombre) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_fecha_siembra">Fecha de Siembra</label>
+                        <input type="date" id="edit_fecha_siembra" name="fecha_siembra" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_estado">Estado</label>
+                        <select id="edit_estado" name="estado" class="form-control" required>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="en_proceso">En Proceso</option>
+                            <option value="completada">Completada</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#editarSiembraModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var siembraId = button.data('id');
+        var empleadoId = button.data('empleado');
+        var terrenoId = button.data('terreno');
+        var productoId = button.data('producto');
+        var fechaSiembra = button.data('fecha');
+        var estado = button.data('estado');
+
+        var modal = $(this);
+        modal.find('#edit_siembra_id').val(siembraId);
+        modal.find('#edit_empleado_id').val(empleadoId);
+        modal.find('#edit_terreno_id').val(terrenoId);
+        modal.find('#edit_producto_id').val(productoId);
+        modal.find('#edit_fecha_siembra').val(fechaSiembra);
+        modal.find('#edit_estado').val(estado);
+    });
+</script>
 
 
 

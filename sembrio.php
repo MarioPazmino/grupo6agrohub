@@ -107,7 +107,6 @@ try {
 
 
 
-// Procesar formulario de edición de siembra
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
     $siembra_id = $_POST['siembra_id'];
     $empleado_id = $_POST['empleado_id'];
@@ -116,11 +115,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
     $fecha_siembra = new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_siembra']));
     $estado = $_POST['estado'];
 
+    // Logging para depuración
+    error_log("Siembra ID: " . $siembra_id);
+    error_log("Empleado ID: " . $empleado_id);
+    error_log("Terreno ID: " . $terreno_id);
+    error_log("Producto ID: " . $producto_id);
+
     // Validar el formato del ID
-    if (preg_match('/^[a-f0-9]{24}$/i', $siembra_id) &&
-        preg_match('/^[a-f0-9]{24}$/i', $empleado_id) &&
-        preg_match('/^[a-f0-9]{24}$/i', $terreno_id) &&
-        preg_match('/^[a-f0-9]{24}$/i', $producto_id)) {
+    if (strlen($siembra_id) == 24 && ctype_xdigit($siembra_id) &&
+        strlen($empleado_id) == 24 && ctype_xdigit($empleado_id) &&
+        strlen($terreno_id) == 24 && ctype_xdigit($terreno_id) &&
+        strlen($producto_id) == 24 && ctype_xdigit($producto_id)) {
         try {
             $result = $siembrasCollection->updateOne(
                 ['_id' => new \MongoDB\BSON\ObjectId($siembra_id)],
@@ -142,9 +147,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
         }
     } else {
         $errors[] = 'ID de siembra o IDs relacionados no válidos.';
+        // Logging adicional para depuración
+        error_log("Validación de ID fallida");
     }
 }
-
 
 ?>
 

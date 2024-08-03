@@ -491,7 +491,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_cosecha' && isset($_GE
             $siembras = $siembrasCollection->find();
             foreach ($siembras as $siembra) {
                 // Obtener el nombre de la siembra
-                $nombreSiembra = isset($siembra->nombre) ? $siembra->nombre : 'Desconocido';
+                $nombreSiembra = isset($siembra->nombre) ? $siembra->nombre : 'No disponible';
                 echo '<option value="' . htmlspecialchars($siembra->_id) . '">' . htmlspecialchars($nombreSiembra) . '</option>';
             }
             ?>

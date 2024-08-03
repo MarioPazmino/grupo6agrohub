@@ -480,47 +480,65 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_cosecha' && isset($_GE
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-           <div class="modal-body">
- <form action="" method="POST">
-        <div class="form-group">
-            <label for="siembra_id">Seleccionar Siembra</label>
-            <select id="siembra_id" name="siembra_id" class="form-control" required>
-                <option value="">Seleccione una siembra</option>
-                <?php
-                // Obtener todas las siembras para el selector
-                $siembras = $siembrasCollection->find();
-                foreach ($siembras as $siembra) {
-                    $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
-                    $productoNombre = $producto ? $producto->nombre : 'Desconocido';
-                    echo '<option value="' . htmlspecialchars($siembra->_id) . '">' . htmlspecialchars($productoNombre) . '</option>';
-                }
-                ?>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="fecha_cosecha">Fecha de Cosecha</label>
-            <input type="date" id="fecha_cosecha" name="fecha_cosecha" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="cantidad">Cantidad</label>
-            <input type="number" id="cantidad" name="cantidad" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="unidad">Unidad</label>
-            <input type="text" id="unidad" name="unidad" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="detalles_cosecha">Detalles de la Cosecha</label>
-            <textarea id="detalles_cosecha" name="detalles_cosecha" class="form-control" rows="3" required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Agregar</button>
-    </form>
-</div>
-
+            <div class="modal-body">
+                <form action="" method="POST" id="agregarCosechaForm">
+                    <div class="form-group">
+                        <label for="siembra_id">Seleccionar Siembra</label>
+                        <select id="siembra_id" name="siembra_id" class="form-control" required>
+                            <option value="">Seleccione una siembra</option>
+                            <?php
+                            // Obtener todas las siembras para el selector
+                            $siembras = $siembrasCollection->find();
+                            foreach ($siembras as $siembra) {
+                                $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
+                                $productoNombre = $producto ? $producto->nombre : 'Desconocido';
+                                echo '<option value="' . htmlspecialchars($siembra->_id) . '" data-fecha-siembra="' . htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')) . '">' . htmlspecialchars($productoNombre) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha_cosecha">Fecha de Cosecha</label>
+                        <input type="date" id="fecha_cosecha" name="fecha_cosecha" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cantidad">Cantidad</label>
+                        <input type="number" id="cantidad" name="cantidad" class="form-control" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="unidad">Unidad</label>
+                        <select id="unidad" name="unidad" class="form-control" required>
+                            <option value="">Seleccione una unidad</option>
+                            <option value="kg">Kilogramos</option>
+                            <option value="g">Gramos</option>
+                            <option value="lb">Libras</option>
+                            <option value="oz">Onzas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="detalles_cosecha">Detalles de la Cosecha</label>
+                        <textarea id="detalles_cosecha" name="detalles_cosecha" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
-      
+
+<script>
+    document.getElementById('agregarCosechaForm').addEventListener('submit', function (event) {
+        const siembraSelect = document.getElementById('siembra_id');
+        const fechaCosechaInput = document.getElementById('fecha_cosecha');
+        const fechaSiembra = siembraSelect.options[siembraSelect.selectedIndex].getAttribute('data-fecha-siembra');
+        
+        if (fechaCosechaInput.value < fechaSiembra) {
+            alert('La fecha de cosecha no puede ser menor que la fecha de siembra.');
+            event.preventDefault(); // Evita el envío del formulario si la validación falla
+        }
+    });
+</script>
+
 
         <!-- Scroll to Top Button-->
         <a class="scroll-to-top rounded" href="#page-top">

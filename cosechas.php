@@ -29,7 +29,11 @@ try {
     $siembrasMap = [];
 
     foreach ($siembras as $siembra) {
-        $siembrasMap[(string)$siembra->_id] = $siembra->producto;
+        if (isset($siembra->producto)) {
+            $siembrasMap[(string)$siembra->_id] = $siembra->producto;
+        } else {
+            $siembrasMap[(string)$siembra->_id] = 'Producto desconocido';
+        }
     }
 } catch (Exception $e) {
     $errors[] = 'Error al obtener las siembras: ' . $e->getMessage();

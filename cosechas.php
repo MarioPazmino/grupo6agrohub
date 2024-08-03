@@ -553,7 +553,9 @@ foreach ($errors as $message) {
         </div>
     </div>
 </div>
-<!-- Modal para editar cosecha -->
+
+
+                    <!-- Modal para editar cosecha -->
 <div class="modal fade" id="editarCosechaModal" tabindex="-1" role="dialog" aria-labelledby="editarCosechaModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -575,7 +577,7 @@ foreach ($errors as $message) {
                             foreach ($siembras as $siembra) {
                                 $producto = $productosCollection->findOne(['_id' => $siembra->producto_id]);
                                 $productoNombre = $producto ? $producto->nombre : 'Desconocido';
-                                echo '<option value="' . htmlspecialchars($siembra->_id) . '" data-fecha-siembra="' . htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')) . '">' . htmlspecialchars($productoNombre) . '</option>';
+                                echo '<option value="' . htmlspecialchars($siembra->_id) . '">' . htmlspecialchars($productoNombre) . '</option>';
                             }
                             ?>
                         </select>
@@ -606,7 +608,7 @@ foreach ($errors as $message) {
         </div>
     </div>
 </div>
-   </div>
+
 
 <script>
     $('#editarCosechaModal').on('show.bs.modal', function (event) {
@@ -620,13 +622,14 @@ foreach ($errors as $message) {
 
         var modal = $(this);
         modal.find('#cosecha_id').val(cosechaId);
-        modal.find('#siembra_id').val(siembraId);
+        modal.find('#siembra_id').val(siembraId); // Selecciona la opción correcta en el dropdown
         modal.find('#fecha_cosecha').val(fechaCosecha);
         modal.find('#cantidad').val(cantidad);
         modal.find('#unidad').val(unidad);
         modal.find('#detalles_cosecha').val(detallesCosecha);
     });
 </script>
+
                     
 <script>
     document.getElementById('agregarCosechaForm').addEventListener('submit', function (event) {

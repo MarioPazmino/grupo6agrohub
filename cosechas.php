@@ -118,11 +118,11 @@ foreach ($siembras as $siembra) {
         <h2>Agregar Cosecha</h2>
         <form method="POST">
             <div class="form-group">
-                <label for="siembra_id">ID de Siembra</label>
+                <label for="siembra_id">Nombre del Producto</label>
                 <select class="form-control" id="siembra_id" name="siembra_id" required>
-                    <?php foreach ($siembrasMap as $siembraId => $productoNombre): ?>
-                        <option value="<?php echo $siembraId; ?>">
-                            Siembra ID: <?php echo $siembraId; ?> - Producto: <?php echo $productoNombre; ?>
+                    <?php foreach ($siembras as $siembra): ?>
+                        <option value="<?php echo $siembra->_id; ?>">
+                            <?php echo isset($productosMap[(string)$siembra->producto_id]) ? $productosMap[(string)$siembra->producto_id] : 'Desconocido'; ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -191,7 +191,7 @@ foreach ($siembras as $siembra) {
                 <?php foreach ($cosechas as $cosecha): ?>
                     <tr>
                         <td><?php echo $cosecha->_id; ?></td>
-                        <td><?php echo $cosecha->siembra_id; ?></td>
+                        <td><?php echo isset($productosMap[(string)$cosecha->siembra_id]) ? $productosMap[(string)$cosecha->siembra_id] : 'Desconocido'; ?></td>
                         <td><?php echo $cosecha->fecha_cosecha->toDateTime()->format('Y-m-d'); ?></td>
                         <td><?php echo $cosecha->cantidad; ?></td>
                         <td><?php echo $cosecha->unidad; ?></td>

@@ -23,22 +23,18 @@ $siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
 $success = [];
 $errors = [];
 
+// Obtener los productos de las siembras
 try {
     $siembrasCursor = $siembrasCollection->find();
     $siembras = iterator_to_array($siembrasCursor);
     $siembrasMap = [];
 
     foreach ($siembras as $siembra) {
-        if (isset($siembra->producto)) {
-            $siembrasMap[(string)$siembra->_id] = $siembra->producto;
-        } else {
-            $siembrasMap[(string)$siembra->_id] = 'Producto desconocido';
-        }
+        $siembrasMap[(string)$siembra->_id] = $siembra->producto ?? 'Producto desconocido';
     }
 } catch (Exception $e) {
     $errors[] = 'Error al obtener las siembras: ' . $e->getMessage();
 }
-
 
 // Manejo de la eliminación de cosechas
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
@@ -67,21 +63,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         if ($_POST['action'] === 'add_cosecha') {
             try {
+                $detallesCosecha = [];
+
+                // Obtener detalles de cosecha del formulario
+                foreach ($_POST['cantidad_recolectada'] as $index => $cantidadRecolectada) {
+                    $detallesCosecha[] = [
+                        'cantidad_recolectada' => intval($cantidadRecolectada),
+                        'calidad' => $_POST['calidad'][$index]
+                    ];
+                }
+
                 $cosechaData = [
                     'siembra_id' => new ObjectId($_POST['siembra_id']),
                     'fecha_cosecha' => new MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_cosecha'])),
                     'cantidad' => intval($_POST['cantidad']),
                     'unidad' => $_POST['unidad'],
-                    'detalles_cosecha' => [
-                        [
-                            'cantidad_recolectada' => intval($_POST['cantidad_recolectada_1']),
-                            'calidad' => $_POST['calidad_1']
-                        ],
-                        [
-                            'cantidad_recolectada' => intval($_POST['cantidad_recolectada_2']),
-                            'calidad' => $_POST['calidad_2']
-                        ]
-                    ]
+                    'detalles_cosecha' => $detallesCosecha
                 ];
 
                 $result = $cosechasCollection->insertOne($cosechaData);
@@ -107,16 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'fecha_cosecha' => new MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_cosecha'])),
                         'cantidad' => intval($_POST['cantidad']),
                         'unidad' => $_POST['unidad'],
-                        'detalles_cosecha' => [
-                            [
-                                'cantidad_recolectada' => intval($_POST['cantidad_recolectada_1']),
-                                'calidad' => $_POST['calidad_1']
-                            ],
-                            [
-                                'cantidad_recolectada' => intval($_POST['cantidad_recolectada_2']),
-                                'calidad' => $_POST['calidad_2']
-                            ]
-                        ]
+                        'detalles_cosecha' => $_POST['detalles_cosecha'] // Asegúrate de enviar los detalles correctamente
                     ];
 
                     $result = $cosechasCollection->updateOne(
@@ -138,7 +126,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
 
 // Obtener cosechas para mostrar en la tabla
 try {
@@ -170,78 +157,6 @@ if (isset($_GET['id'])) {
     exit();
 }
 
-
-// Modifica la parte de eliminación de detalles de cosecha
-if (isset($_GET['action']) && $_GET['action'] === 'delete_detalle' && isset($_GET['cosecha_id']) && isset($_GET['detalle_index'])) {
-    $cosecha_id = $_GET['cosecha_id'];
-    $detalle_index = intval($_GET['detalle_index']);  // Convertir el índice a entero
-
-    $success = [];
-    $errors = [];
-
-    try {
-        $result = $productosCollection->updateOne(
-            ['_id' => new ObjectId($cosecha_id)],
-            ['$unset' => ['detalles_cosecha.' . $detalle_index => '']]
-        );
-
-        if ($result->getModifiedCount() > 0) {
-            $success[] = 'Detalle de cosecha eliminado exitosamente.';
-        } else {
-            $errors[] = 'No se pudo eliminar el detalle de cosecha.';
-        }
-    } catch (Exception $e) {
-        $errors[] = 'Error al eliminar el detalle de cosecha: ' . $e->getMessage();
-    }
-
-    // Redirigir a la página de cosechas después de la eliminación
-    header("Location: cosechas.php");
-    exit();
-}
-
-
-
-// Manejo de la agregación de detalles de cosecha
-if (isset($_POST['action']) && $_POST['action'] === 'add_detalle' && isset($_POST['cosecha_id']) && isset($_POST['cantidad_recolectada']) && isset($_POST['calidad'])) {
-    $cosecha_id = $_POST['cosecha_id'];
-    $detalle = [
-        'cantidad_recolectada' => intval($_POST['cantidad_recolectada']),
-        'calidad' => $_POST['calidad']
-    ];
-
-    try {
-        // Validar el ID de la cosecha
-        if (strlen($cosecha_id) === 24 && ctype_xdigit($cosecha_id)) {
-            $result = $productosCollection->updateOne(
-                ['_id' => new ObjectId($cosecha_id)],
-                ['$push' => ['detalles_cosecha' => $detalle]]
-            );
-            if ($result->getModifiedCount() > 0) {
-                $success[] = 'Detalle de cosecha agregado exitosamente.';
-            } else {
-                $errors[] = 'No se pudo agregar el detalle de cosecha. Verifique que la cosecha exista.';
-            }
-        } else {
-            $errors[] = 'ID de cosecha inválido.';
-        }
-    } catch (Exception $e) {
-        $errors[] = 'Error al agregar el detalle de cosecha: ' . $e->getMessage();
-    }
-
-    header('Location: cosechas.php');
-    exit();
-}
-
-
-
-
-
-
-
-
-
-
-
 // Contar el número total de empleados y tareas si el usuario es admin
 $total_empleados = 0;
 $total_tareas_pendientes = 0;
@@ -272,10 +187,6 @@ if ($_SESSION['rol'] === 'admin') {
     }
 }
 ?>
-
-
-
-
 
 
 
@@ -558,106 +469,106 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-<div class="row">
-    <div id="messages-container"></div>
-
-    <div class="col-lg-12">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Cosechas</h6>
-            </div>
-            <div class="card-body">
-
-                <?php if (!empty($success)): ?>
-                <div class="alert alert-success" role="alert">
-                    <?php foreach ($success as $message): ?>
-                    <?php echo htmlspecialchars($message); ?><br>
-                    <?php endforeach; ?>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Cosechas</h6>
                 </div>
-                <?php endif; ?>
+                <div class="card-body">
 
-                <?php if (!empty($errors)): ?>
-                <div class="alert alert-danger" role="alert">
-                    <?php foreach ($errors as $message): ?>
-                    <?php echo htmlspecialchars($message); ?><br>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
-
-<!-- Botón para abrir el modal de agregar cosecha (solo para admin) -->
-<?php if ($_SESSION['rol'] === 'admin'): ?>
-<button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarDetalleCosechaModal">
-    <i class="fas fa-plus"></i> Agregar Cosecha
-</button>
-<?php endif; ?>
-
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Producto Sembrado</th>
-                            <th>Fecha de Cosecha</th>
-                            <th>Cantidad Recolectada</th>
-                            <th>Calidad</th>
-                            <?php if ($_SESSION['rol'] === 'admin'): ?>
-                            <th>Acciones</th>
-                            <?php endif; ?>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($cosechas as $cosecha): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($siembrasMap[(string)$cosecha['siembra_id']] ?? 'Producto Desconocido'); ?></td>
-                            <td><?php echo htmlspecialchars(date('Y-m-d', $cosecha['fecha_cosecha']->toDateTime()->getTimestamp())); ?></td>
-                            <td>
-                                <?php 
-                                $totalCantidadRecolectada = 0;
-                                if (isset($cosecha['detalles_cosecha'])) {
-                                    foreach ($cosecha['detalles_cosecha'] as $detalle) {
-                                        $totalCantidadRecolectada += $detalle['cantidad_recolectada'] ?? 0;
-                                    }
-                                }
-                                echo htmlspecialchars($totalCantidadRecolectada);
-                                ?>
-                            </td>
-                            <td>
-                                <?php
-                                $calidades = [];
-                                if (isset($cosecha['detalles_cosecha'])) {
-                                    foreach ($cosecha['detalles_cosecha'] as $detalle) {
-                                        $calidades[] = htmlspecialchars($detalle['calidad'] ?? 'N/A');
-                                    }
-                                }
-                                echo implode(', ', $calidades);
-                                ?>
-                            </td>
-                            <?php if ($_SESSION['rol'] === 'admin'): ?>
-                            <td>
-                                <button type="button" class="btn btn-info btn-sm" onclick="showDetallesCosecha(<?php echo htmlspecialchars(json_encode($cosecha['detalles_cosecha']), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($cosecha['_id']); ?>')">
-                                    <i class="fas fa-info-circle"></i> Detalles
-                                </button>
-                                <button type="button" class="btn btn-warning btn-sm" onclick="editCosecha('<?php echo htmlspecialchars($cosecha['_id']); ?>', '<?php echo htmlspecialchars((string)$cosecha['siembra_id']); ?>', '<?php echo htmlspecialchars($cosecha['fecha_cosecha']->toDateTime()->format('Y-m-d')); ?>', '<?php echo htmlspecialchars($cosecha['cantidad']); ?>', '<?php echo htmlspecialchars($cosecha['unidad']); ?>', <?php echo htmlspecialchars(json_encode($cosecha['detalles_cosecha']), ENT_QUOTES, 'UTF-8'); ?>)">
-                                    <i class="fas fa-edit"></i> Editar
-                                </button>
-                                <a href="cosechas.php?action=delete&id=<?php echo htmlspecialchars($cosecha['_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta cosecha?')">
-                                    <i class="fas fa-trash"></i> Eliminar
-                                </a>
-                            </td>
-                            <?php endif; ?>
-                        </tr>
+                    <!-- Mensajes de éxito -->
+                    <?php if (!empty($success)): ?>
+                    <div class="alert alert-success" role="alert">
+                        <?php foreach ($success as $message): ?>
+                        <?php echo htmlspecialchars($message); ?><br>
                         <?php endforeach; ?>
-                    </tbody>
-                </table>
+                    </div>
+                    <?php endif; ?>
 
+                    <!-- Mensajes de error -->
+                    <?php if (!empty($errors)): ?>
+                    <div class="alert alert-danger" role="alert">
+                        <?php foreach ($errors as $message): ?>
+                        <?php echo htmlspecialchars($message); ?><br>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Botón para abrir el modal de agregar cosecha (solo para admin) -->
+                    <?php if ($_SESSION['rol'] === 'admin'): ?>
+                    <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#agregarDetalleCosechaModal">
+                        <i class="fas fa-plus"></i> Agregar Cosecha
+                    </button>
+                    <?php endif; ?>
+
+                    <!-- Tabla de Cosechas -->
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Producto Sembrado</th>
+                                <th>Fecha de Cosecha</th>
+                                <th>Cantidad Recolectada</th>
+                                <th>Calidad</th>
+                                <?php if ($_SESSION['rol'] === 'admin'): ?>
+                                <th>Acciones</th>
+                                <?php endif; ?>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($cosechas as $cosecha): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($siembrasMap[(string)$cosecha['siembra_id']] ?? 'Producto Desconocido'); ?></td>
+                                <td><?php echo htmlspecialchars(date('Y-m-d', $cosecha['fecha_cosecha']->toDateTime()->getTimestamp())); ?></td>
+                                <td>
+                                    <?php 
+                                    $totalCantidadRecolectada = 0;
+                                    if (isset($cosecha['detalles_cosecha'])) {
+                                        foreach ($cosecha['detalles_cosecha'] as $detalle) {
+                                            $totalCantidadRecolectada += $detalle['cantidad_recolectada'] ?? 0;
+                                        }
+                                    }
+                                    echo htmlspecialchars($totalCantidadRecolectada);
+                                    ?>
+                                </td>
+                                <td>
+                                    <?php
+                                    $calidades = [];
+                                    if (isset($cosecha['detalles_cosecha'])) {
+                                        foreach ($cosecha['detalles_cosecha'] as $detalle) {
+                                            $calidades[] = htmlspecialchars($detalle['calidad'] ?? 'N/A');
+                                        }
+                                    }
+                                    echo implode(', ', $calidades);
+                                    ?>
+                                </td>
+                                <?php if ($_SESSION['rol'] === 'admin'): ?>
+                                <td>
+                                    <button type="button" class="btn btn-info btn-sm" onclick="showDetallesCosecha(<?php echo htmlspecialchars(json_encode($cosecha['detalles_cosecha']), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($cosecha['_id']); ?>')">
+                                        <i class="fas fa-info-circle"></i> Detalles
+                                    </button>
+                                    <button type="button" class="btn btn-warning btn-sm" onclick="editCosecha('<?php echo htmlspecialchars($cosecha['_id']); ?>', '<?php echo htmlspecialchars((string)$cosecha['siembra_id']); ?>', '<?php echo htmlspecialchars($cosecha['fecha_cosecha']->toDateTime()->format('Y-m-d')); ?>', '<?php echo htmlspecialchars($cosecha['cantidad']); ?>', '<?php echo htmlspecialchars($cosecha['unidad']); ?>', <?php echo htmlspecialchars(json_encode($cosecha['detalles_cosecha']), ENT_QUOTES, 'UTF-8'); ?>)">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                    <a href="cosechas.php?action=delete&id=<?php echo htmlspecialchars($cosecha['_id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta cosecha?')">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </a>
+                                </td>
+                                <?php endif; ?>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-
-
 <!-- Modal Agregar Cosecha (solo para admin) -->
 <?php if ($_SESSION['rol'] === 'admin'): ?>
-<!-- Modal para agregar detalles de cosecha -->
 <div class="modal fade" id="agregarDetalleCosechaModal" tabindex="-1" role="dialog" aria-labelledby="agregarDetalleCosechaModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -706,47 +617,35 @@ if ($_SESSION['rol'] === 'admin') {
 
 <script>
     function agregarDetalleCosecha() {
-        // Contenedor para los detalles de cosecha
-        var container = document.getElementById('detalles_cosecha_container');
-        
-        // Contador de detalles de cosecha
-        var detalleIndex = container.children.length;
-        
-        // Crear elementos para un nuevo detalle de cosecha
-        var detalleDiv = document.createElement('div');
-        detalleDiv.classList.add('form-group');
-        detalleDiv.id = 'detalle_' + detalleIndex;
-
-        var cantidadRecolectadaLabel = document.createElement('label');
-        cantidadRecolectadaLabel.innerText = 'Cantidad Recolectada';
-
-        var cantidadRecolectadaInput = document.createElement('input');
-        cantidadRecolectadaInput.type = 'number';
-        cantidadRecolectadaInput.className = 'form-control';
-        cantidadRecolectadaInput.name = 'detalles_cosecha[' + detalleIndex + '][cantidad_recolectada]';
-        cantidadRecolectadaInput.required = true;
-
-        var calidadLabel = document.createElement('label');
-        calidadLabel.innerText = 'Calidad';
-
-        var calidadInput = document.createElement('input');
-        calidadInput.type = 'text';
-        calidadInput.className = 'form-control';
-        calidadInput.name = 'detalles_cosecha[' + detalleIndex + '][calidad]';
-        calidadInput.required = true;
-
-        // Agregar los campos al contenedor de detalles de cosecha
-        detalleDiv.appendChild(cantidadRecolectadaLabel);
-        detalleDiv.appendChild(cantidadRecolectadaInput);
-        detalleDiv.appendChild(calidadLabel);
-        detalleDiv.appendChild(calidadInput);
-
-        container.appendChild(detalleDiv);
+        const container = document.getElementById('detalles_cosecha_container');
+        const newDetail = document.createElement('div');
+        newDetail.classList.add('form-group');
+        newDetail.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Cantidad Recolectada:</label>
+                    <input type="number" class="form-control" name="cantidad_recolectada[]" required>
+                </div>
+                <div class="col-md-6">
+                    <label>Calidad:</label>
+                    <input type="text" class="form-control" name="calidad[]" required>
+                </div>
+            </div>
+        `;
+        container.appendChild(newDetail);
     }
 
     function validarFormularioDetalleCosecha() {
-        // Aquí puedes agregar lógica de validación adicional si es necesario
-        return true; // Retorna false si quieres evitar el envío del formulario
+        // Aquí puedes agregar validaciones específicas para el formulario
+        return true;
+    }
+
+    function showDetallesCosecha(detalles, id) {
+        // Implementar función para mostrar detalles de cosecha
+    }
+
+    function editCosecha(id, siembra_id, fecha_cosecha, cantidad, unidad, detalles) {
+        // Implementar función para editar cosecha
     }
 </script>
 
@@ -793,349 +692,17 @@ if ($_SESSION['rol'] === 'admin') {
 </div>
 
 
-<!-- Modal para agregar variedad -->
-<div class="modal fade" id="agregarVariedadModal" tabindex="-1" role="dialog" aria-labelledby="agregarVariedadModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-<form action="productos.php" method="POST" id="agregarVariedadForm" onsubmit="return validarFormularioVariedad()">
-    <div class="modal-header">
-        <h5 class="modal-title" id="agregarVariedadModalLabel">Agregar Variedad</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-    <div class="modal-body">
-        <input type="hidden" id="product_id" name="product_id">
 
-        <div class="form-group">
-            <label for="variedad_nombre">Nombre de la Variedad</label>
-            <input type="text" class="form-control" id="variedad_nombre" name="variedad_nombre" required>
-        </div>
 
-        <div class="form-group">
-            <label for="caracteristicas">Características</label>
-            <textarea class="form-control" id="caracteristicas" name="caracteristicas" required></textarea>
-        </div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary" name="action" value="add_variedad">Agregar Variedad</button>
-    </div>
-</form>
 
 
 
-        </div>
-    </div>
-</div>
 
 
 
-<!-- Modal para ver variedades -->
-<div class="modal fade" id="verVariedadesModal" tabindex="-1" role="dialog" aria-labelledby="verVariedadesModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="verVariedadesModalLabel">Variedades</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Características</th>
-                            <?php if ($_SESSION['rol'] === 'admin'): ?>
-                            <th>Acciones</th>
-                            <?php endif; ?>
-                        </tr>
-                    </thead>
-                    <tbody id="variedades_table_body">
-                        <!-- Las variedades se cargarán aquí con JavaScript -->
-                    </tbody>
-                </table>
 
-                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <button type="button" class="btn btn-primary" onclick="openAddVariedadModal(document.getElementById('product_id').value)">
-                    <i class="fas fa-plus"></i> Agregar Variedad
-                </button>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
 
 
-
-
-<script>
-    let detalleCount = 0;
-
-    function agregarDetalleCosecha() {
-        detalleCount++;
-        const detallesContainer = document.getElementById('detalles_cosecha_container');
-        const detalleHtml = `
-            <div class="detalle-cosecha" id="detalle_${detalleCount}">
-                <h6>Detalle ${detalleCount}</h6>
-                <div class="form-group">
-                    <label for="cantidad_recolectada_${detalleCount}">Cantidad Recolectada</label>
-                    <input type="number" class="form-control" id="cantidad_recolectada_${detalleCount}" name="detalles_cosecha[${detalleCount}][cantidad_recolectada]" required>
-                </div>
-                <div class="form-group">
-                    <label for="calidad_${detalleCount}">Calidad</label>
-                    <select class="form-control" id="calidad_${detalleCount}" name="detalles_cosecha[${detalleCount}][calidad]" required>
-                        <option value="alta">Alta</option>
-                        <option value="media">Media</option>
-                        <option value="baja">Baja</option>
-                    </select>
-                </div>
-                <button type="button" class="btn btn-danger" onclick="eliminarDetalleCosecha(${detalleCount})">Eliminar Detalle</button>
-            </div>`;
-        detallesContainer.insertAdjacentHTML('beforeend', detalleHtml);
-    }
-
-    function eliminarDetalleCosecha(detalleId) {
-        const detalleElement = document.getElementById(`detalle_${detalleId}`);
-        if (detalleElement) {
-            detalleElement.remove();
-        }
-    }
-
-    function validarFormularioDetalleCosecha() {
-        const cantidad = document.getElementById('cantidad').value;
-        const unidad = document.getElementById('unidad').value;
-        const fechaCosecha = document.getElementById('fecha_cosecha').value;
-
-        if (!cantidad || !unidad || !fechaCosecha) {
-            alert('Por favor, complete todos los campos requeridos.');
-            return false;
-        }
-
-        return true;
-    }
-
-    // Función para abrir el modal de agregar detalle de cosecha
-    function openAddDetalleCosechaModal(siembraId) {
-        document.getElementById('siembra_id').value = siembraId;
-        $('#agregarDetalleCosechaModal').modal('show');
-    }
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-    // Función para mostrar el modal de agregar variedad
-    function showVariedades(variedades, productId) {
-        document.getElementById('product_id').value = productId;
-
-        // Mostrar variedades en el modal
-        let variedadesHtml = '';
-        variedades.forEach(variedad => {
-            variedadesHtml += `<tr>
-                <td>${variedad.nombre_variedad}</td>
-                <td>${variedad.caracteristicas}</td>
-                <?php if ($_SESSION['rol'] === 'admin'): ?>
-                <td>
-                    <a href="?action=delete_variedad&product_id=${productId}&variedad_nombre=${encodeURIComponent(variedad.nombre_variedad)}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta variedad?');">
-                        <i class="fas fa-trash"></i> Eliminar
-                    </a>
-                </td>
-                <?php endif; ?>
-            </tr>`;
-        });
-
-        document.getElementById('variedades_table_body').innerHTML = variedadesHtml;
-        $('#verVariedadesModal').modal('show');
-    }
-
-    // Función para abrir el modal de agregar variedad
-    function openAddVariedadModal(productId) {
-        document.getElementById('product_id').value = productId;
-        $('#agregarVariedadModal').modal('show');
-    }
-</script>
-
-                    
-<script>
-$(document).ready(function() {
-    // Configura el modal de agregar variedad con el ID del producto
-    $('#agregarVariedadModal').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget); // Botón que abrió el modal
-        var productId = button.data('product-id'); // Extrae el ID del producto
-        var modal = $(this);
-        modal.find('#product_id').val(productId);
-    });
-
-    // Maneja el envío del formulario de agregar variedad
-    $('#agregarVariedadForm').on('submit', function(e) {
-        e.preventDefault(); // Evita el envío normal del formulario
-        var formData = $(this).serialize(); // Serializa los datos del formulario
-
-        $.ajax({
-            url: 'productos.php',
-            type: 'POST',
-            data: formData + '&action=add_variedad', // Agrega la acción al formulario
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    alert(response.success[0]);
-                    $('#agregarVariedadModal').modal('hide');
-                    // Recargar la tabla de variedades
-                    showVariedades(response.variedades, $('#product_id').val());
-                } else if (response.errors) {
-                    alert(response.errors[0]);
-                }
-            },
-            error: function() {
-                alert('Error al agregar la variedad.');
-            }
-        });
-    });
-});
-
-    function eliminarVariedad(productoId, nombreVariedad) {
-        if (confirm('¿Estás seguro de que deseas eliminar esta variedad?')) {
-            fetch(`productos.php?action=delete_variedad&product_id=${productoId}&variedad_nombre=${encodeURIComponent(nombreVariedad)}`, {
-                method: 'GET'
-            })
-            .then(response => response.json())
-            .then(data => {
-                let messageHTML = '';
-                // Limpiar el contenedor de mensajes antes de agregar nuevos
-                const messagesContainer = document.getElementById('messages-container');
-                messagesContainer.innerHTML = '';
-
-                if (data.success && data.success.length > 0) {
-                    messageHTML += '<div class="alert alert-success" role="alert">';
-                    data.success.forEach(message => {
-                        messageHTML += `${message}<br>`;
-                    });
-                    messageHTML += '</div>';
-                }
-                if (data.errors && data.errors.length > 0) {
-                    messageHTML += '<div class="alert alert-danger" role="alert">';
-                    data.errors.forEach(message => {
-                        messageHTML += `${message}<br>`;
-                    });
-                    messageHTML += '</div>';
-                }
-                
-                // Insertar los mensajes en el DOM solo si hay mensajes que mostrar
-                if (messageHTML !== '') {
-                    messagesContainer.innerHTML = messageHTML;
-                    // Hacer scroll hacia los mensajes
-                    messagesContainer.scrollIntoView({ behavior: "smooth" });
-                }
-                
-                // Actualizar la tabla de variedades en lugar de recargar la página
-                if (data.success && data.success.length > 0) {
-                    actualizarTablaVariedades(); // Asegúrate de definir esta función para actualizar la tabla de variedades
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al eliminar variedad');
-            });
-        }
-    }
-
-
-</script>
-
-
-                    <script>
-function validarFormularioVariedad() {
-    var nombreVariedad = document.getElementById('variedad_nombre').value;
-    var caracteristicas = document.getElementById('caracteristicas').value;
-    var regex = /\d/; // Expresión regular para detectar números
-
-    if (regex.test(nombreVariedad)) {
-        alert('El campo "Nombre de la Variedad" no debe contener números.');
-        return false;
-    }
-
-    if (caracteristicas && regex.test(caracteristicas)) {
-        alert('El campo "Características" no debe contener números.');
-        return false;
-    }
-
-    return true; // Si todas las validaciones son correctas
-}
-</script>
-
-<script>
-function openEditModal(id) {
-    console.log("ID recibido:", id); // Para depuración
-    fetch('cosechas.php?id=' + id)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                console.log("Datos recibidos:", data); // Para depuración
-                document.getElementById('edit_id').value = id; // Usa el ID original
-                document.getElementById('edit_nombre').value = data.nombre;
-                document.getElementById('edit_descripcion').value = data.descripcion;
-                document.getElementById('edit_fecha').value = data.fecha;
-                document.getElementById('edit_cantidad_recolectada').value = data.cantidad_recolectada;
-                document.getElementById('edit_calidad').value = data.calidad;
-
-                $('#editarCosechaModal').modal('show');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error); // Para depuración
-            alert('Error al obtener los datos de la cosecha.');
-        });
-}
-</script>
-
-<script>
-function validarFormulario() {
-    var nombre = document.getElementById('edit_nombre').value;
-    var descripcion = document.getElementById('edit_descripcion').value;
-    var regex = /\d/; // Expresión regular para detectar números
-
-    if (regex.test(nombre)) {
-        alert('El campo "Nombre" no debe contener números.');
-        return false;
-    }
-
-    if (regex.test(descripcion)) {
-        alert('El campo "Descripción" no debe contener números.');
-        return false;
-    }
-
-    return true; // Si todas las validaciones son correctas
-}
-</script>
-
-
-
-
-
-
-
-
-
-
-
-                    
 
                             
                 </div>

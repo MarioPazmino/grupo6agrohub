@@ -549,8 +549,6 @@ if ($_SESSION['rol'] === 'admin') {
 
                     </div>
 
-
-
 <!-- Content Row -->
 <div class="row">
     <div id="messages-container"></div>
@@ -591,9 +589,8 @@ if ($_SESSION['rol'] === 'admin') {
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Nombre</th>
-                            <th>Descripción</th>
-                            <th>Fecha</th>
+                            <th>Fecha de Siembra</th>
+                            <th>Fecha de Cosecha</th>
                             <th>Cantidad Recolectada</th>
                             <th>Calidad</th>
                             <?php if ($_SESSION['rol'] === 'admin'): ?>
@@ -604,8 +601,7 @@ if ($_SESSION['rol'] === 'admin') {
                     <tbody>
                         <?php foreach ($cosechas as $cosecha): ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($cosecha->nombre ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($cosecha->descripcion ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($cosecha->fecha_siembra ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($cosecha->fecha_cosecha ?? ''); ?></td>
                             <td>
                                 <?php 
@@ -650,6 +646,7 @@ if ($_SESSION['rol'] === 'admin') {
         </div>
     </div>
 </div>
+
 
 <!-- Modal Agregar Cosecha (solo para admin) -->
 <?php if ($_SESSION['rol'] === 'admin'): ?>

@@ -147,6 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
 }
 
 
+
 ?>
 
 <!DOCTYPE html>
@@ -587,7 +588,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
 </div>
 
 
-
 <!-- Modal para editar siembra -->
 <div class="modal fade" id="editarSiembraModal" tabindex="-1" role="dialog" aria-labelledby="editarSiembraModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -652,6 +652,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
         </div>
     </div>
 </div>
+
 <script>
     $('#editarSiembraModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);
@@ -671,6 +672,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
         modal.find('#edit_estado').val(estado);
     });
 </script>
+
 
 
 

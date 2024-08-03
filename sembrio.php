@@ -538,20 +538,6 @@ try {
     </div>
 </div>
 
-<script>
-    // Función para mostrar variedades en el modal
-    function showVariedades(variedades, productoId) {
-        let modalBody = document.getElementById('variedadesModalBody');
-        modalBody.innerHTML = '';
-        variedades.forEach(function(variedad) {
-            modalBody.innerHTML += `<p><strong>Variedad:</strong> ${variedad.nombre} <br> <strong>Descripción:</strong> ${variedad.descripcion}</p>`;
-        });
-        $('#variedadesModal').modal('show');
-    }
-</script>
-
-
-
 
 
 

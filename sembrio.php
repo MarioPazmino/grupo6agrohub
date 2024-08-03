@@ -466,9 +466,6 @@ try {
     <a href="?action=delete_siembra&id=<?php echo htmlspecialchars($siembra->_id); ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta siembra?');">
         <i class="fas fa-trash"></i>
     </a>
-    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editarSiembraModal" data-id="<?php echo htmlspecialchars($siembra->_id); ?>" data-empleado="<?php echo htmlspecialchars($siembra->empleado_id); ?>" data-terreno="<?php echo htmlspecialchars($siembra->terreno_id); ?>" data-producto="<?php echo htmlspecialchars($siembra->producto_id); ?>" data-fecha="<?php echo htmlspecialchars($siembra->fecha_siembra->toDateTime()->format('Y-m-d')); ?>" data-estado="<?php echo htmlspecialchars($siembra->estado); ?>">
-        <i class="fas fa-edit"></i>
-    </button>
     <?php endif; ?>
 </td>
 

@@ -108,9 +108,7 @@ try {
 
 
 
-
-
-    // Procesar formulario de edición de siembra
+// Procesar formulario de edición de siembra
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
     $siembra_id = $_POST['siembra_id'];
     $empleado_id = $_POST['empleado_id'];
@@ -119,26 +117,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['siembra_id'])) {
     $fecha_siembra = new \MongoDB\BSON\UTCDateTime(new DateTime($_POST['fecha_siembra']));
     $estado = $_POST['estado'];
 
-    try {
-        $result = $siembrasCollection->updateOne(
-            ['_id' => new ObjectId($siembra_id)],
-            ['$set' => [
-                'empleado_id' => new \MongoDB\BSON\ObjectId($empleado_id),
-                'terreno_id' => new \MongoDB\BSON\ObjectId($terreno_id),
-                'producto_id' => new \MongoDB\BSON\ObjectId($producto_id),
-                'fecha_siembra' => $fecha_siembra,
-                'estado' => $estado
-            ]]
-        );
-        if ($result->getModifiedCount() > 0) {
-            $success[] = 'Siembra actualizada correctamente.';
-        } else {
-            $errors[] = 'No se encontraron cambios para actualizar.';
+    // Validar el formato del ID
+    if (preg_match('/^[a-f0-9]{24}$/i', $siembra_id)) {
+        try {
+            $result = $siembrasCollection->updateOne(
+                ['_id' => new \MongoDB\BSON\ObjectId($siembra_id)],
+                ['$set' => [
+                    'empleado_id' => new \MongoDB\BSON\ObjectId($empleado_id),
+                    'terreno_id' => new \MongoDB\BSON\ObjectId($terreno_id),
+                    'producto_id' => new \MongoDB\BSON\ObjectId($producto_id),
+                    'fecha_siembra' => $fecha_siembra,
+                    'estado' => $estado
+                ]]
+            );
+            if ($result->getModifiedCount() > 0) {
+                $success[] = 'Siembra actualizada correctamente.';
+            } else {
+                $errors[] = 'No se encontraron cambios para actualizar.';
+            }
+        } catch (Exception $e) {
+            $errors[] = 'Error al actualizar la siembra: ' . $e->getMessage();
         }
-    } catch (Exception $e) {
-        $errors[] = 'Error al actualizar la siembra: ' . $e->getMessage();
+    } else {
+        $errors[] = 'ID de siembra no válido.';
     }
 }
+
 
 ?>
 

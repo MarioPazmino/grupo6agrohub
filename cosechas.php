@@ -551,8 +551,6 @@ if ($_SESSION['rol'] === 'admin') {
 
 
 
-
-
 <!-- Content Row -->
 <div class="row">
     <div id="messages-container"></div>
@@ -606,11 +604,31 @@ if ($_SESSION['rol'] === 'admin') {
                     <tbody>
                         <?php foreach ($cosechas as $cosecha): ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($cosecha->nombre); ?></td>
-                            <td><?php echo htmlspecialchars($cosecha->descripcion); ?></td>
-                            <td><?php echo htmlspecialchars($cosecha->fecha); ?></td>
-                            <td><?php echo htmlspecialchars($cosecha->cantidad_recolectada); ?></td>
-                            <td><?php echo htmlspecialchars($cosecha->calidad); ?></td>
+                            <td><?php echo htmlspecialchars($cosecha->nombre ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($cosecha->descripcion ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($cosecha->fecha_cosecha ?? ''); ?></td>
+                            <td>
+                                <?php 
+                                $totalCantidadRecolectada = 0;
+                                if (isset($cosecha->detalles_cosecha)) {
+                                    foreach ($cosecha->detalles_cosecha as $detalle) {
+                                        $totalCantidadRecolectada += $detalle['cantidad_recolectada'] ?? 0;
+                                    }
+                                }
+                                echo htmlspecialchars($totalCantidadRecolectada);
+                                ?>
+                            </td>
+                            <td>
+                                <?php
+                                $calidades = [];
+                                if (isset($cosecha->detalles_cosecha)) {
+                                    foreach ($cosecha->detalles_cosecha as $detalle) {
+                                        $calidades[] = htmlspecialchars($detalle['calidad'] ?? 'N/A');
+                                    }
+                                }
+                                echo implode(', ', $calidades);
+                                ?>
+                            </td>
                             <?php if ($_SESSION['rol'] === 'admin'): ?>
                             <td>
                                 <button type="button" class="btn btn-info btn-sm" onclick="showDetallesCosecha(<?php echo htmlspecialchars(json_encode($cosecha->detalles_cosecha), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo htmlspecialchars($cosecha->_id); ?>')">

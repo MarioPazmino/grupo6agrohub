@@ -661,7 +661,7 @@ if ($_SESSION['rol'] === 'admin') {
 <div class="modal fade" id="agregarDetalleCosechaModal" tabindex="-1" role="dialog" aria-labelledby="agregarDetalleCosechaModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form action="productos.php" method="POST" id="agregarDetalleCosechaForm" onsubmit="return validarFormularioDetalleCosecha()">
+            <form action="cosechas.php" method="POST" id="agregarDetalleCosechaForm" onsubmit="return validarFormularioDetalleCosecha()">
                 <div class="modal-header">
                     <h5 class="modal-title" id="agregarDetalleCosechaModalLabel">Agregar Detalle de Cosecha</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">

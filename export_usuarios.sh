@@ -20,7 +20,7 @@ then
     exit 1
 fi
 
-# Process the JSON file with jq to remove $oid and $date and simplify the structure
+# Process the JSON file with jq
 "$JQ_PATH" 'map({
     _id: ._id.$oid,  # Extrae el valor del campo $oid
     nombre: .nombre,

@@ -5,13 +5,23 @@ DB_NAME="grupo6_agrohub"
 OUTPUT_DIR="/var/www/html/grupo6agrohub/backup"
 URI="mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem"
 
+# Define the path to jq
+JQ_PATH="/usr/bin/jq"  # Cambia esto si jq está en una ubicación diferente
+
 # Export the usuarios collection to JSON
 COLLECTION="usuarios"
 echo "Exporting collection: $COLLECTION"
 mongoexport --uri="$URI" --db="$DB_NAME" --collection="$COLLECTION" --jsonArray --out="$OUTPUT_DIR/$COLLECTION.json"
 
+# Check if jq is installed
+if ! command -v "$JQ_PATH" &> /dev/null
+then
+    echo "jq command not found. Please install jq."
+    exit 1
+fi
+
 # Process the JSON file with jq
-jq 'map({
+"$JQ_PATH" 'map({
     _id: ._id.$oid,
     nombre: .nombre,
     apellido: .apellido,

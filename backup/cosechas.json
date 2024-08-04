@@ -1,0 +1,6 @@
+[
+{"_id":{"$oid":"66ae47d76faf39fbf4065ad2"},"siembra_id":{"$oid":"66ad623c2cdd8b6c7b008952"},"fecha_cosecha":{"$date":"2024-08-15T00:00:00Z"},"cantidad":56654,"unidad":"fhhgh","detalles_cosecha":"hhfgff"}
+,{"_id":{"$oid":"66ae49f93b0e0abc980e1f32"},"siembra_id":{"$oid":"66ad623c2cdd8b6c7b008952"},"fecha_cosecha":{"$date":"2024-12-20T00:00:00Z"},"cantidad":22,"unidad":"kg","detalles_cosecha":"vcnncvnnb"}
+,{"_id":{"$oid":"66ae53773b0e0abc980e1f35"},"siembra_id":{"$oid":"66ad623c2cdd8b6c7b008952"},"fecha_cosecha":{"$date":"2024-08-31T00:00:00Z"},"cantidad":456,"unidad":"DS","detalles_cosecha":"fhfhh"}
+,{"_id":{"$oid":"66ae5758647b892cd1074a03"},"siembra_id":{"$oid":"66ad7c8c0c12b9ad040c0e94"},"fecha_cosecha":{"$date":"2024-09-08T00:00:00Z"},"cantidad":656,"unidad":"g","detalles_cosecha":"yryyryt"}
+]

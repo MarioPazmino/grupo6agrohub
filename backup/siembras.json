@@ -1,0 +1,6 @@
+[
+{"_id":{"$oid":"66ad7c8c0c12b9ad040c0e94"},"empleado_id":{"$oid":"66a719feaaaa8db2ac196d16"},"terreno_id":{"$oid":"66a8587bf3206d05420bb687"},"producto_id":{"$oid":"66ac588db5acabfe2f012812"},"fecha_siembra":{"$date":"2024-08-22T00:00:00Z"},"estado":"pendiente"}
+,{"_id":{"$oid":"66ad7e111ae7e5878f050d33"},"empleado_id":{"$oid":"66a719feaaaa8db2ac196d16"},"terreno_id":{"$oid":"66a8587bf3206d05420bb687"},"producto_id":{"$oid":"66ac588db5acabfe2f012812"},"fecha_siembra":{"$date":"2024-08-31T00:00:00Z"},"estado":"completada"}
+,{"_id":{"$oid":"66ad7e20d2fbf835cc05aab5"},"empleado_id":{"$oid":"66a719feaaaa8db2ac196d16"},"terreno_id":{"$oid":"66a8587bf3206d05420bb687"},"producto_id":{"$oid":"66ac588db5acabfe2f012812"},"fecha_siembra":{"$date":"2024-08-31T00:00:00Z"},"estado":"en_proceso"}
+,{"_id":{"$oid":"66ad8078716ab809c70b8eb5"},"empleado_id":{"$oid":"66a719feaaaa8db2ac196d16"},"terreno_id":{"$oid":"66a8587bf3206d05420bb687"},"producto_id":{"$oid":"66ac588db5acabfe2f012812"},"fecha_siembra":{"$date":"2024-08-31T00:00:00Z"},"estado":"en_proceso"}
+]

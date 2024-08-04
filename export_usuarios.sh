@@ -29,24 +29,24 @@ then
     exit 1
 fi
 
-# Process the JSON file with jq
 "$JQ_PATH" 'map({
-    _id: ._id.$oid,
+    _id: ._id.$oid // O simplemente ._id si no es un objeto anidado
     nombre: .nombre,
     apellido: .apellido,
     email: .email,
     telefono: .telefono,
     cedula: .cedula,
     rol: .rol,
-    fecha_contratacion: .fecha_contratacion.$date,
+    fecha_contratacion: .fecha_contratacion, // Ajusta si es necesario
     tareas_asignadas: (.tareas_asignadas // [] | map({
-        tarea_id: .tarea_id.$oid,
+        tarea_id: .tarea_id // Ajusta si es necesario
         descripcion: .descripcion,
         estado: .estado
     })),
     password: .password,
     nombre_usuario: .nombre_usuario
 })' "$OUTPUT_DIR/$COLLECTION.json" > "$OUTPUT_DIR/$COLLECTION.tmp"
+
 
 # Replace the original file with the modified one
 mv "$OUTPUT_DIR/$COLLECTION.tmp" "$OUTPUT_DIR/$COLLECTION.json"

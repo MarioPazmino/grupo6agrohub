@@ -8,10 +8,19 @@ URI="mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docd
 # Define the path to jq
 JQ_PATH="/usr/bin/jq"  # Cambia esto si jq está en una ubicación diferente
 
-# Export the usuarios collection to JSON
+# Define the collection name
 COLLECTION="usuarios"
+echo "Collection: $COLLECTION"
+
+# Export the usuarios collection to JSON
 echo "Exporting collection: $COLLECTION"
 mongoexport --uri="$URI" --db="$DB_NAME" --collection="$COLLECTION" --jsonArray --out="$OUTPUT_DIR/$COLLECTION.json"
+
+# Check if mongoexport was successful
+if [ $? -ne 0 ]; then
+    echo "mongoexport failed"
+    exit 1
+fi
 
 # Check if jq is installed
 if ! command -v "$JQ_PATH" &> /dev/null

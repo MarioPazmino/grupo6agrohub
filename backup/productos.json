@@ -1,5 +1,0 @@
-[
-{"_id":{"$oid":"66abe6ea3dfea2fbcc01aff2"},"nombre":"mario1","descripcion":"dsfdff","tipo":"Tipo1aaaa","precio_unitario":4354.0,"unidad":"sda","variedades":[{"nombre_variedad":"sad","caracteristicas":"dsdsasad"}]}
-,{"_id":{"$oid":"66abdef51a12bf92b003f242"},"nombre":"mario2","descripcion":"bvvbvb","tipo":"Tipo1","precio_unitario":546.0,"unidad":"gfgfgf","variedades":[{"nombre_variedad":"fbc","caracteristicas":"bcbbc"},{"nombre_variedad":"sdfddfs","caracteristicas":"dfsfdsfdssdf"}]}
-,{"_id":{"$oid":"66a85af8506b5c54511dc471"},"nombre":"Semilla de Maíz","descripcion":"Semilla para cultivo de maíz.","tipo":"abono","precio_unitario":15.0,"unidad":"kg","variedades":[{"nombre_variedad":"Dente de León","caracteristicas":"Semilla de maíz resistente, ideal para climas cálidos."}]}
-]

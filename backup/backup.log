@@ -496,3 +496,32 @@ Exporting collection: usuarios
 2024-08-04T19:00:02.083+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
 2024-08-04T19:00:02.107+0000	exported 3 records
 Backup completed.
+Exporting collection: cosechas
+2024-08-04T19:10:01.175+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T19:10:01.201+0000	exported 5 records
+Exporting collection: productos
+2024-08-04T19:10:01.237+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T19:10:01.259+0000	exported 4 records
+Exporting collection: siembras
+2024-08-04T19:10:01.304+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T19:10:01.324+0000	exported 5 records
+Exporting collection: terrenos
+2024-08-04T19:10:01.369+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T19:10:01.389+0000	exported 2 records
+Exporting collection: usuarios
+2024-08-04T19:10:01.426+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T19:10:01.460+0000	exported 3 records
+Backup completed.
+Exporting collection: cosechas
+2024-08-04T19:20:01.520+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T19:20:01.547+0000	exported 5 records
+Exporting collection: productos
+2024-08-04T19:20:01.584+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T19:20:01.617+0000	exported 4 records
+Exporting collection: siembras
+2024-08-04T19:20:01.666+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T19:20:01.687+0000	exported 5 records
+Exporting collection: terrenos
+2024-08-04T19:20:01.732+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T19:20:01.769+0000	exported 2 records
+Exporting collection: usuarios

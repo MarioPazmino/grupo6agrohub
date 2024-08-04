@@ -13,9 +13,17 @@ for COLLECTION in "${COLLECTIONS[@]}"; do
     echo "Exporting collection: $COLLECTION"
     mongoexport --uri="$URI" --db="$DB_NAME" --collection="$COLLECTION" --out="$OUTPUT_DIR/$COLLECTION.json"
     
-    # Add brackets to the JSON file to make it an array
+    # Add brackets to the JSON file and properly format it as an array
     echo "[" > "$OUTPUT_DIR/$COLLECTION.tmp"
-    sed '1d' "$OUTPUT_DIR/$COLLECTION.json" >> "$OUTPUT_DIR/$COLLECTION.tmp"
+    
+    # Remove the first line which is an opening bracket or similar
+    sed '1d' "$OUTPUT_DIR/$COLLECTION.json" | \
+    # Remove trailing comma from each line
+    sed 's/,$//' | \
+    # Add commas between lines, except the last line
+    awk '{if (NR!=1) printf(","); print}' >> "$OUTPUT_DIR/$COLLECTION.tmp"
+    
+    # Add closing bracket
     echo "]" >> "$OUTPUT_DIR/$COLLECTION.tmp"
     
     # Replace the original file with the modified one

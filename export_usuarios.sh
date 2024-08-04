@@ -22,16 +22,16 @@ fi
 
 # Process the JSON file with jq
 "$JQ_PATH" 'map({
-    _id: ._id.$oid,  # Extrae el valor del campo $oid
+    _id: ._id.$oid // Extrae el valor del campo $oid, si existe
     nombre: .nombre,
     apellido: .apellido,
     email: .email,
     telefono: .telefono,
     cedula: .cedula,
     rol: .rol,
-    fecha_contratacion: .fecha_contratacion.$date,  # Extrae el valor del campo $date
+    fecha_contratacion: .fecha_contratacion.$date // Extrae el valor del campo $date, si existe
     tareas_asignadas: (.tareas_asignadas // [] | map({
-        tarea_id: .tarea_id.$oid,  # Extrae el valor del campo $oid
+        tarea_id: .tarea_id.$oid // Extrae el valor del campo $oid, si existe
         descripcion: .descripcion,
         estado: .estado
     })),

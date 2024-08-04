@@ -637,3 +637,15 @@ Backup completed.
 /bin/sh: 1: /var/www/html/grupo6agrohub/export_usuarios.sh: Permission denied
 /bin/sh: 1: /var/www/html/grupo6agrohub/export_usuarios.sh: Permission denied
 /bin/sh: 1: /var/www/html/grupo6agrohub/export_usuarios.sh: Permission denied
+/bin/sh: 1: /var/www/html/grupo6agrohub/export_usuarios.sh: Permission denied
+/bin/sh: 1: /var/www/html/grupo6agrohub/export_usuarios.sh: Permission denied
+Exporting collection: usuarios
+2024-08-04T20:28:01.489+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T20:28:01.533+0000	exported 3 records
+/var/www/html/grupo6agrohub/export_usuarios.sh: line 30: jq: command not found
+Backup completed.
+Exporting collection: usuarios
+2024-08-04T20:29:01.583+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T20:29:01.613+0000	exported 3 records
+/var/www/html/grupo6agrohub/export_usuarios.sh: line 30: jq: command not found
+Backup completed.

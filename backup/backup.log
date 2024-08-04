@@ -727,3 +727,19 @@ Exporting collection: usuarios
 2024-08-04T21:06:01.634+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
 2024-08-04T21:06:01.676+0000	exported 3 records
 Backup completed.
+Exporting collection: usuarios
+2024-08-04T21:07:01.762+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T21:07:01.881+0000	exported 3 records
+Backup completed.
+Exporting collection: usuarios
+2024-08-04T21:08:02.014+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T21:08:02.083+0000	exported 3 records
+Backup completed.
+Exporting collection: usuarios
+2024-08-04T21:09:01.205+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T21:09:01.238+0000	exported 3 records
+Backup completed.
+Exporting collection: usuarios
+2024-08-04T21:10:01.394+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T21:10:01.458+0000	exported 3 records
+Backup completed.

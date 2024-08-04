@@ -12,6 +12,14 @@ COLLECTIONS=("cosechas" "productos" "siembras" "terrenos" "usuarios")
 for COLLECTION in "${COLLECTIONS[@]}"; do
     echo "Exporting collection: $COLLECTION"
     mongoexport --uri="$URI" --db="$DB_NAME" --collection="$COLLECTION" --out="$OUTPUT_DIR/$COLLECTION.json"
+    
+    # Add brackets to the JSON file to make it an array
+    echo "[" > "$OUTPUT_DIR/$COLLECTION.tmp"
+    sed '1d' "$OUTPUT_DIR/$COLLECTION.json" >> "$OUTPUT_DIR/$COLLECTION.tmp"
+    echo "]" >> "$OUTPUT_DIR/$COLLECTION.tmp"
+    
+    # Replace the original file with the modified one
+    mv "$OUTPUT_DIR/$COLLECTION.tmp" "$OUTPUT_DIR/$COLLECTION.json"
 done
 
 echo "Backup completed."

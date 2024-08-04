@@ -1,0 +1,4 @@
+{"_id":{"$oid":"66a8587bf3206d05420bb687"},"nombre":"Mario Raul","ubicacion":"dfdfsdfs","tamano":"1","estado":"activo","descripcion":"gfgf"}
+{"_id":{"$oid":"66a84806f3206d05420bb686"},"nombre":"Mario","ubicacion":"dfdfsdfs","tamano":"1","estado":"Activo","descripcion":"hjjkhk"}
+{"_id":{"$oid":"66ac687f3f06ea05d409d454"},"nombre":"Mario","ubicacion":"Finca Los Pinos","tamano":"44","estado":"Ocupado","descripcion":"sds"}
+{"_id":{"$oid":"66ac6b6db9ab08d3c60915c4"},"nombre":"Mario","ubicacion":"Finca Los Pinos","tamano":"44","estado":"Ocupado","descripcion":"sds"}

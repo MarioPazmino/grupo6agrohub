@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Define the database and the output directory
@@ -15,13 +14,15 @@ for COLLECTION in "${COLLECTIONS[@]}"; do
     mongoexport --uri="$URI" --db="$DB_NAME" --collection="$COLLECTION" --out="$OUTPUT_DIR/$COLLECTION.json"
     
     # Add brackets to the JSON file to make it an array
+    # Create a temporary file to hold the formatted JSON
     TEMP_FILE="$OUTPUT_DIR/$COLLECTION.tmp"
     
     # Start the JSON array
     echo "[" > "$TEMP_FILE"
     
-    # Add each line, except the first one, and handle trailing commas
-    awk 'NR > 1 {print "," $0}' "$OUTPUT_DIR/$COLLECTION.json" >> "$TEMP_FILE"
+    # Add each line, except the first one (which does not need a leading comma)
+    # and handle the trailing comma for the last item
+    awk 'NR > 1 {print (NR==2 ? "" : ",") $0}' "$OUTPUT_DIR/$COLLECTION.json" >> "$TEMP_FILE"
     
     # End the JSON array
     echo "]" >> "$TEMP_FILE"

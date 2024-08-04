@@ -660,3 +660,14 @@ jq: error: syntax error, unexpected '$', expecting FORMAT or QQSTRING_START (Uni
         tarea_id: .tarea_id.$oid,                            
 jq: 3 compile errors
 Backup completed.
+Exporting collection: usuarios
+2024-08-04T20:42:01.060+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T20:42:01.083+0000	exported 3 records
+jq: error: syntax error, unexpected '$', expecting FORMAT or QQSTRING_START (Unix shell quoting issues?) at <top-level>, line 2:
+    _id: ._id.$oid,              
+jq: error: syntax error, unexpected '$', expecting FORMAT or QQSTRING_START (Unix shell quoting issues?) at <top-level>, line 9:
+    fecha_contratacion: .fecha_contratacion.$date,                                            
+jq: error: syntax error, unexpected '$', expecting FORMAT or QQSTRING_START (Unix shell quoting issues?) at <top-level>, line 11:
+        tarea_id: .tarea_id.$oid,                            
+jq: 3 compile errors
+Backup completed.

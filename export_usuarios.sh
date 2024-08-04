@@ -8,19 +8,10 @@ URI="mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docd
 # Define the path to jq
 JQ_PATH="/usr/bin/jq"  # Cambia esto si jq está en una ubicación diferente
 
-# Define the collection name
-COLLECTION="usuarios"
-echo "Collection: $COLLECTION"
-
 # Export the usuarios collection to JSON
+COLLECTION="usuarios"
 echo "Exporting collection: $COLLECTION"
 mongoexport --uri="$URI" --db="$DB_NAME" --collection="$COLLECTION" --jsonArray --out="$OUTPUT_DIR/$COLLECTION.json"
-
-# Check if mongoexport was successful
-if [ $? -ne 0 ]; then
-    echo "mongoexport failed"
-    exit 1
-fi
 
 # Check if jq is installed
 if ! command -v "$JQ_PATH" &> /dev/null
@@ -29,24 +20,24 @@ then
     exit 1
 fi
 
+# Process the JSON file with jq
 "$JQ_PATH" 'map({
-    _id: ._id.$oid // O simplemente ._id si no es un objeto anidado
+    _id: ._id,
     nombre: .nombre,
     apellido: .apellido,
     email: .email,
     telefono: .telefono,
     cedula: .cedula,
     rol: .rol,
-    fecha_contratacion: .fecha_contratacion, // Ajusta si es necesario
+    fecha_contratacion: .fecha_contratacion,
     tareas_asignadas: (.tareas_asignadas // [] | map({
-        tarea_id: .tarea_id // Ajusta si es necesario
+        tarea_id: .tarea_id,
         descripcion: .descripcion,
         estado: .estado
     })),
     password: .password,
     nombre_usuario: .nombre_usuario
 })' "$OUTPUT_DIR/$COLLECTION.json" > "$OUTPUT_DIR/$COLLECTION.tmp"
-
 
 # Replace the original file with the modified one
 mv "$OUTPUT_DIR/$COLLECTION.tmp" "$OUTPUT_DIR/$COLLECTION.json"

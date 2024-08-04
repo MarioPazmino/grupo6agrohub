@@ -613,3 +613,27 @@ Exporting collection: usuarios
 2024-08-04T20:10:02.359+0000	exported 3 records
 /var/www/html/grupo6agrohub/backup_collections.sh: line 71: jq: command not found
 Backup completed.
+Exporting collection: cosechas
+2024-08-04T20:20:01.427+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T20:20:01.454+0000	exported 5 records
+/var/www/html/grupo6agrohub/backup_collections.sh: line 28: jq: command not found
+Exporting collection: productos
+2024-08-04T20:20:01.487+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T20:20:01.502+0000	exported 4 records
+/var/www/html/grupo6agrohub/backup_collections.sh: line 42: jq: command not found
+Exporting collection: siembras
+2024-08-04T20:20:01.546+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T20:20:01.658+0000	exported 5 records
+/var/www/html/grupo6agrohub/backup_collections.sh: line 52: jq: command not found
+Exporting collection: terrenos
+2024-08-04T20:20:01.764+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T20:20:02.154+0000	exported 3 records
+/var/www/html/grupo6agrohub/backup_collections.sh: line 81: jq: command not found
+Exporting collection: usuarios
+2024-08-04T20:20:02.324+0000	connected to: mongodb://[**REDACTED**]@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/var/www/html/grupo6agrohub/global-bundle.pem
+2024-08-04T20:20:02.358+0000	exported 3 records
+/var/www/html/grupo6agrohub/backup_collections.sh: line 71: jq: command not found
+Backup completed.
+/bin/sh: 1: /var/www/html/grupo6agrohub/export_usuarios.sh: Permission denied
+/bin/sh: 1: /var/www/html/grupo6agrohub/export_usuarios.sh: Permission denied
+/bin/sh: 1: /var/www/html/grupo6agrohub/export_usuarios.sh: Permission denied

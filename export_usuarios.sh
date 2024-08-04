@@ -20,18 +20,18 @@ then
     exit 1
 fi
 
-# Process the JSON file with jq
+# Process the JSON file with jq to remove $oid and $date and simplify the structure
 "$JQ_PATH" 'map({
-    _id: ._id,
+    _id: ._id.$oid,  # Extrae el valor del campo $oid
     nombre: .nombre,
     apellido: .apellido,
     email: .email,
     telefono: .telefono,
     cedula: .cedula,
     rol: .rol,
-    fecha_contratacion: .fecha_contratacion,
+    fecha_contratacion: .fecha_contratacion.$date,  # Extrae el valor del campo $date
     tareas_asignadas: (.tareas_asignadas // [] | map({
-        tarea_id: .tarea_id,
+        tarea_id: .tarea_id.$oid,  # Extrae el valor del campo $oid
         descripcion: .descripcion,
         estado: .estado
     })),

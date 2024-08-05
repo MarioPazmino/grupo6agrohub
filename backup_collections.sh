@@ -11,7 +11,12 @@ COLLECTIONS=("cosechas" "productos" "siembras" "terrenos" "usuarios")
 # Export each collection to JSON
 for COLLECTION in "${COLLECTIONS[@]}"; do
     echo "Exporting collection: $COLLECTION"
-    mongoexport --uri="$URI" --db="$DB_NAME" --collection="$COLLECTION" --out="$OUTPUT_DIR/$COLLECTION.json"
+    OUTPUT_FILE="$OUTPUT_DIR/$COLLECTION.json"
+    mongoexport --uri="$URI" --db="$DB_NAME" --collection="$COLLECTION" --out="$OUTPUT_FILE"
+
+    # Enclose the content in square brackets
+    sed -i '1s/^/[\n/' "$OUTPUT_FILE" # Add an opening bracket at the beginning
+    echo "]" >> "$OUTPUT_FILE"        # Add a closing bracket at the end
 done
 
 echo "Backup completed."

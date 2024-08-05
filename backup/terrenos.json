@@ -1,4 +1,5 @@
 [
 {"_id":{"$oid":"66afa2ba35ef2d653f0aea62"},"nombre":"Terreno Izquierdo","ubicacion":"En la parte superior de la granja","tamano":"2","estado":"En Mantenimiento","descripcion":"Sigue sucio"}
-,{"_id":{"$oid":"66afe043bc8d920da404b302"},"nombre":"sfdsdsfdfdfssdf","ubicacion":"dsffdsdfdfsdfs","tamano":"3343","estado":"Activo","descripcion":"sdsddfsdsf"}
+{"_id":{"$oid":"66afe043bc8d920da404b302"},"nombre":"sfdsdsfdfdfssdf","ubicacion":"dsffdsdfdfsdfs","tamano":"3343","estado":"Activo","descripcion":"sdsddfsdsf"}
+{"_id":{"$oid":"66b05dc78a50f61ebc01f255"},"nombre":"mario121","ubicacion":"dsffdsdfdfsdfs","tamano":"3343","estado":"Activo","descripcion":"34545454"}
 ]

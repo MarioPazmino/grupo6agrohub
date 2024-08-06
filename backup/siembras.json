@@ -1,4 +1,5 @@
 [
 {"_id":{"$oid":"66b05e8f27bc6d90580749c5"},"empleado_id":{"$oid":"66b05e6e5b047fd56e078dc4"},"terreno_id":{"$oid":"66afa2ba35ef2d653f0aea62"},"producto_id":{"$oid":"66a85af8506b5c54511dc471"},"fecha_siembra":{"$date":"2024-07-30T00:00:00Z"},"estado":"pendiente"}
 {"_id":{"$oid":"66b05eec70c9c0d0d20c9024"},"empleado_id":{"$oid":"66b05e6e5b047fd56e078dc4"},"terreno_id":{"$oid":"66afa2ba35ef2d653f0aea62"},"producto_id":{"$oid":"66b05df35b059c13f109fe43"},"fecha_siembra":{"$date":"2024-08-06T00:00:00Z"},"estado":"en_proceso"}
+{"_id":{"$oid":"66b1b88cd69c5ab3800e6ce3"},"empleado_id":{"$oid":"66b1b4fbd69c5ab3800e6ce2"},"terreno_id":{"$oid":"66afa2ba35ef2d653f0aea62"},"producto_id":{"$oid":"66a85af8506b5c54511dc471"},"fecha_siembra":{"$date":"2024-08-06T00:00:00Z"},"estado":"pendiente"}
 ]

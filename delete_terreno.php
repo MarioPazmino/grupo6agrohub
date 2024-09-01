@@ -8,7 +8,7 @@ use MongoDB\Client;
 use MongoDB\Exception\Exception;
 
 // Configuración de MongoDB
-$mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
+$mongoUri = "mongodb://localhost:27017";
 $mongoClient = new Client($mongoUri);
 $database = $mongoClient->grupo6_agrohub; // Nombre de la base de datos
 $collection = $database->terrenos; // Nombre de la colección

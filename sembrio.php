@@ -17,12 +17,12 @@ use MongoDB\BSON\ObjectId;
 use MongoDB\Exception\Exception;
 
 // Conexión a MongoDB con la URL proporcionada
-$mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
+$mongoUri = "mongodb://localhost:27017";
 $mongoClient = new Client($mongoUri);
 $productosCollection = $mongoClient->grupo6_agrohub->productos;
-$collection = $mongoClient->grupo6_agrohub->usuarios;
 $terrenosCollection = $mongoClient->grupo6_agrohub->terrenos;
 $siembrasCollection = $mongoClient->grupo6_agrohub->siembras;
+$usuariosCollection = $mongoClient->grupo6_agrohub->usuarios; // Inicialización correcta
 
 // Variables para mensajes de éxito y error
 $success = [];
@@ -36,7 +36,6 @@ $total_tareas_completadas = 0;
 
 if ($_SESSION['rol'] === 'admin') {
     try {
-        $usuariosCollection = $mongoClient->grupo6_agrohub->usuarios;
         $total_empleados = $usuariosCollection->countDocuments(['rol' => 'empleado']);
 
         $total_tareas_pendientes = $usuariosCollection->countDocuments([
@@ -103,12 +102,7 @@ try {
 } catch (Exception $e) {
     $errors[] = 'Error al obtener información de siembras: ' . $e->getMessage();
 }
-
-
-
-
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 

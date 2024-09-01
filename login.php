@@ -9,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     // URI de conexión a MongoDB (Amazon DocumentDB)
-    $mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem";
+    $mongoUri = "mongodb://localhost:27017";
 
     // Conexión a MongoDB
     try {

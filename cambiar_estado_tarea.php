@@ -13,7 +13,7 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'empleado') {
 }
 
 // Conexión a MongoDB con la URL actualizada
-$mongoUri = "mongodb://mario1010:marito10@testmongo1.cluster-c9ccw6ywgi5c.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=global-bundle.pem&retryWrites=false";
+$mongoUri = "mongodb://localhost:27017";
 $mongoClient = new Client($mongoUri);
 $db = $mongoClient->selectDatabase("grupo6_agrohub");
 $collection = $db->usuarios; // Nombre de la colección en MongoDB

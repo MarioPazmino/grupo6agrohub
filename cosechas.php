@@ -226,10 +226,17 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_cosecha' && isset($_GE
             <hr class="sidebar-divider">
 
             <!-- Nav Item - Charts -->
-            <li class="nav-item">
-                <a class="nav-link" href="ventas.php">
+                                       <!-- Nav Item - Charts -->
+                                       <li class="nav-item">
+                <a class="nav-link" href="dashboard.php">
                     <i class="fas fa-fw fa-cart-plus"></i>
-                    <span>Ventas</span></a>
+                    <span>Dashboard Empresarial</span></a>
+            </li>
+                               <!-- Nav Item - Charts -->
+                               <li class="nav-item">
+                <a class="nav-link" href="dashboardd.php">
+                    <i class="fas fa-fw fa-cart-plus"></i>
+                    <span>Dashboard Empresarial</span></a>
             </li>
 
             <!-- Divider -->

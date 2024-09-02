@@ -22,74 +22,6 @@ $success = [];
 
 
 
-// Pipeline de agregación
-$pipeline = [
-    [
-        '$group' => [
-            '_id' => [
-                'producto_id' => '$siembra_id',
-                'fecha' => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$fecha_cosecha']]
-            ],
-            'totalCantidad' => ['$sum' => '$cantidad']
-        ]
-    ],
-    [
-        '$lookup' => [
-            'from' => 'siembras',
-            'localField' => '_id.producto_id',
-            'foreignField' => '_id',
-            'as' => 'siembra'
-        ]
-    ],
-    [
-        '$unwind' => '$siembra'
-    ],
-    [
-        '$lookup' => [
-            'from' => 'productos',
-            'localField' => 'siembra.producto_id',
-            'foreignField' => '_id',
-            'as' => 'producto'
-        ]
-    ],
-    [
-        '$unwind' => '$producto'
-    ],
-    [
-        '$group' => [
-            '_id' => [
-                'fecha' => '$_id.fecha',
-                'nombre_producto' => '$producto.nombre'
-            ],
-            'totalCantidad' => ['$sum' => '$totalCantidad']
-        ]
-    ],
-    [
-        '$sort' => ['_id.fecha' => 1]
-    ],
-    [
-        '$group' => [
-            '_id' => '$_id.nombre_producto',
-            'datos' => [
-                '$push' => [
-                    'fecha' => '$_id.fecha',
-                    'cantidad' => '$totalCantidad'
-                ]
-            ]
-        ]
-    ]
-];
-
-try {
-    $results = $collectionCosechas->aggregate($pipeline);
-    $data = [];
-    
-    foreach ($results as $result) {
-        $data[$result['_id']] = $result['datos'];
-    }
-} catch (Exception $e) {
-    die('Error en la consulta: ' . $e->getMessage());
-}
 
 // Contar el número total de empleados
 $total_empleados = $collectionUsuarios->countDocuments(['rol' => 'empleado']);
@@ -175,8 +107,7 @@ if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $labels_estado[] = $row['estado_terreno'];
         $data_estado[] = $row['cantidad_terrenos'];
-        // Opcional: Si tienes nombres de terrenos en otro campo
-        $names_terrenos[] = $row['nombre_terreno'];
+
     }
 } else {
     echo "0 resultados";
@@ -290,19 +221,19 @@ $conn->close();
            
             <!-- Divider -->
             <hr class="sidebar-divider">
-
                             <!-- Nav Item - Charts -->
                             <li class="nav-item">
                 <a class="nav-link" href="dashboard.php">
-                    <i class="fas fa-fw fa-cart-plus"></i>
-                    <span>Dashboard Empresarial</span></a>
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard Empresarial D</span></a>
             </li>
                                <!-- Nav Item - Charts -->
                                <li class="nav-item">
                 <a class="nav-link" href="dashboardd.php">
-                    <i class="fas fa-fw fa-cart-plus"></i>
-                    <span>Dashboard Empresarial</span></a>
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard Empresarial S</span></a>
             </li>
+
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
@@ -576,42 +507,7 @@ $conn->close();
                 </div>
             </div>
 </div>
-<div class="row">
-            <div class="col-xl-8 col-lg-7">
 
-    <!-- Area Chart -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Distribución de Productos por Tipo</h6>
-        </div>
-        <div class="card-body">
-            <div class="chart-area">
-                <canvas id="areaChart"></canvas>
-            </div>
-            <hr>
-            En el dashboard, una barra más alta indica un mejor rendimiento 
-            promedio de cosecha para ese terreno.
-        </div>
-    </div>
-
-    
-</div>
-<div class="col-xl-4 col-lg-5">
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Estado de los Terrenos</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-area">
-                            <canvas id="areaChart"></canvas>
-                        </div>
-                        <hr>
-                        n el dashboard, una barra más alta indica un mejor rendimiento 
-            promedio de cosecha para ese terreno.
-                    </div>
-                </div>
-            </div>
-</div>
 
 <script>
         // Pasar los datos PHP a JavaScript
@@ -776,61 +672,6 @@ $conn->close();
             config_pie
         );
     </script>
-
-
-
-<script>
-    // Datos PHP convertidos a JSON
-    const phpData = <?php echo json_encode($data); ?>;
-    
-    console.log('Datos PHP:', phpData); // Para depuración
-    
-    // Preparar datos para Chart.js
-    const datasets = [];
-
-    Object.keys(phpData).forEach(producto => {
-        const data = phpData[producto];
-        const dataset = {
-            label: producto,
-            data: data.map(entry => ({ x: new Date(entry.fecha).toISOString(), y: entry.cantidad })),
-            fill: true,
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1
-        };
-        datasets.push(dataset);
-    });
-
-    const ctx = document.getElementById('areaChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            datasets: datasets
-        },
-        options: {
-            scales: {
-                x: {
-                    type: 'time',
-                    time: {
-                        unit: 'day',
-                        tooltipFormat: 'll',
-                        displayFormats: {
-                            day: 'MMM D'
-                        }
-                    }
-                },
-                y: {
-                    beginAtZero: true
-                }
-            },
-            plugins: {
-                legend: {
-                    display: true
-                }
-            }
-        }
-    });
-</script>
 
 
 

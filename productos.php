@@ -353,21 +353,19 @@ if ($_SESSION['rol'] === 'admin') {
                 </div>
             </li>
 
-           
             <!-- Divider -->
             <hr class="sidebar-divider">
-
                             <!-- Nav Item - Charts -->
                             <li class="nav-item">
                 <a class="nav-link" href="dashboard.php">
-                    <i class="fas fa-fw fa-cart-plus"></i>
-                    <span>Dashboard Empresarial</span></a>
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard Empresarial D</span></a>
             </li>
                                <!-- Nav Item - Charts -->
                                <li class="nav-item">
                 <a class="nav-link" href="dashboardd.php">
-                    <i class="fas fa-fw fa-cart-plus"></i>
-                    <span>Dashboard Empresarial</span></a>
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard Empresarial S</span></a>
             </li>
 
 
@@ -660,7 +658,7 @@ if ($_SESSION['rol'] === 'admin') {
     </div>
     <div class="form-group">
         <label for="precio_unitario">Precio Unitario</label>
-        <input type="number" step="0.01" class="form-control" id="precio_unitario" name="precio_unitario" required>
+        <input type="number" id="precio_unitario" name="precio_unitario" class="form-control" step="0.01" min="0.01" required>
     </div>
     <div class="form-group">
         <label for="unidad">Unidad</label>

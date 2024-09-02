@@ -242,20 +242,19 @@ if ($_SESSION['rol'] === 'admin') {
 
             <!-- Divider -->
             <hr class="sidebar-divider">
-
-            <!-- Nav Item - Charts -->
                             <!-- Nav Item - Charts -->
                             <li class="nav-item">
                 <a class="nav-link" href="dashboard.php">
-                    <i class="fas fa-fw fa-cart-plus"></i>
-                    <span>Dashboard Empresarial</span></a>
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard Empresarial D</span></a>
             </li>
                                <!-- Nav Item - Charts -->
                                <li class="nav-item">
                 <a class="nav-link" href="dashboardd.php">
-                    <i class="fas fa-fw fa-cart-plus"></i>
-                    <span>Dashboard Empresarial</span></a>
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard Empresarial S</span></a>
             </li>
+
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
@@ -523,7 +522,7 @@ if ($_SESSION['rol'] === 'admin') {
                         </div>
                         <div class="form-group">
                             <label for="tamano">Tamaño (ha)</label>
-                            <input type="number" class="form-control" id="tamano" name="tamano" required>
+                            <input type="number" id="tamano" name="tamano" class="form-control" step="0.01" min="0.01" required>
                         </div>
                         <div class="form-group">
                             <label for="estado">Estado</label>
